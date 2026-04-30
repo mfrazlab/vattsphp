@@ -39,7 +39,7 @@ class RpcController
             $className = 'App\\Rpc\\' . str_replace('/', '\\', $file);
 
             if (!class_exists($className)) {
-                $response->status(404)->json(['success' => false, 'error' => 'RPC file/class not found']);
+                $response->status(404)->json(['success' => false, 'error' => 'RPC file/class not found' . $className, 'className' => $className]);
                 return $response;
             }
 
