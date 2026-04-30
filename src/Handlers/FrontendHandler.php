@@ -44,17 +44,30 @@ class FrontendHandler
         $uri = ltrim($request->getPath(), '/');
         $exportPath = $this->projectPath . DIRECTORY_SEPARATOR . 'exported' . DIRECTORY_SEPARATOR;
 
-        // Se a URI for vazia ou for um diretório, assume index.html
         $targetFile = empty($uri) ? 'index.html' : $uri;
-        $filePath = realpath($exportPath . $targetFile);
+        $filePath = $exportPath . $targetFile;
+        $realFilePath = realpath($filePath);
 
-        // Segurança: impede path traversal e garante que estamos dentro da pasta exported
-        if (!$filePath || !str_starts_with($filePath, realpath($exportPath)) || !is_file($filePath)) {
-            // Se o arquivo não existe, serve o index.html (comportamento SPA)
-            return $this->serveFile($exportPath . 'index.html', $response);
+        // Segurança e verificação de existência
+        if (!$realFilePath || !str_starts_with($realFilePath, realpath($exportPath)) || !is_file($realFilePath)) {
+
+            // Se o arquivo original não existe, vamos checar se existem versões comprimidas (.br ou .gz)
+            // antes de desistir e mandar para o index.html
+            $acceptEncoding = $_SERVER['HTTP_ACCEPT_ENCODING'] ?? '';
+
+            if (str_contains($acceptEncoding, 'br') && file_exists($filePath . '.br')) {
+                return $this->serveFile($filePath, $response);
+            }
+
+            if (str_contains($acceptEncoding, 'gzip') && file_exists($filePath . '.gz')) {
+                return $this->serveFile($filePath, $response);
+            }
+
+            // Se realmente não existe nada, manda o index.html com 404 como solicitado
+            return $this->serveFile($exportPath . 'index.html', $response->status(404));
         }
 
-        return $this->serveFile($filePath, $response);
+        return $this->serveFile($realFilePath, $response);
     }
 
     /**
@@ -62,27 +75,29 @@ class FrontendHandler
      */
     protected function serveFile(string $filePath, Response $response): Response
     {
-        if (!is_file($filePath)) {
-            return $response->status(404)->html('<h1>404 - File not found</h1>');
-        }
+        // Se chegamos aqui e o arquivo base não existe, mas o .gz ou .br sim,
+        // a lógica abaixo vai detectar e servir.
 
         $mimeType = $this->getMimeType($filePath);
         $encoding = null;
         $servedPath = $filePath;
 
-        // Suporte a Brotli (.br) e Gzip (.gz) para assets estáticos (JS, CSS, SVG, etc)
-        $compressible = ['application/javascript', 'text/css', 'image/svg+xml', 'application/json', 'text/html'];
+        $acceptEncoding = $_SERVER['HTTP_ACCEPT_ENCODING'] ?? '';
 
-        if (in_array($mimeType, $compressible)) {
-            $acceptEncoding = $_SERVER['HTTP_ACCEPT_ENCODING'] ?? '';
-
-            if (str_contains($acceptEncoding, 'br') && file_exists($filePath . '.br')) {
-                $servedPath = $filePath . '.br';
-                $encoding = 'br';
-            } elseif (str_contains($acceptEncoding, 'gzip') && file_exists($filePath . '.gz')) {
-                $servedPath = $filePath . '.gz';
-                $encoding = 'gzip';
-            }
+        // Tenta Brotli (.br)
+        if (str_contains($acceptEncoding, 'br') && file_exists($filePath . '.br')) {
+            $servedPath = $filePath . '.br';
+            $encoding = 'br';
+        }
+        // Tenta Gzip (.gz)
+        elseif (str_contains($acceptEncoding, 'gzip') && file_exists($filePath . '.gz')) {
+            $servedPath = $filePath . '.gz';
+            $encoding = 'gzip';
+        }
+        // Se nem o comprimido nem o original existem (caso do index.html forçado), garante que o arquivo existe
+        elseif (!file_exists($filePath)) {
+            // Fallback de segurança caso o arquivo passado não exista de fato
+            return $response->status(404)->send('File not found');
         }
 
         if ($encoding) {
@@ -162,7 +177,10 @@ class FrontendHandler
 
     protected function getMimeType(string $path): string
     {
-        $extension = pathinfo($path, PATHINFO_EXTENSION);
+        // Remove extensões de compressão para pegar o mime original
+        $cleanPath = preg_replace('/\.(gz|br)$/', '', $path);
+        $extension = pathinfo($cleanPath, PATHINFO_EXTENSION);
+
         $mimes = [
             'html' => 'text/html',
             'js'   => 'application/javascript',
