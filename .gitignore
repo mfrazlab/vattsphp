@@ -1,0 +1,6 @@
+.env
+example_client/
+vendor/
+composer.lock
+
+.idea

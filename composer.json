@@ -1,0 +1,27 @@
+{
+    "name": "vattsp/vattsphp",
+    "version": "1.0.0",
+    "type": "library",
+    "description": "VattsPHP - Framework leve com Router próprio para Slim + Eloquent com RPC",
+    "authors": [
+        {
+            "name": "murillo",
+            "email": "murillofrazaocunha@gmail.com"
+        }
+    ],
+    "require": {
+        "slim/slim": "^4.15",
+        "slim/psr7": "^1.8",
+        "illuminate/database": "^13.7",
+        "vlucas/phpdotenv": "^5.6",
+        "eftec/bladeone": "^4.19"
+    },
+    "autoload": {
+        "psr-4": {
+            "Vatts\\": "src/"
+        },
+        "files": [
+            "src/Utils/helpers.php"
+        ]
+    }
+}

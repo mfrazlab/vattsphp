@@ -1,0 +1,172 @@
+<?php
+
+namespace Vatts;
+
+use Illuminate\Database\Capsule\Manager as Capsule;
+use Vatts\Controllers\ControllerResolver;
+use Vatts\Router\Router;
+use Vatts\Router\Request;
+use Vatts\Router\Response;
+use Vatts\Rpc\RpcController;
+use Vatts\Utils\Middleware;
+use Vatts\Handlers\FrontendHandler;
+
+class Vatts
+{
+    protected Router $router;
+    protected ControllerResolver $resolver;
+    protected string $projectPath;
+
+    /**
+     * Inicia o Vatts e retorna a instância do Router.
+     * Config keys:
+     *  - project_path: caminho do projeto cliente (onde estão app/, public/, models/)
+     *  - db: array com configuração do Eloquent (optional)
+     *  - autoload_helpers: bool (default: true) - registra helpers globais
+     */
+    public static function init(array $config = []): Router
+    {
+        $self = new self($config['project_path'] ?? getcwd());
+
+        // Registra instância globalmente para helpers
+        $GLOBALS['vatts_instance'] = $self;
+
+        // bootstrap DB se houver
+        if (!empty($config['db']) && is_array($config['db'])) {
+            $self->bootEloquent($config['db']);
+        }
+
+        $self->bootRouter();
+
+        // auto-require models e controllers se configurado
+        if ($config['autoload_models'] ?? true) {
+            $self->autoloadModels();
+        }
+        if ($config['autoload_controllers'] ?? true) {
+            $self->autoloadControllers();
+        }
+
+        // registra middlewares automáticos
+        $self->registerMiddlewares();
+
+        // registra rota RPC automaticamente
+        $self->registerRpcRoute();
+
+        // registra fallback para frontend (prod/dev) automaticamente
+        $self->registerFrontendFallback();
+
+        // carrega as rotas do projeto cliente, se existir
+        $routesFile = $self->projectPath . DIRECTORY_SEPARATOR . 'app' . DIRECTORY_SEPARATOR . 'routes.php';
+        if (is_file($routesFile)) {
+            // expõe helper $app para as rotas (é o router agora)
+            $app = $self->router;
+            $v = $self;
+            require $routesFile;
+        }
+
+        return $self->router;
+    }
+
+    public function __construct(string $projectPath)
+    {
+        $this->projectPath = rtrim($projectPath, "\\/ ");
+        $this->resolver = new ControllerResolver($this->projectPath);
+    }
+
+    protected function bootRouter(): void
+    {
+        // cria router próprio do Vatts
+        $this->router = new Router();
+    }
+
+    protected function bootEloquent(array $dbConfig): void
+    {
+        $capsule = new Capsule();
+        $capsule->addConnection($dbConfig);
+        $capsule->setAsGlobal();
+        $capsule->bootEloquent();
+    }
+
+    protected function registerMiddlewares(): void
+    {
+        $dir = $this->projectPath . DIRECTORY_SEPARATOR . 'app' . DIRECTORY_SEPARATOR . 'middlewares';
+        if (!is_dir($dir)) {
+            return;
+        }
+
+        $before = get_declared_classes();
+        foreach (glob($dir . DIRECTORY_SEPARATOR . '*.php') as $file) {
+            require_once $file;
+        }
+        $after = get_declared_classes();
+
+        $new = array_diff($after, $before);
+        foreach ($new as $class) {
+            if (is_subclass_of($class, Middleware::class)) {
+                // o middleware deve definir uma propriedade estática $name
+                $name = $class::$name ?? null;
+                if (!$name) {
+                    continue;
+                }
+
+                $instance = new $class();
+                // Registra como middleware global no router
+                // O middleware recebe Request e retorna Request modificada
+                $this->router->use(function (Request $request) use ($instance) {
+                    return $instance->handle($request);
+                });
+            }
+        }
+    }
+
+    protected function autoloadModels(): void
+    {
+        $dir = $this->projectPath . DIRECTORY_SEPARATOR . 'models';
+        if (!is_dir($dir)) {
+            return;
+        }
+
+        foreach (glob($dir . DIRECTORY_SEPARATOR . '*.php') as $file) {
+            require_once $file;
+        }
+    }
+
+    protected function autoloadControllers(): void
+    {
+        $dir = $this->projectPath . DIRECTORY_SEPARATOR . 'app' . DIRECTORY_SEPARATOR . 'controllers';
+        if (!is_dir($dir)) {
+            return;
+        }
+
+        foreach (glob($dir . DIRECTORY_SEPARATOR . '*.php') as $file) {
+            require_once $file;
+        }
+    }
+
+    protected function registerRpcRoute(): void
+    {
+        // Registra automaticamente a rota POST /api/rpc para RPC
+        $this->router->post('/api/rpc', function (Request $request, Response $response) {
+            $rpc = new RpcController();
+            return $rpc->handle($request, $response);
+        });
+    }
+
+    protected function registerFrontendFallback(): void
+    {
+        // Registra automaticamente fallback para frontend (dev proxy ou prod serve)
+        $env = getenv('APP_ENV') ?: 'dev';
+        $port = getenv('DEV_SERVER_PORT') ?: 3000;
+
+        $handler = new FrontendHandler($this->projectPath, $env, (int) $port);
+        $this->router->fallback($handler);
+    }
+
+    /**
+     * Retorna um callable a partir de "Controller@method"
+     */
+    public function action(string $action): callable
+    {
+        return $this->resolver->resolve($action);
+    }
+}
