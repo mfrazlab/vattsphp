@@ -10,24 +10,57 @@ class DB
 {
     protected static ?PDO $pdo = null;
 
+    /** @var array Guarda a configuração para conectar apenas quando for solicitado */
+    protected static array $config = [];
+
     /**
-     * Inicializa a conexão PDO com o banco
+     * Inicializa o DB Manager APENAS salvando as configurações.
+     * Não faz a conexão PDO neste momento (Lazy Loading).
      */
     public static function init(array $config): void
     {
-        $driver = $config['driver'] ?? 'mysql';
+        self::$config = $config;
+    }
+
+    /**
+     * Retorna a instância ativa do PDO.
+     * Conecta ao banco automaticamente na PRIMEIRA vez que for chamado por um Model.
+     */
+    public static function getPdo(): PDO
+    {
+        // Se já estiver conectado nesta requisição, apenas devolve a conexão ativa
+        if (self::$pdo) {
+            return self::$pdo;
+        }
+
+        if (empty(self::$config)) {
+            throw new Exception("Database is not configured. Check your Vatts::init() config.");
+        }
+
+        // Conecta de verdade no MySQL/SQLite agora!
+        self::connect();
+
+        return self::$pdo;
+    }
+
+    /**
+     * Lógica interna que estabelece a conexão real com o banco de dados
+     */
+    protected static function connect(): void
+    {
+        $driver = self::$config['driver'] ?? 'mysql';
 
         try {
             if ($driver === 'sqlite') {
-                $database = $config['database'] ?? ':memory:';
+                $database = self::$config['database'] ?? ':memory:';
                 $dsn = "sqlite:{$database}";
                 self::$pdo = new PDO($dsn);
             } else {
-                $host = $config['host'] ?? '127.0.0.1';
-                $database = $config['database'] ?? '';
-                $username = $config['username'] ?? 'root';
-                $password = $config['password'] ?? '';
-                $charset = $config['charset'] ?? 'utf8mb4';
+                $host = self::$config['host'] ?? '127.0.0.1';
+                $database = self::$config['database'] ?? '';
+                $username = self::$config['username'] ?? 'root';
+                $password = self::$config['password'] ?? '';
+                $charset = self::$config['charset'] ?? 'utf8mb4';
 
                 $dsn = "{$driver}:host={$host};dbname={$database};charset={$charset}";
                 self::$pdo = new PDO($dsn, $username, $password);
@@ -40,16 +73,5 @@ class DB
         } catch (PDOException $e) {
             throw new Exception("Database connection failed: " . $e->getMessage());
         }
-    }
-
-    /**
-     * Retorna a instância ativa do PDO
-     */
-    public static function getPdo(): PDO
-    {
-        if (!self::$pdo) {
-            throw new Exception("Database is not initialized. Check your init() config.");
-        }
-        return self::$pdo;
     }
 }
