@@ -161,13 +161,82 @@ class Vatts
 
     protected function autoloadModels(): void
     {
-        $dir = $this->projectPath . DIRECTORY_SEPARATOR . 'models';
+        // Alterado de 'models' para 'src/models'
+        $dir = $this->projectPath . DIRECTORY_SEPARATOR . 'src' . DIRECTORY_SEPARATOR . 'models';
         if (!is_dir($dir)) {
             return;
         }
 
+        $before = get_declared_classes();
         foreach (glob($dir . DIRECTORY_SEPARATOR . '*.php') as $file) {
             require_once $file;
+        }
+        $after = get_declared_classes();
+
+        $newClasses = array_diff($after, $before);
+        foreach ($newClasses as $class) {
+            if (is_subclass_of($class, \Illuminate\Database\Eloquent\Model::class)) {
+                $this->syncModelSchema($class);
+            }
+        }
+    }
+
+    /**
+     * Sincroniza o schema do banco de dados com a propriedade estática $schema do Model.
+     * Cria a tabela se não existir ou atualiza (adicionando/removendo colunas).
+     */
+    protected function syncModelSchema(string $modelClass): void
+    {
+        if (!property_exists($modelClass, 'schema')) {
+            return; // Ignora se o model não tiver o array $schema definido
+        }
+
+        $instance = new $modelClass();
+        $tableName = $instance->getTable();
+        $schemaBuilder = Capsule::schema();
+        $schemaDefinition = $modelClass::$schema;
+
+        if (!$schemaBuilder->hasTable($tableName)) {
+            // A tabela não existe: cria do zero
+            $schemaBuilder->create($tableName, function ($table) use ($schemaDefinition, $instance) {
+                $table->id();
+                foreach ($schemaDefinition as $column => $type) {
+                    $table->$type($column)->nullable(); // Colunas criadas como nullable por padrão para flexibilidade
+                }
+                if ($instance->usesTimestamps()) {
+                    $table->timestamps();
+                }
+            });
+        } else {
+            // A tabela existe: verifica colunas modificadas, adicionadas ou removidas
+            $currentColumns = $schemaBuilder->getColumnListing($tableName);
+
+            $expectedColumns = array_keys($schemaDefinition);
+            $expectedColumns[] = 'id';
+            if ($instance->usesTimestamps()) {
+                $expectedColumns[] = 'created_at';
+                $expectedColumns[] = 'updated_at';
+            }
+
+            $toAdd = array_diff($expectedColumns, $currentColumns);
+            $toDrop = array_diff($currentColumns, $expectedColumns);
+
+            if (!empty($toAdd) || !empty($toDrop)) {
+                $schemaBuilder->table($tableName, function ($table) use ($toAdd, $toDrop, $schemaDefinition) {
+                    // Deleta as colunas que foram removidas do array $schema
+                    foreach ($toDrop as $column) {
+                        $table->dropColumn($column);
+                    }
+
+                    // Adiciona as novas colunas configuradas no array $schema
+                    foreach ($toAdd as $column) {
+                        if (isset($schemaDefinition[$column])) {
+                            $type = $schemaDefinition[$column];
+                            $table->$type($column)->nullable();
+                        }
+                    }
+                });
+            }
         }
     }
 

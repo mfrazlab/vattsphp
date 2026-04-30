@@ -42,7 +42,7 @@ class FrontendHandler
     protected function serveStaticOrSPA(Request $request, Response $response): Response
     {
         $uri = ltrim($request->getPath(), '/');
-        $exportPath = $this->projectPath . DIRECTORY_SEPARATOR . 'exported' . DIRECTORY_SEPARATOR;
+        $exportPath = $this->projectPath . DIRECTORY_SEPARATOR . 'serve' . DIRECTORY_SEPARATOR . 'dist' . DIRECTORY_SEPARATOR;
 
         $targetFile = empty($uri) ? 'index.html' : $uri;
         $filePath = $exportPath . $targetFile;
