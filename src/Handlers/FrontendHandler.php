@@ -149,7 +149,7 @@ class FrontendHandler
 
         if (curl_errno($ch)) {
             $error = curl_error($ch);
-            curl_close($ch);
+            // curl_close removido
             return $response->status(502)->html(
                 '<h1>502 Bad Gateway</h1><p>' . htmlspecialchars($error) . '</p>'
             );
@@ -157,7 +157,7 @@ class FrontendHandler
 
         $resHeaders = substr($result, 0, $headerSize);
         $resBody = substr($result, $headerSize);
-        curl_close($ch);
+        // curl_close removido
 
         $response = $response->status($httpCode);
 
