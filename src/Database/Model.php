@@ -18,13 +18,13 @@ abstract class Model implements JsonSerializable
     /** @var array Campos que devem ser ocultados ao converter para Array/JSON (ex: ['password']) */
     protected static array $hidden = [];
 
-    /** @var bool Se o model deve usar/criar as colunas created_at e updated_at */
+    /** @var bool Se o model deve usar/criar as colunas created_at e updated_at (pode ser ativado pelo schema também) */
     protected static bool $usesTimestamps = true;
 
     /** @var array Controla as tabelas já sincronizadas nesta requisição para evitar queries repetidas */
     protected static array $syncedTables = [];
 
-    /** @var array Atributos "mágicos" (quando o dev não declara a propriedade na classe) */
+    /** @var array Atributos reais (dados do banco) populados nesta instância */
     protected array $attributes = [];
 
     public function __construct(array $attributes = [])
@@ -48,10 +48,6 @@ abstract class Model implements JsonSerializable
         $this->setAttribute($key, $value);
     }
 
-    /**
-     * Define o valor. Se o usuário criou uma propriedade tipada (public string $name),
-     * injeta nela. Se não, joga no array genérico $attributes.
-     */
     protected function setAttribute(string $key, $value): void
     {
         if (property_exists($this, $key)) {
@@ -61,9 +57,6 @@ abstract class Model implements JsonSerializable
         }
     }
 
-    /**
-     * Junta as propriedades tipadas do Model com os atributos mágicos para salvar no banco
-     */
     protected function getRecordData(): array
     {
         $data = $this->attributes;
@@ -78,12 +71,27 @@ abstract class Model implements JsonSerializable
     }
 
     // =========================================================================
+    // SERIALIZAÇÃO (OCULTAR DADOS COMO PASSWORD)
+    // =========================================================================
+
+    public function toArray(): array
+    {
+        $data = $this->getRecordData();
+        foreach (static::$hidden as $hiddenField) {
+            unset($data[$hiddenField]);
+        }
+        return $data;
+    }
+
+    public function jsonSerialize(): mixed
+    {
+        return $this->toArray();
+    }
+
+    // =========================================================================
     // ACTIVE RECORD (SAVE, DELETE)
     // =========================================================================
 
-    /**
-     * Insere um novo registro ou atualiza se já existir um ID
-     */
     public function save(): bool
     {
         static::syncSchema();
@@ -93,7 +101,10 @@ abstract class Model implements JsonSerializable
 
         $isInsert = empty($data['id']);
 
-        if (static::$usesTimestamps) {
+        // Verifica se usa timestamp pela classe ou pelo schema
+        $useTimestamps = static::$usesTimestamps || (isset(static::$schema['timestamps']) && static::$schema['timestamps'] === 'timestamps');
+
+        if ($useTimestamps) {
             $now = date('Y-m-d H:i:s');
             $data['updated_at'] = $now;
             if ($isInsert) {
@@ -104,7 +115,6 @@ abstract class Model implements JsonSerializable
         }
 
         if ($isInsert) {
-            // INSERT
             $columns = array_keys($data);
             $placeholders = array_map(fn($col) => ":{$col}", $columns);
 
@@ -118,9 +128,8 @@ abstract class Model implements JsonSerializable
             }
             return $result;
         } else {
-            // UPDATE
             $id = $data['id'];
-            unset($data['id']); // Remove o ID dos dados para não dar update na chave primária
+            unset($data['id']);
 
             $sets = [];
             foreach (array_keys($data) as $col) {
@@ -128,16 +137,13 @@ abstract class Model implements JsonSerializable
             }
 
             $sql = "UPDATE {$table} SET " . implode(', ', $sets) . " WHERE id = :id";
-            $data['id'] = $id; // Recoloca para o bind do WHERE
+            $data['id'] = $id;
 
             $stmt = $pdo->prepare($sql);
             return $stmt->execute($data);
         }
     }
 
-    /**
-     * Deleta o registro atual do banco
-     */
     public function delete(): bool
     {
         $data = $this->getRecordData();
@@ -149,13 +155,9 @@ abstract class Model implements JsonSerializable
     }
 
     // =========================================================================
-    // QUERY BUILDER / ESTÁTICOS
+    // QUERY BUILDER
     // =========================================================================
 
-    /**
-     * Busca um único registro.
-     * Uso: User::get(1) | User::get('email', 'teste@teste.com') | User::get(['status' => 'ativo'])
-     */
     public static function get(...$args): ?static
     {
         static::syncSchema();
@@ -191,10 +193,6 @@ abstract class Model implements JsonSerializable
         return $row ? new static($row) : null;
     }
 
-    /**
-     * Busca vários registros baseados em condições (Array de Objetos)
-     * Uso: User::where('role', 'admin') | User::where(['role' => 'admin', 'active' => 1])
-     */
     public static function where($column, $value = null): array
     {
         static::syncSchema();
@@ -222,10 +220,6 @@ abstract class Model implements JsonSerializable
         return self::hydrate($stmt->fetchAll());
     }
 
-    /**
-     * Retorna todos os registros ordenados
-     * Uso: User::orderBy('name', 'DESC')
-     */
     public static function orderBy(string $column, string $direction = 'ASC'): array
     {
         static::syncSchema();
@@ -238,21 +232,14 @@ abstract class Model implements JsonSerializable
         return self::hydrate($stmt->fetchAll());
     }
 
-    /**
-     * Ponto de partida estático opcional (ex: Model::all())
-     */
     public static function all(): array
     {
         static::syncSchema();
         $table = static::getTableName();
         $stmt = DB::getPdo()->query("SELECT * FROM {$table}");
-
         return self::hydrate($stmt->fetchAll());
     }
 
-    /**
-     * Transforma um array de resultados do PDO em um array de Objetos (Models)
-     */
     protected static function hydrate(array $rows): array
     {
         $results = [];
@@ -263,47 +250,23 @@ abstract class Model implements JsonSerializable
     }
 
     // =========================================================================
-    // SERIALIZAÇÃO E PROTEÇÃO DE DADOS (JSON / ARRAY)
-    // =========================================================================
-
-    /**
-     * Converte o model para array, ocultando os campos definidos em $hidden
-     */
-    public function toArray(): array
-    {
-        $data = $this->getRecordData();
-        foreach (static::$hidden as $hiddenField) {
-            unset($data[$hiddenField]);
-        }
-        return $data;
-    }
-
-    /**
-     * Executado automaticamente pelo PHP ao fazer json_encode($model)
-     */
-    public function jsonSerialize(): mixed
-    {
-        return $this->toArray();
-    }
-
-    // =========================================================================
-    // SCHEMA SYNC / CORE
+    // SCHEMA SYNC (COM SUPORTE A ENUM E FOREIGN KEYS)
     // =========================================================================
 
     public static function getTableName(): string
     {
+        // Se a classe filha definiu estaticamente
         if (static::$table) {
             return static::$table;
         }
         $path = explode('\\', static::class);
-        return strtolower(end($path)) . 's'; // Ex: User -> users
+        return strtolower(end($path)) . 's';
     }
 
     protected static function syncSchema(): void
     {
         $table = static::getTableName();
 
-        // Se a tabela já foi checada nessa execução, ignora.
         if (isset(self::$syncedTables[$table]) || empty(static::$schema)) {
             return;
         }
@@ -312,6 +275,57 @@ abstract class Model implements JsonSerializable
 
         $pdo = DB::getPdo();
         $driver = $pdo->getAttribute(PDO::ATTR_DRIVER_NAME);
+
+        // --- Parsing do Schema Avançado ---
+        $schemaDef = static::$schema;
+        $useTimestamps = static::$usesTimestamps;
+
+        // Remove timestamps e id do schema bruto, trataremos internamente
+        if (isset($schemaDef['timestamps'])) {
+            $useTimestamps = true;
+            unset($schemaDef['timestamps']);
+        }
+        if (isset($schemaDef['id'])) {
+            unset($schemaDef['id']);
+        }
+
+        $parsedColumns = [];
+        $foreignKeys = [];
+
+        foreach ($schemaDef as $col => $type) {
+            $sqlType = 'VARCHAR(255)';
+            $typeStr = strtolower(trim($type));
+
+            // Tratamento de ENUM
+            if (str_starts_with($typeStr, 'enum:')) {
+                if ($driver === 'sqlite') {
+                    $sqlType = 'TEXT'; // Fallback para SQLite
+                } else {
+                    $options = explode(',', substr($type, 5));
+                    $optionsStr = implode(', ', array_map(fn($o) => "'" . trim($o) . "'", $options));
+                    $sqlType = "ENUM({$optionsStr})";
+                }
+            }
+            // Tratamento de FOREIGN KEY
+            elseif (str_starts_with($typeStr, 'foreign:')) {
+                // foreign:users.id
+                $sqlType = 'INT';
+                $ref = substr($type, 8);
+                $parts = explode('.', $ref);
+                if (count($parts) === 2) {
+                    $foreignKeys[$col] = [
+                        'table' => $parts[0],
+                        'column' => $parts[1]
+                    ];
+                }
+            }
+            // Tipos Básicos
+            else {
+                $sqlType = self::mapType($typeStr, $driver);
+            }
+
+            $parsedColumns[$col] = $sqlType;
+        }
 
         // 1. Verifica se a tabela existe
         $tableExists = false;
@@ -323,22 +337,27 @@ abstract class Model implements JsonSerializable
             $tableExists = (bool) $stmt->fetch();
         }
 
-        // 2. Tabela não existe: CRIA do zero
+        // 2. Tabela não existe: CRIA DO ZERO
         if (!$tableExists) {
-            $columns = [];
-            $columns[] = ($driver === 'sqlite') ? "id INTEGER PRIMARY KEY AUTOINCREMENT" : "id INT AUTO_INCREMENT PRIMARY KEY";
+            $colsSql = [];
+            $colsSql[] = ($driver === 'sqlite') ? "id INTEGER PRIMARY KEY AUTOINCREMENT" : "id INT AUTO_INCREMENT PRIMARY KEY";
 
-            foreach (static::$schema as $col => $type) {
-                $columns[] = "{$col} " . self::mapType($type, $driver) . " NULL";
+            foreach ($parsedColumns as $col => $sqlType) {
+                $colsSql[] = "{$col} {$sqlType} NULL";
             }
 
-            if (static::$usesTimestamps) {
-                $columns[] = "created_at DATETIME NULL";
-                $columns[] = "updated_at DATETIME NULL";
+            if ($useTimestamps) {
+                $colsSql[] = "created_at DATETIME NULL";
+                $colsSql[] = "updated_at DATETIME NULL";
             }
 
-            $pdo->exec("CREATE TABLE {$table} (" . implode(', ', $columns) . ")");
-            return; // Se criou do zero, não precisa sincronizar colunas
+            // Adiciona restrições de Foreign Key na criação
+            foreach ($foreignKeys as $col => $ref) {
+                $colsSql[] = "FOREIGN KEY ({$col}) REFERENCES {$ref['table']}({$ref['column']}) ON DELETE SET NULL";
+            }
+
+            $pdo->exec("CREATE TABLE {$table} (" . implode(', ', $colsSql) . ")");
+            return;
         }
 
         // 3. Tabela existe: Sincroniza Adicionando ou Removendo colunas
@@ -351,9 +370,9 @@ abstract class Model implements JsonSerializable
             while ($row = $stmt->fetch()) $existingCols[] = $row['Field'];
         }
 
-        $expectedCols = array_keys(static::$schema);
+        $expectedCols = array_keys($parsedColumns);
         $expectedCols[] = 'id';
-        if (static::$usesTimestamps) {
+        if ($useTimestamps) {
             $expectedCols[] = 'created_at';
             $expectedCols[] = 'updated_at';
         }
@@ -361,21 +380,30 @@ abstract class Model implements JsonSerializable
         $toAdd = array_diff($expectedCols, $existingCols);
         $toDrop = array_diff($existingCols, $expectedCols);
 
-        // Adiciona novas colunas configuradas no $schema
+        // Adiciona novas colunas
         foreach ($toAdd as $col) {
-            if (isset(static::$schema[$col])) {
-                $type = self::mapType(static::$schema[$col], $driver);
+            if (isset($parsedColumns[$col])) {
+                $type = $parsedColumns[$col];
                 $pdo->exec("ALTER TABLE {$table} ADD COLUMN {$col} {$type} NULL");
+
+                // Tenta adicionar a Foreign Key no banco existente (MySQL suporta, SQLite em modo ALTER não)
+                if (isset($foreignKeys[$col]) && $driver !== 'sqlite') {
+                    $ref = $foreignKeys[$col];
+                    try {
+                        $pdo->exec("ALTER TABLE {$table} ADD CONSTRAINT fk_{$table}_{$col} FOREIGN KEY ({$col}) REFERENCES {$ref['table']}({$ref['column']}) ON DELETE SET NULL");
+                    } catch (\Exception $e) {} // Ignora se a chave já existir
+                }
+
             } elseif (in_array($col, ['created_at', 'updated_at'])) {
                 $pdo->exec("ALTER TABLE {$table} ADD COLUMN {$col} DATETIME NULL");
             }
         }
 
-        // Deleta colunas que foram removidas do $schema
+        // Deleta colunas removidas
         foreach ($toDrop as $col) {
             try {
                 $pdo->exec("ALTER TABLE {$table} DROP COLUMN {$col}");
-            } catch (\Exception $e) {} // Ignora falhas em versões antigas do SQLite que não suportam DROP COLUMN
+            } catch (\Exception $e) {}
         }
     }
 
@@ -387,7 +415,9 @@ abstract class Model implements JsonSerializable
         if ($type === 'boolean' || $type === 'bool') return $driver === 'sqlite' ? 'INTEGER' : 'TINYINT(1)';
         if ($type === 'text') return 'TEXT';
         if ($type === 'float' || $type === 'double') return 'DOUBLE';
+        if ($type === 'date') return 'DATE';
+        if ($type === 'datetime') return 'DATETIME';
 
-        return 'VARCHAR(255)'; // Default fallback
+        return 'VARCHAR(255)';
     }
 }
