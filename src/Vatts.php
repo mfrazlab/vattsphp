@@ -146,7 +146,7 @@ class Vatts
     protected function registerRpcRoute(): void
     {
         // Registra automaticamente a rota POST /api/rpc para RPC
-        $this->router->post('/api/rpc', function (Request $request, Response $response) {
+        $this->router->post('/api/prpc', function (Request $request, Response $response) {
             $rpc = new RpcController();
             return $rpc->handle($request, $response);
         });
