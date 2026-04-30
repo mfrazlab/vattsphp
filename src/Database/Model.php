@@ -6,7 +6,17 @@ use PDO;
 use ReflectionObject;
 use ReflectionProperty;
 use JsonSerializable;
+use Exception;
 
+/**
+ * @method static static where(string|array $column, mixed $value = null)
+ * @method static static orderBy(string $column, string $direction = 'ASC')
+ * @method static static limit(int $limit)
+ * @method static static|null get(mixed ...$args)
+ * @method static static|null find(mixed ...$args)
+ * @method static static|null first()
+ * @method static static[] all()
+ */
 abstract class Model implements JsonSerializable
 {
     /** @var array Define as colunas dinâmicas (ex: ['name' => 'string']) */
@@ -26,6 +36,13 @@ abstract class Model implements JsonSerializable
 
     /** @var array Atributos reais (dados do banco) populados nesta instância */
     protected array $attributes = [];
+
+    // Variáveis internas para montar as Queries (Method Chaining)
+    protected array $qbWheres = [];
+    protected array $qbParams = [];
+    protected string $qbOrderBy = '';
+    protected string $qbLimit = '';
+    protected int $qbParamCounter = 0;
 
     public function __construct(array $attributes = [])
     {
@@ -155,89 +172,105 @@ abstract class Model implements JsonSerializable
     }
 
     // =========================================================================
-    // QUERY BUILDER
+    // QUERY BUILDER (ENCADEAMENTO E MÉTODOS ESTÁTICOS MÁGICOS)
     // =========================================================================
 
-    public static function get(...$args): ?static
+    /**
+     * Intercepta métodos chamados estaticamente para criar o Query Builder.
+     * Exemplo: User::where() cria new User() e chama ->where().
+     */
+    public static function __callStatic($name, $arguments)
     {
+        $instance = new static();
+        if (method_exists($instance, $name)) {
+            return $instance->$name(...$arguments);
+        }
+        throw new Exception("Static method {$name} does not exist on " . static::class);
+    }
+
+    public function where($column, $value = null): static
+    {
+        if (is_array($column)) {
+            foreach ($column as $k => $v) {
+                $this->qbParamCounter++;
+                $this->qbWheres[] = "{$k} = :qb_{$this->qbParamCounter}";
+                $this->qbParams["qb_{$this->qbParamCounter}"] = $v;
+            }
+        } else {
+            $this->qbParamCounter++;
+            $this->qbWheres[] = "{$column} = :qb_{$this->qbParamCounter}";
+            $this->qbParams["qb_{$this->qbParamCounter}"] = $value;
+        }
+
+        return $this; // Retorna a própria instância para encadeamento
+    }
+
+    public function orderBy(string $column, string $direction = 'ASC'): static
+    {
+        $direction = strtoupper($direction) === 'DESC' ? 'DESC' : 'ASC';
+        $this->qbOrderBy = " ORDER BY {$column} {$direction}";
+        return $this;
+    }
+
+    public function limit(int $limit): static
+    {
+        $this->qbLimit = " LIMIT {$limit}";
+        return $this;
+    }
+
+    public function first(): ?static
+    {
+        $this->limit(1);
+        $results = $this->get(); // Chama o próprio get() para disparar a query
+        return $results[0] ?? null;
+    }
+
+    public function find(...$args): ?static
+    {
+        if (count($args) === 1) {
+            if (is_array($args[0])) {
+                $this->where($args[0]);
+            } else {
+                $this->where('id', $args[0]);
+            }
+        } elseif (count($args) === 2) {
+            $this->where($args[0], $args[1]);
+        }
+        return $this->first();
+    }
+
+    /**
+     * Ponto de finalização da Query ou Busca Direta
+     * Se usar User::get(1), ele atua como o antigo get, buscando por ID.
+     * Se usar User::where(...)->get(), ele executa as condições encadeadas.
+     */
+    public function get(...$args)
+    {
+        // Se argumentos foram passados (ex: User::get(1)), atua como find para buscar 1 registro
+        if (!empty($args)) {
+            return $this->find(...$args);
+        }
+
+        // Se está encadeado (ex: User::where()->get()), finaliza a query e traz Array de Models
         static::syncSchema();
         $table = static::getTableName();
         $pdo = DB::getPdo();
 
         $sql = "SELECT * FROM {$table}";
-        $params = [];
-
-        if (count($args) === 1) {
-            if (is_array($args[0])) {
-                $conditions = [];
-                foreach ($args[0] as $key => $value) {
-                    $conditions[] = "{$key} = :{$key}";
-                    $params[$key] = $value;
-                }
-                $sql .= " WHERE " . implode(' AND ', $conditions);
-            } else {
-                $sql .= " WHERE id = :id";
-                $params['id'] = $args[0];
-            }
-        } elseif (count($args) === 2) {
-            $sql .= " WHERE {$args[0]} = :val";
-            $params['val'] = $args[1];
+        if (!empty($this->qbWheres)) {
+            $sql .= " WHERE " . implode(' AND ', $this->qbWheres);
         }
-
-        $sql .= " LIMIT 1";
+        $sql .= $this->qbOrderBy . $this->qbLimit;
 
         $stmt = $pdo->prepare($sql);
-        $stmt->execute($params);
-        $row = $stmt->fetch();
-
-        return $row ? new static($row) : null;
-    }
-
-    public static function where($column, $value = null): array
-    {
-        static::syncSchema();
-        $table = static::getTableName();
-        $pdo = DB::getPdo();
-
-        $sql = "SELECT * FROM {$table} WHERE ";
-        $params = [];
-
-        if (is_array($column)) {
-            $conditions = [];
-            foreach ($column as $k => $v) {
-                $conditions[] = "{$k} = :{$k}";
-                $params[$k] = $v;
-            }
-            $sql .= implode(' AND ', $conditions);
-        } else {
-            $sql .= "{$column} = :val";
-            $params['val'] = $value;
-        }
-
-        $stmt = $pdo->prepare($sql);
-        $stmt->execute($params);
+        $stmt->execute($this->qbParams);
 
         return self::hydrate($stmt->fetchAll());
     }
 
-    public static function orderBy(string $column, string $direction = 'ASC'): array
+    public function all(): array
     {
-        static::syncSchema();
-        $table = static::getTableName();
-        $pdo = DB::getPdo();
-
-        $direction = strtoupper($direction) === 'DESC' ? 'DESC' : 'ASC';
-        $stmt = $pdo->query("SELECT * FROM {$table} ORDER BY {$column} {$direction}");
-
-        return self::hydrate($stmt->fetchAll());
-    }
-
-    public static function all(): array
-    {
-        static::syncSchema();
-        $table = static::getTableName();
-        $stmt = DB::getPdo()->query("SELECT * FROM {$table}");
-        return self::hydrate($stmt->fetchAll());
+        return clone $this->get();
     }
 
     protected static function hydrate(array $rows): array
