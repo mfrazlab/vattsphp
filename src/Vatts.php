@@ -20,9 +20,9 @@ class Vatts
     /**
      * Inicia o Vatts e retorna a instância do Router.
      * Config keys:
-     *  - project_path: caminho do projeto cliente (onde estão app/, public/, models/)
-     *  - db: array com configuração do Eloquent (optional)
-     *  - autoload_helpers: bool (default: true) - registra helpers globais
+     * - project_path: caminho do projeto cliente (onde estão app/, public/, models/)
+     * - db: array com configuração do Eloquent (optional)
+     * - autoload_helpers: bool (default: true) - registra helpers globais
      */
     public static function init(array $config = []): Router
     {
@@ -70,7 +70,48 @@ class Vatts
     public function __construct(string $projectPath)
     {
         $this->projectPath = rtrim($projectPath, "\\/ ");
+
+        // Registra as variáveis de ambiente do .env antes de qualquer outra coisa
+        $this->loadEnv();
+
         $this->resolver = new ControllerResolver($this->projectPath);
+    }
+
+    /**
+     * Carrega e registra as variáveis do arquivo .env
+     */
+    protected function loadEnv(): void
+    {
+        $path = $this->projectPath . DIRECTORY_SEPARATOR . '.env';
+
+        if (!is_file($path)) {
+            return;
+        }
+
+        $lines = file($path, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+        foreach ($lines as $line) {
+            // Pula comentários
+            if (str_starts_with(trim($line), '#')) {
+                continue;
+            }
+
+            // Divide apenas no primeiro '='
+            if (strpos($line, '=') !== false) {
+                list($name, $value) = explode('=', $line, 2);
+                $name = trim($name);
+                $value = trim($value);
+
+                // Remove aspas se existirem
+                $value = trim($value, "\"'");
+
+                // Define se ainda não existir
+                if (!array_key_exists($name, $_SERVER) && !array_key_exists($name, $_ENV)) {
+                    putenv(sprintf('%s=%s', $name, $value));
+                    $_ENV[$name] = $value;
+                    $_SERVER[$name] = $value;
+                }
+            }
+        }
     }
 
     protected function bootRouter(): void
@@ -111,7 +152,6 @@ class Vatts
 
                 $instance = new $class();
                 // Registra como middleware global no router
-                // O middleware recebe Request e retorna Request modificada
                 $this->router->use(function (Request $request) use ($instance) {
                     return $instance->handle($request);
                 });
@@ -145,7 +185,7 @@ class Vatts
 
     protected function registerRpcRoute(): void
     {
-        // Registra automaticamente a rota POST /api/rpc para RPC
+        // Registra automaticamente a rota POST /api/prpc para RPC
         $this->router->post('/api/prpc', function (Request $request, Response $response) {
             $rpc = new RpcController();
             return $rpc->handle($request, $response);
@@ -155,6 +195,7 @@ class Vatts
     protected function registerFrontendFallback(): void
     {
         // Registra automaticamente fallback para frontend (dev proxy ou prod serve)
+        // Agora o getenv() vai funcionar pois o loadEnv() rodou no construtor
         $env = getenv('APP_ENV') ?: 'dev';
         $port = getenv('DEV_SERVER_PORT') ?: 3000;
 
