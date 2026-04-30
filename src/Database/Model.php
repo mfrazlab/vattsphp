@@ -177,18 +177,36 @@ abstract class Model implements JsonSerializable
 
     /**
      * Intercepta métodos chamados estaticamente para criar o Query Builder.
-     * Exemplo: User::where() cria new User() e chama ->where().
+     * Exemplo: User::where() cria new User() e chama ->_where().
      */
     public static function __callStatic($name, $arguments)
     {
         $instance = new static();
-        if (method_exists($instance, $name)) {
-            return $instance->$name(...$arguments);
+        $method = '_' . $name;
+
+        if (method_exists($instance, $method)) {
+            return $instance->$method(...$arguments);
         }
+
         throw new Exception("Static method {$name} does not exist on " . static::class);
     }
 
-    public function where($column, $value = null): static
+    /**
+     * Intercepta métodos encadeados na instância.
+     * Exemplo: ->get() redireciona para ->_get()
+     */
+    public function __call($name, $arguments)
+    {
+        $method = '_' . $name;
+
+        if (method_exists($this, $method)) {
+            return $this->$method(...$arguments);
+        }
+
+        throw new Exception("Method {$name} does not exist on " . static::class);
+    }
+
+    protected function _where($column, $value = null): static
     {
         if (is_array($column)) {
             foreach ($column as $k => $v) {
@@ -205,50 +223,48 @@ abstract class Model implements JsonSerializable
         return $this; // Retorna a própria instância para encadeamento
     }
 
-    public function orderBy(string $column, string $direction = 'ASC'): static
+    protected function _orderBy(string $column, string $direction = 'ASC'): static
     {
         $direction = strtoupper($direction) === 'DESC' ? 'DESC' : 'ASC';
         $this->qbOrderBy = " ORDER BY {$column} {$direction}";
         return $this;
     }
 
-    public function limit(int $limit): static
+    protected function _limit(int $limit): static
     {
         $this->qbLimit = " LIMIT {$limit}";
         return $this;
     }
 
-    public function first(): ?static
+    protected function _first(): ?static
     {
-        $this->limit(1);
-        $results = $this->get(); // Chama o próprio get() para disparar a query
+        $this->_limit(1);
+        $results = $this->_get(); // Chama o próprio _get() para disparar a query
         return $results[0] ?? null;
     }
 
-    public function find(...$args): ?static
+    protected function _find(...$args): ?static
     {
         if (count($args) === 1) {
             if (is_array($args[0])) {
-                $this->where($args[0]);
+                $this->_where($args[0]);
             } else {
-                $this->where('id', $args[0]);
+                $this->_where('id', $args[0]);
             }
         } elseif (count($args) === 2) {
-            $this->where($args[0], $args[1]);
+            $this->_where($args[0], $args[1]);
         }
-        return $this->first();
+        return $this->_first();
     }
 
     /**
      * Ponto de finalização da Query ou Busca Direta
-     * Se usar User::get(1), ele atua como o antigo get, buscando por ID.
-     * Se usar User::where(...)->get(), ele executa as condições encadeadas.
      */
-    public function get(...$args)
+    protected function _get(...$args)
     {
         // Se argumentos foram passados (ex: User::get(1)), atua como find para buscar 1 registro
         if (!empty($args)) {
-            return $this->find(...$args);
+            return $this->_find(...$args);
         }
 
         // Se está encadeado (ex: User::where()->get()), finaliza a query e traz Array de Models
@@ -268,9 +284,9 @@ abstract class Model implements JsonSerializable
         return self::hydrate($stmt->fetchAll());
     }
 
-    public function all(): array
+    protected function _all(): array
     {
-        return clone $this->get();
+        return $this->_get();
     }
 
     protected static function hydrate(array $rows): array
