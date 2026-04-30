@@ -22,27 +22,31 @@ class RpcController
                 return $response;
             }
 
-            $file = $payload['file'];
+            $file = $payload['file']; // ex: "app/Services/UserActions" ou "app/Rpc/TestActions"
             $fn = $payload['fn'];
             $args = $payload['args'] ?? [];
 
-            if (preg_match('/[^a-zA-Z0-9\/_]/', $file)) {
-                $response->status(403)->json(['success' => false, 'error' => 'Invalid file path']);
+            // Permite letras, números, barras, sublinhados e hífens
+            if (preg_match('/[^a-zA-Z0-9\/_\\-]/', $file)) {
+                $response->status(403)->json(['success' => false, 'error' => 'Invalid file path characters']);
                 return $response;
             }
 
-            // 1. Localiza a raiz do projeto do cliente
-            $basePath = getcwd(); // Pega o diretório de execução (root do projeto)
+            // 1. Localiza a raiz do projeto real
+            // Se o processo rodar em /public, voltamos um nível para a raiz do cliente
+            $basePath = getcwd();
+            if (basename($basePath) === 'public') {
+                $basePath = dirname($basePath);
+            }
 
-            // 2. Define o caminho do arquivo físico (ex: app/Rpc/UserActions.php)
-            // Você pode mudar 'app/Rpc/' para a pasta que preferir que os clientes usem
-            $filePath = $basePath . DIRECTORY_SEPARATOR . 'app' . DIRECTORY_SEPARATOR . 'Rpc' . DIRECTORY_SEPARATOR . str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $file) . '.php';
+            // 2. Define o caminho do arquivo físico a partir da raiz (sem forçar pasta app/Rpc)
+            $filePath = $basePath . DIRECTORY_SEPARATOR . str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $file) . '.php';
 
             if (!file_exists($filePath)) {
                 $response->status(404)->json([
                     'success' => false,
                     'error' => 'RPC file not found',
-                    'path' => $filePath
+                    'resolvedPath' => $filePath
                 ]);
                 return $response;
             }
@@ -50,15 +54,19 @@ class RpcController
             // 3. Inclui o arquivo manualmente
             require_once $filePath;
 
-            // 4. Resolve o nome da classe com Namespace
-            // Como é uma lib, aqui você assume que o cliente segue o padrão App\Rpc
-            // ou você pode extrair o namespace do arquivo se quiser ser 100% dinâmico
-            $className = 'App\\Rpc\\' . str_replace('/', '\\', $file);
+            // 4. Resolve o nome da classe dinamicamente
+            // Converte "/" para "\"
+            $className = str_replace('/', '\\', $file);
+
+            // Se o caminho começar com "app/", corrigimos para "App\" (padrão PSR-4)
+            if (str_starts_with(strtolower($className), 'app\\')) {
+                $className = 'App\\' . substr($className, 4);
+            }
 
             if (!class_exists($className)) {
                 $response->status(404)->json([
                     'success' => false,
-                    'error' => "Class '{$className}' not found inside file",
+                    'error' => "Class '{$className}' not found inside the required file",
                     'file' => $filePath
                 ]);
                 return $response;
@@ -73,6 +81,7 @@ class RpcController
 
             $method = $reflection->getMethod($fn);
 
+            // Verifica se o método tem o atributo #[Expose]
             $attributes = $method->getAttributes(Expose::class);
             if (empty($attributes)) {
                 $response->status(403)->json([
@@ -84,6 +93,7 @@ class RpcController
 
             $instance = $reflection->newInstance();
 
+            // Injeção de dependência do Request se for o primeiro parâmetro
             $params = $method->getParameters();
             if (!empty($params)) {
                 $firstParamType = $params[0]->getType();
