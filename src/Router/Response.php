@@ -69,9 +69,24 @@ class Response
      */
     public function view(string $template, array $data = []): self
     {
+        $request = Router::parseRequest();
+        // colocar request junto com data
+        $data = array_merge($data, ['request' => $request]);
         // Pega a instância configurada e roda o template
         $this->body = BladeConfig::get()->run($template, $data);
         $this->header('Content-Type', 'text/html');
+
+
+        return $this;
+    }
+
+    /**
+     * Redireciona a requisição para uma nova URL.
+     */
+    public function redirect(string $url, int $status = 302): self
+    {
+        $this->status($status);
+        $this->header('Location', $url);
 
         return $this;
     }

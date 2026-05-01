@@ -5,85 +5,94 @@ namespace Vatts\Router;
 class Router
 {
     protected array $routes = [];
-    protected array $globalMiddlewares = [];
     protected $fallbackHandler = null;
 
     /**
-     * Registra uma rota GET
+     * Pilha para gerenciar prefixos e middlewares de grupos aninhados
      */
+    protected array $groupStack = [];
+
     public function get(string $pattern, $handler): Route
     {
         return $this->register('GET', $pattern, $handler);
     }
 
-    /**
-     * Registra uma rota POST
-     */
     public function post(string $pattern, $handler): Route
     {
         return $this->register('POST', $pattern, $handler);
     }
 
-    /**
-     * Registra uma rota PUT
-     */
     public function put(string $pattern, $handler): Route
     {
         return $this->register('PUT', $pattern, $handler);
     }
 
-    /**
-     * Registra uma rota DELETE
-     */
     public function delete(string $pattern, $handler): Route
     {
         return $this->register('DELETE', $pattern, $handler);
     }
 
-    /**
-     * Registra uma rota PATCH
-     */
     public function patch(string $pattern, $handler): Route
     {
         return $this->register('PATCH', $pattern, $handler);
     }
 
     /**
-     * Registra uma rota com método arbitrário
+     * Agrupa rotas sob um prefixo ou conjunto de middlewares
+     * Ex: $app->group(['prefix' => '/admin', 'middleware' => 'auth'], function($router) { ... })
      */
+    public function group(array $attributes, callable $callback): void
+    {
+        $this->groupStack[] = $attributes;
+        $callback($this);
+        array_pop($this->groupStack);
+    }
+
     public function register(string $method, string $pattern, $handler): Route
     {
-        $route = new Route($method, $pattern, $handler);
+        $prefix = '';
+        $groupMiddlewares = [];
+
+        // Acumula atributos dos grupos pais
+        foreach ($this->groupStack as $group) {
+            if (isset($group['prefix'])) {
+                $prefix .= '/' . trim($group['prefix'], '/');
+            }
+            if (isset($group['middleware'])) {
+                $m = $group['middleware'];
+                if (is_array($m)) {
+                    $groupMiddlewares = array_merge($groupMiddlewares, $m);
+                } else {
+                    $groupMiddlewares[] = $m;
+                }
+            }
+        }
+
+        // Formata o pattern final com o prefixo
+        $finalPattern = $prefix . '/' . trim($pattern, '/');
+        $finalPattern = ($finalPattern === '//') ? '/' : $finalPattern;
+
+        $route = new Route($method, $finalPattern, $handler);
+
+        // Aplica os middlewares do grupo na rota
+        if (!empty($groupMiddlewares)) {
+            $route->middleware($groupMiddlewares);
+        }
+
         $this->routes[] = $route;
         return $route;
     }
 
-    /**
-     * Registra um middleware global
-     */
-    public function use(callable $middleware): void
-    {
-        $this->globalMiddlewares[] = $middleware;
-    }
-
-    /**
-     * Registra um fallback handler para rotas não encontradas
-     * Útil para proxy do frontend em dev ou servir SPA em prod
-     */
     public function fallback(callable $handler): void
     {
         $this->fallbackHandler = $handler;
     }
 
-    /**
-     * Despacha uma requisição
-     */
     public function dispatch(Request $request, Response $response): Response
     {
         $method = $request->getMethod();
         $path = $request->getPath();
 
-        // Encontra a rota que corresponde
         $route = null;
         foreach ($this->routes as $r) {
             if ($r->matches($method, $path)) {
@@ -93,78 +102,82 @@ class Router
         }
 
         if (!$route) {
-            // Se não encontrou a rota, usa o fallback (se registrado)
             if ($this->fallbackHandler) {
-                $request = $this->executeFallbackMiddlewares($request);
                 try {
-                    $response = ($this->fallbackHandler)($request, $response);
+                    return ($this->fallbackHandler)($request, $response);
                 } catch (\Throwable $e) {
-                    $response->status(500)->json(['error' => $e->getMessage()]);
+                    return $response->status(500)->json(['error' => $e->getMessage()]);
                 }
-                return $response;
+            }
+            return $response->status(404)->json(['error' => 'Route not found']);
+        }
+
+        // Define os parâmetros da URL no request (sempre array)
+        $request->setParams($route->extractParams($path));
+
+        // Executa middlewares
+        foreach ($route->getMiddlewares() as $middleware) {
+            $result = $this->resolveMiddleware($middleware, $request, $response);
+
+            if ($result instanceof Response) return $result;
+            if ($result instanceof Request) $request = $result;
+        }
+
+        // Executa o handler final
+        try {
+            return $route->call($request, $response);
+        } catch (\Throwable $e) {
+            return $response->status(500)->json(['error' => $e->getMessage()]);
+        }
+    }
+
+    /**
+     * Resolve a execução do middleware (Callable, String/Classe ou Objeto)
+     */
+    protected function resolveMiddleware($middleware, Request $request, Response $response)
+    {
+        if (is_callable($middleware)) {
+            return $middleware($request, $response);
+        }
+
+        if (is_string($middleware)) {
+            if (class_exists($middleware)) {
+                $instance = new $middleware();
+                return $instance->handle($request, $response);
             }
 
-            // Sem fallback, retorna 404
-            $response->status(404)->json(['error' => 'Route not found']);
-            return $response;
+            // Busca por alias/name definido na classe do middleware
+            foreach (get_declared_classes() as $class) {
+                if (is_subclass_of($class, \Vatts\Utils\Middleware::class)) {
+                    if (property_exists($class, 'name') && $class::$name === $middleware) {
+                        $instance = new $class();
+                        return $instance->handle($request, $response);
+                    }
+                }
+            }
+            throw new \Exception("Middleware '{$middleware}' não encontrado.");
         }
 
-        // Extrai parâmetros e coloca no request
-        $params = $route->extractParams($path);
-        $request->setParams($params);
-
-        // Executa middlewares globais
-        foreach ($this->globalMiddlewares as $middleware) {
-            $request = $middleware($request) ?? $request;
+        if (is_object($middleware) && method_exists($middleware, 'handle')) {
+            return $middleware->handle($request, $response);
         }
 
-        // Executa middlewares da rota
-        foreach ($route->getMiddlewares() as $middleware) {
-            $request = $middleware($request) ?? $request;
-        }
-
-        // Executa o handler da rota
-        try {
-            $response = $route->call($request, $response);
-        } catch (\Throwable $e) {
-            $response->status(500)->json(['error' => $e->getMessage()]);
-        }
-
-        return $response;
+        return null;
     }
 
-    /**
-     * Executa apenas os middlewares globais (sem os da rota)
-     */
-    protected function executeFallbackMiddlewares(Request $request): Request
+    public static function parseRequest(): Request
     {
-        // Executa middlewares globais
-        foreach ($this->globalMiddlewares as $middleware) {
-            $request = $middleware($request) ?? $request;
-        }
-
-        return $request;
-    }
-
-    /**
-     * Inicia o servidor e despacha a requisição atual
-     */
-    public function run(): void
-    {
-        // Detecta o método HTTP
         $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
-
-        // Detecta o caminho (remove query string)
         $path = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH);
 
-        // Remove o prefixo do app (se houver)
+        // Remove prefixo de subpastas se necessário
         $scriptPath = dirname($_SERVER['SCRIPT_NAME'] ?? '');
         if ($scriptPath !== '/' && strpos($path, $scriptPath) === 0) {
             $path = substr($path, strlen($scriptPath));
         }
-        if (!$path) $path = '/';
+        $path = $path ?: '/';
 
-        // Parse body
+        // Parse do Body
         $body = [];
         $contentType = $_SERVER['CONTENT_TYPE'] ?? '';
         if (in_array($method, ['POST', 'PUT', 'PATCH'])) {
@@ -175,19 +188,17 @@ class Router
             }
         }
 
-        // Parse headers
-        $headers = getallheaders() ?? [];
+        return new Request($method, $path, $body, $_GET ?? [], getallheaders() ?: []);
+    }
 
-        // Cria request
-        $request = new Request($method, $path, $body, $_GET ?? [], $headers);
-
-        // Cria response
+    public function run(): void
+    {
+        $request = self::parseRequest();
         $response = new Response();
 
-        // Despacha
         $response = $this->dispatch($request, $response);
 
-        // Envia response
+        // Envio da resposta
         http_response_code($response->getStatus());
         foreach ($response->getHeaders() as $key => $value) {
             header($key . ': ' . $value);
@@ -199,4 +210,3 @@ class Router
         }
     }
 }
-

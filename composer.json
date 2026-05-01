@@ -1,5 +1,5 @@
 {
-    "name": "vattsp/vattsphp",
+    "name": "mfrazlab/vattsphp",
     "version": "1.0.0",
     "type": "library",
     "description": "VattsPHP - Framework leve com Router próprio para Slim + Eloquent com RPC",

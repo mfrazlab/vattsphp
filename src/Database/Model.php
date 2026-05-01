@@ -3,6 +3,7 @@
 namespace Vatts\Database;
 
 use PDO;
+use ReflectionClass;
 use ReflectionObject;
 use ReflectionProperty;
 use JsonSerializable;
@@ -28,7 +29,7 @@ abstract class Model implements JsonSerializable
     /** @var array Campos que devem ser ocultados ao converter para Array/JSON (ex: ['password']) */
     protected static array $hidden = [];
 
-    /** @var bool Se o model deve usar/criar as colunas created_at e updated_at (pode ser ativado pelo schema também) */
+    /** @var bool Se o model deve usar/criar as colunas created_at e updated_at */
     protected static bool $usesTimestamps = true;
 
     /** @var array Controla as tabelas já sincronizadas nesta requisição para evitar queries repetidas */
@@ -94,7 +95,12 @@ abstract class Model implements JsonSerializable
     public function toArray(): array
     {
         $data = $this->getRecordData();
-        foreach (static::$hidden as $hiddenField) {
+
+        $ref = new ReflectionClass(static::class);
+        $defaults = $ref->getDefaultProperties();
+        $hidden = $defaults['hidden'] ?? [];
+
+        foreach ($hidden as $hiddenField) {
             unset($data[$hiddenField]);
         }
         return $data;
@@ -118,8 +124,14 @@ abstract class Model implements JsonSerializable
 
         $isInsert = empty($data['id']);
 
-        // Verifica se usa timestamp pela classe ou pelo schema
-        $useTimestamps = static::$usesTimestamps || (isset(static::$schema['timestamps']) && static::$schema['timestamps'] === 'timestamps');
+        $ref = new ReflectionClass(static::class);
+        $defaults = $ref->getDefaultProperties();
+        $schemaDef = $defaults['schema'] ?? [];
+
+        $useTimestamps = $defaults['usesTimestamps'] ?? true;
+        if (isset($schemaDef['timestamps']) && $schemaDef['timestamps'] === 'timestamps') {
+            $useTimestamps = true;
+        }
 
         if ($useTimestamps) {
             $now = date('Y-m-d H:i:s');
@@ -175,10 +187,6 @@ abstract class Model implements JsonSerializable
     // QUERY BUILDER (ENCADEAMENTO E MÉTODOS ESTÁTICOS MÁGICOS)
     // =========================================================================
 
-    /**
-     * Intercepta métodos chamados estaticamente para criar o Query Builder.
-     * Exemplo: User::where() cria new User() e chama ->_where().
-     */
     public static function __callStatic($name, $arguments)
     {
         $instance = new static();
@@ -191,10 +199,6 @@ abstract class Model implements JsonSerializable
         throw new Exception("Static method {$name} does not exist on " . static::class);
     }
 
-    /**
-     * Intercepta métodos encadeados na instância.
-     * Exemplo: ->get() redireciona para ->_get()
-     */
     public function __call($name, $arguments)
     {
         $method = '_' . $name;
@@ -220,7 +224,7 @@ abstract class Model implements JsonSerializable
             $this->qbParams["qb_{$this->qbParamCounter}"] = $value;
         }
 
-        return $this; // Retorna a própria instância para encadeamento
+        return $this;
     }
 
     protected function _orderBy(string $column, string $direction = 'ASC'): static
@@ -239,7 +243,7 @@ abstract class Model implements JsonSerializable
     protected function _first(): ?static
     {
         $this->_limit(1);
-        $results = $this->_get(); // Chama o próprio _get() para disparar a query
+        $results = $this->_get();
         return $results[0] ?? null;
     }
 
@@ -257,17 +261,12 @@ abstract class Model implements JsonSerializable
         return $this->_first();
     }
 
-    /**
-     * Ponto de finalização da Query ou Busca Direta
-     */
     protected function _get(...$args)
     {
-        // Se argumentos foram passados (ex: User::get(1)), atua como find para buscar 1 registro
         if (!empty($args)) {
             return $this->_find(...$args);
         }
 
-        // Se está encadeado (ex: User::where()->get()), finaliza a query e traz Array de Models
         static::syncSchema();
         $table = static::getTableName();
         $pdo = DB::getPdo();
@@ -304,10 +303,13 @@ abstract class Model implements JsonSerializable
 
     public static function getTableName(): string
     {
-        // Se a classe filha definiu estaticamente
-        if (static::$table) {
-            return static::$table;
+        $ref = new ReflectionClass(static::class);
+        $defaults = $ref->getDefaultProperties();
+
+        if (!empty($defaults['table'])) {
+            return $defaults['table'];
         }
+
         $path = explode('\\', static::class);
         return strtolower(end($path)) . 's';
     }
@@ -316,7 +318,15 @@ abstract class Model implements JsonSerializable
     {
         $table = static::getTableName();
 
-        if (isset(self::$syncedTables[$table]) || empty(static::$schema)) {
+        if (isset(self::$syncedTables[$table])) {
+            return;
+        }
+
+        $ref = new ReflectionClass(static::class);
+        $defaults = $ref->getDefaultProperties();
+        $schemaDef = $defaults['schema'] ?? [];
+
+        if (empty($schemaDef)) {
             return;
         }
 
@@ -325,11 +335,8 @@ abstract class Model implements JsonSerializable
         $pdo = DB::getPdo();
         $driver = $pdo->getAttribute(PDO::ATTR_DRIVER_NAME);
 
-        // --- Parsing do Schema Avançado ---
-        $schemaDef = static::$schema;
-        $useTimestamps = static::$usesTimestamps;
+        $useTimestamps = $defaults['usesTimestamps'] ?? true;
 
-        // Remove timestamps e id do schema bruto, trataremos internamente
         if (isset($schemaDef['timestamps'])) {
             $useTimestamps = true;
             unset($schemaDef['timestamps']);
@@ -345,22 +352,19 @@ abstract class Model implements JsonSerializable
             $sqlType = 'VARCHAR(255)';
             $typeStr = strtolower(trim($type));
 
-            // Tratamento de ENUM
             if (str_starts_with($typeStr, 'enum:')) {
                 if ($driver === 'sqlite') {
-                    $sqlType = 'TEXT'; // Fallback para SQLite
+                    $sqlType = 'TEXT';
                 } else {
                     $options = explode(',', substr($type, 5));
                     $optionsStr = implode(', ', array_map(fn($o) => "'" . trim($o) . "'", $options));
                     $sqlType = "ENUM({$optionsStr})";
                 }
             }
-            // Tratamento de FOREIGN KEY
             elseif (str_starts_with($typeStr, 'foreign:')) {
-                // foreign:users.id
                 $sqlType = 'INT';
-                $ref = substr($type, 8);
-                $parts = explode('.', $ref);
+                $refData = substr($type, 8);
+                $parts = explode('.', $refData);
                 if (count($parts) === 2) {
                     $foreignKeys[$col] = [
                         'table' => $parts[0],
@@ -368,7 +372,6 @@ abstract class Model implements JsonSerializable
                     ];
                 }
             }
-            // Tipos Básicos
             else {
                 $sqlType = self::mapType($typeStr, $driver);
             }
@@ -376,7 +379,6 @@ abstract class Model implements JsonSerializable
             $parsedColumns[$col] = $sqlType;
         }
 
-        // 1. Verifica se a tabela existe
         $tableExists = false;
         if ($driver === 'sqlite') {
             $stmt = $pdo->query("SELECT name FROM sqlite_master WHERE type='table' AND name='{$table}'");
@@ -386,7 +388,6 @@ abstract class Model implements JsonSerializable
             $tableExists = (bool) $stmt->fetch();
         }
 
-        // 2. Tabela não existe: CRIA DO ZERO
         if (!$tableExists) {
             $colsSql = [];
             $colsSql[] = ($driver === 'sqlite') ? "id INTEGER PRIMARY KEY AUTOINCREMENT" : "id INT AUTO_INCREMENT PRIMARY KEY";
@@ -400,16 +401,14 @@ abstract class Model implements JsonSerializable
                 $colsSql[] = "updated_at DATETIME NULL";
             }
 
-            // Adiciona restrições de Foreign Key na criação
-            foreach ($foreignKeys as $col => $ref) {
-                $colsSql[] = "FOREIGN KEY ({$col}) REFERENCES {$ref['table']}({$ref['column']}) ON DELETE SET NULL";
+            foreach ($foreignKeys as $col => $refData) {
+                $colsSql[] = "FOREIGN KEY ({$col}) REFERENCES {$refData['table']}({$refData['column']}) ON DELETE SET NULL";
             }
 
             $pdo->exec("CREATE TABLE {$table} (" . implode(', ', $colsSql) . ")");
             return;
         }
 
-        // 3. Tabela existe: Sincroniza Adicionando ou Removendo colunas
         $existingCols = [];
         if ($driver === 'sqlite') {
             $stmt = $pdo->query("PRAGMA table_info({$table})");
@@ -429,18 +428,16 @@ abstract class Model implements JsonSerializable
         $toAdd = array_diff($expectedCols, $existingCols);
         $toDrop = array_diff($existingCols, $expectedCols);
 
-        // Adiciona novas colunas
         foreach ($toAdd as $col) {
             if (isset($parsedColumns[$col])) {
                 $type = $parsedColumns[$col];
                 $pdo->exec("ALTER TABLE {$table} ADD COLUMN {$col} {$type} NULL");
 
-                // Tenta adicionar a Foreign Key no banco existente (MySQL suporta, SQLite em modo ALTER não)
                 if (isset($foreignKeys[$col]) && $driver !== 'sqlite') {
-                    $ref = $foreignKeys[$col];
+                    $refData = $foreignKeys[$col];
                     try {
-                        $pdo->exec("ALTER TABLE {$table} ADD CONSTRAINT fk_{$table}_{$col} FOREIGN KEY ({$col}) REFERENCES {$ref['table']}({$ref['column']}) ON DELETE SET NULL");
-                    } catch (\Exception $e) {} // Ignora se a chave já existir
+                        $pdo->exec("ALTER TABLE {$table} ADD CONSTRAINT fk_{$table}_{$col} FOREIGN KEY ({$col}) REFERENCES {$refData['table']}({$refData['column']}) ON DELETE SET NULL");
+                    } catch (\Exception $e) {}
                 }
 
             } elseif (in_array($col, ['created_at', 'updated_at'])) {
@@ -448,7 +445,6 @@ abstract class Model implements JsonSerializable
             }
         }
 
-        // Deleta colunas removidas
         foreach ($toDrop as $col) {
             try {
                 $pdo->exec("ALTER TABLE {$table} DROP COLUMN {$col}");

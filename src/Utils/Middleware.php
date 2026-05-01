@@ -3,6 +3,7 @@
 namespace Vatts\Utils;
 
 use Vatts\Router\Request;
+use Vatts\Router\Response;
 
 /**
  * Classe abstrata para middlewares do Vatts.
@@ -14,12 +15,9 @@ abstract class Middleware
     public static string $name = '';
 
     /**
-     * Método principal do middleware. Recebe a request e pode modificar/parsear dados.
-     * Retorna a request (modificada ou não).
-     *
-     * Para passar dados parsados para o controller:
-     * $request->setParsed('chave', $valor_parsado);
+     * Método principal do middleware. Recebe a request e a response.
+     * Pode modificar/parsear dados e retornar a Request para continuar,
+     * ou retornar uma Response para interromper o fluxo (ex: redirecionamento ou erro).
      */
-    abstract public function handle(Request $request): Request;
+    abstract public function handle(Request $request, Response $response): Request|Response;
 }
-

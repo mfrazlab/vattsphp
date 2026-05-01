@@ -84,5 +84,12 @@ class Request
     {
         return $this->parsed;
     }
-}
 
+    /**
+     * Verifica se o caminho atual corresponde ao padrão fornecido
+     */
+    public function is(string $path): bool
+    {
+        return $this->path === $path;
+    }
+}

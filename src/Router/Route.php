@@ -58,8 +58,6 @@ class Route
             return '(?P<' . $name . '>[^/]+)?';
         }, $regex);
 
-        // A linha do preg_quote foi removida daqui!
-
         $this->pattern = '#^' . $regex . '$#';
     }
 
@@ -84,9 +82,19 @@ class Route
         return $params;
     }
 
-    public function middleware(callable $middleware): self
+    /**
+     * Adiciona um ou múltiplos middlewares na rota.
+     * Pode ser um Callable, o nome da classe, um alias ou um array misturado de ambos.
+     */
+    public function middleware(string|callable|array|object $middleware): self
     {
-        $this->middlewares[] = $middleware;
+        // Se for array e não for um array-callable do PHP (ex: [Classe, metodo])
+        if (is_array($middleware) && !is_callable($middleware)) {
+            $this->middlewares = array_merge($this->middlewares, $middleware);
+        } else {
+            $this->middlewares[] = $middleware;
+        }
+
         return $this;
     }
 
@@ -114,6 +122,3 @@ class Route
         return ($h)($request, $response);
     }
 }
-
-
-

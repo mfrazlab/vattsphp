@@ -46,8 +46,8 @@ class Vatts
             $self->autoloadControllers();
         }
 
-        // registra middlewares automáticos
-        $self->registerMiddlewares();
+        // Carrega as classes de middleware na memória (sem registrar globalmente)
+        $self->autoloadMiddlewares();
 
         // registra rota RPC automaticamente
         $self->registerRpcRoute();
@@ -120,32 +120,15 @@ class Vatts
         DB::init($dbConfig);
     }
 
-    protected function registerMiddlewares(): void
+    protected function autoloadMiddlewares(): void
     {
         $dir = $this->projectPath . DIRECTORY_SEPARATOR . 'app' . DIRECTORY_SEPARATOR . 'middlewares';
         if (!is_dir($dir)) {
             return;
         }
 
-        $before = get_declared_classes();
         foreach (glob($dir . DIRECTORY_SEPARATOR . '*.php') as $file) {
             require_once $file;
-        }
-        $after = get_declared_classes();
-
-        $new = array_diff($after, $before);
-        foreach ($new as $class) {
-            if (is_subclass_of($class, Middleware::class)) {
-                $name = $class::$name ?? null;
-                if (!$name) {
-                    continue;
-                }
-
-                $instance = new $class();
-                $this->router->use(function (Request $request) use ($instance) {
-                    return $instance->handle($request);
-                });
-            }
         }
     }
 
