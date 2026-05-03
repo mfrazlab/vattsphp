@@ -127,8 +127,11 @@ class Vatts
             return;
         }
 
-        foreach (glob($dir . DIRECTORY_SEPARATOR . '*.php') as $file) {
-            require_once $file;
+        $iterator = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($dir));
+        foreach ($iterator as $file) {
+            if ($file->isFile() && $file->getExtension() === 'php') {
+                require_once $file->getPathname();
+            }
         }
     }
 
@@ -141,8 +144,11 @@ class Vatts
 
         // Apenas carrega os arquivos em memória. O schema_sync
         // agora acontece no próprio Model, somente quando ele for usado.
-        foreach (glob($dir . DIRECTORY_SEPARATOR . '*.php') as $file) {
-            require_once $file;
+        $iterator = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($dir));
+        foreach ($iterator as $file) {
+            if ($file->isFile() && $file->getExtension() === 'php') {
+                require_once $file->getPathname();
+            }
         }
     }
 
@@ -153,8 +159,11 @@ class Vatts
             return;
         }
 
-        foreach (glob($dir . DIRECTORY_SEPARATOR . '*.php') as $file) {
-            require_once $file;
+        $iterator = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($dir));
+        foreach ($iterator as $file) {
+            if ($file->isFile() && $file->getExtension() === 'php') {
+                require_once $file->getPathname();
+            }
         }
     }
 

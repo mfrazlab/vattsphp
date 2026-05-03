@@ -15,7 +15,8 @@
         "illuminate/database": "^13.7",
         "vlucas/phpdotenv": "^5.6",
         "eftec/bladeone": "^4.19",
-      "ext-pdo": "*"
+      "ext-pdo": "*",
+      "ext-curl": "*"
     },
     "autoload": {
         "psr-4": {

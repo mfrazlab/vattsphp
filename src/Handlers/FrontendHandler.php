@@ -29,11 +29,49 @@ class FrontendHandler
      */
     public function __invoke(Request $request, Response $response): Response
     {
+        // 1. Tenta buscar arquivos extras em serve/ (ex: serve/admin/modal.js)
+        // Mas ignora se o caminho começar com 'dist/' para não conflitar
+        $extraFileResponse = $this->tryServeExtraStatic($request, $response);
+        if ($extraFileResponse !== null) {
+            return $extraFileResponse;
+        }
+
         if ($this->environment === 'production') {
             return $this->serveStaticOrSPA($request, $response);
         }
 
         return $this->proxyToDevServer($request, $response);
+    }
+
+    /**
+     * Tenta servir arquivos que estão diretamente na pasta 'serve',
+     * exceto o que estiver em 'serve/dist'.
+     */
+    protected function tryServeExtraStatic(Request $request, Response $response): ?Response
+    {
+        $uri = ltrim($request->getPath(), '/');
+
+        // Se estiver vazio (home) ou tentar acessar a dist por aqui, ignora
+        if (empty($uri) || str_starts_with($uri, 'dist/')) {
+            return null;
+        }
+
+        $servePath = $this->projectPath . DIRECTORY_SEPARATOR . 'serve' . DIRECTORY_SEPARATOR;
+        $filePath = $servePath . $uri;
+        $realFilePath = realpath($filePath);
+
+        // Verifica se o arquivo existe e se está dentro da pasta serve (segurança)
+        if ($realFilePath && str_starts_with($realFilePath, realpath($servePath)) && is_file($realFilePath)) {
+            // Se o arquivo real estiver dentro de 'serve/dist', ignoramos para seguir a lógica da SPA
+            $distPath = realpath($servePath . 'dist');
+            if ($distPath && str_starts_with($realFilePath, $distPath)) {
+                return null;
+            }
+
+            return $this->serveFile($realFilePath, $response);
+        }
+
+        return null;
     }
 
     /**
@@ -51,8 +89,6 @@ class FrontendHandler
         // Segurança e verificação de existência
         if (!$realFilePath || !str_starts_with($realFilePath, realpath($exportPath)) || !is_file($realFilePath)) {
 
-            // Se o arquivo original não existe, vamos checar se existem versões comprimidas (.br ou .gz)
-            // antes de desistir e mandar para o index.html
             $acceptEncoding = $_SERVER['HTTP_ACCEPT_ENCODING'] ?? '';
 
             if (str_contains($acceptEncoding, 'br') && file_exists($filePath . '.br')) {
@@ -63,7 +99,6 @@ class FrontendHandler
                 return $this->serveFile($filePath, $response);
             }
 
-            // Se realmente não existe nada, manda o index.html com 404 como solicitado
             return $this->serveFile($exportPath . 'index.html', $response->status(404));
         }
 
@@ -75,28 +110,21 @@ class FrontendHandler
      */
     protected function serveFile(string $filePath, Response $response): Response
     {
-        // Se chegamos aqui e o arquivo base não existe, mas o .gz ou .br sim,
-        // a lógica abaixo vai detectar e servir.
-
         $mimeType = $this->getMimeType($filePath);
         $encoding = null;
         $servedPath = $filePath;
 
         $acceptEncoding = $_SERVER['HTTP_ACCEPT_ENCODING'] ?? '';
 
-        // Tenta Brotli (.br)
         if (str_contains($acceptEncoding, 'br') && file_exists($filePath . '.br')) {
             $servedPath = $filePath . '.br';
             $encoding = 'br';
         }
-        // Tenta Gzip (.gz)
         elseif (str_contains($acceptEncoding, 'gzip') && file_exists($filePath . '.gz')) {
             $servedPath = $filePath . '.gz';
             $encoding = 'gzip';
         }
-        // Se nem o comprimido nem o original existem (caso do index.html forçado), garante que o arquivo existe
         elseif (!file_exists($filePath)) {
-            // Fallback de segurança caso o arquivo passado não exista de fato
             return $response->status(404)->send('File not found');
         }
 
@@ -115,7 +143,7 @@ class FrontendHandler
     protected function proxyToDevServer(Request $request, Response $response): Response
     {
         $path = $request->getPath();
-        $devServerUrl = 'http://localhost:' . $this->devServerPort . $path;
+        $devServerUrl = 'http://127.0.0.1:' . $this->devServerPort . $path;
 
         $query = $request->getQuery();
         if (!empty($query)) {
@@ -149,7 +177,6 @@ class FrontendHandler
 
         if (curl_errno($ch)) {
             $error = curl_error($ch);
-            // curl_close removido
             return $response->status(502)->html(
                 '<h1>502 Bad Gateway</h1><p>' . htmlspecialchars($error) . '</p>'
             );
@@ -157,7 +184,6 @@ class FrontendHandler
 
         $resHeaders = substr($result, 0, $headerSize);
         $resBody = substr($result, $headerSize);
-        // curl_close removido
 
         $response = $response->status($httpCode);
 
@@ -177,7 +203,6 @@ class FrontendHandler
 
     protected function getMimeType(string $path): string
     {
-        // Remove extensões de compressão para pegar o mime original
         $cleanPath = preg_replace('/\.(gz|br)$/', '', $path);
         $extension = pathinfo($cleanPath, PATHINFO_EXTENSION);
 

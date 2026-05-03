@@ -1,0 +1,28 @@
+{
+    "name": "murillofrazocunha/example_client",
+    "autoload": {
+        "psr-4": {
+            "App\\": "app/",
+            "models\\": "src/models/"
+        }
+    },
+    "authors": [
+        {
+            "name": "murillo",
+            "email": "murillofrazaocunha@gmail.com"
+        }
+    ],
+    "repositories": [
+        {
+            "type": "path",
+            "url": "E:/hightcloud",
+            "options": {
+                "symlink": true
+            }
+        }
+    ],
+    "require": {
+        "mfrazlab/vattsphp": "*",
+        "rakit/validation": "^1.4"
+    }
+}

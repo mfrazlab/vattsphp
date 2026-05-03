@@ -10,7 +10,7 @@ use JsonSerializable;
 use Exception;
 
 /**
- * @method static static where(string|array $column, mixed $value = null)
+ * @method static static[] where(string|array $column, mixed $operator = null, mixed $value = null)
  * @method static static orderBy(string $column, string $direction = 'ASC')
  * @method static static limit(int $limit)
  * @method static static|null get(mixed ...$args)
@@ -38,6 +38,14 @@ abstract class Model implements JsonSerializable
     /** @var array Atributos reais (dados do banco) populados nesta instância */
     protected array $attributes = [];
 
+    // =========================================================================
+    // CACHES DE ALTA PERFORMANCE (Evita Reflection repetitivo e I/O de Banco)
+    // =========================================================================
+    protected static ?PDO $pdoInstance = null;
+    protected static array $cachedTableNames = [];
+    protected static array $cachedDefaults = [];
+    protected static array $classProperties = [];
+
     // Variáveis internas para montar as Queries (Method Chaining)
     protected array $qbWheres = [];
     protected array $qbParams = [];
@@ -45,13 +53,34 @@ abstract class Model implements JsonSerializable
     protected string $qbLimit = '';
     protected int $qbParamCounter = 0;
 
-    public function __construct(array $attributes = [])
+    /**
+     * @param array $attributes Atributos iniciais
+     * @param bool $syncSchema Define se deve sincronizar o schema (desativado na hidratação por performance)
+     */
+    public function __construct(array $attributes = [], bool $syncSchema = true)
     {
-        static::syncSchema();
+        if ($syncSchema) {
+            static::syncSchema();
+        }
 
         foreach ($attributes as $key => $value) {
             $this->setAttribute($key, $value);
         }
+    }
+
+    // =========================================================================
+    // GERENCIAMENTO DA CONEXÃO PDO (SINGLETON CACHE)
+    // =========================================================================
+
+    /**
+     * Retorna a conexão PDO, abrindo apenas se ainda não existir nesta requisição.
+     */
+    protected static function getPdoConnection(): PDO
+    {
+        if (self::$pdoInstance === null) {
+            self::$pdoInstance = DB::getPdo(); // Chama a classe externa apenas 1x
+        }
+        return self::$pdoInstance;
     }
 
     // =========================================================================
@@ -68,21 +97,56 @@ abstract class Model implements JsonSerializable
 
     protected function setAttribute(string $key, $value): void
     {
-        if (property_exists($this, $key)) {
+        // Verifica as propriedades mapeadas em cache para evitar ReflectionProperty
+        $props = static::getClassProperties();
+
+        if (in_array($key, $props, true)) {
             $this->$key = $value;
         } else {
             $this->attributes[$key] = $value;
         }
     }
 
+    /**
+     * Retorna lista em cache de propriedades públicas (não-estáticas)
+     */
+    protected static function getClassProperties(): array
+    {
+        $class = static::class;
+        if (!isset(self::$classProperties[$class])) {
+            $ref = new ReflectionClass($class);
+            $props = [];
+            foreach ($ref->getProperties(ReflectionProperty::IS_PUBLIC) as $prop) {
+                if (!$prop->isStatic()) {
+                    $props[] = $prop->getName();
+                }
+            }
+            self::$classProperties[$class] = $props;
+        }
+        return self::$classProperties[$class];
+    }
+
+    /**
+     * Retorna defaults em cache para evitar ReflectionClass massivo
+     */
+    protected static function getClassDefaults(): array
+    {
+        $class = static::class;
+        if (!isset(self::$cachedDefaults[$class])) {
+            $ref = new ReflectionClass($class);
+            self::$cachedDefaults[$class] = $ref->getDefaultProperties();
+        }
+        return self::$cachedDefaults[$class];
+    }
+
     protected function getRecordData(): array
     {
         $data = $this->attributes;
-        $reflection = new ReflectionObject($this);
 
-        foreach ($reflection->getProperties(ReflectionProperty::IS_PUBLIC) as $prop) {
-            if ($prop->isInitialized($this)) {
-                $data[$prop->getName()] = $prop->getValue($this);
+        // Puxa as propriedades via cache, milissegundos mais rápido que Reflection
+        foreach (static::getClassProperties() as $propName) {
+            if (isset($this->$propName)) {
+                $data[$propName] = $this->$propName;
             }
         }
         return $data;
@@ -95,9 +159,7 @@ abstract class Model implements JsonSerializable
     public function toArray(): array
     {
         $data = $this->getRecordData();
-
-        $ref = new ReflectionClass(static::class);
-        $defaults = $ref->getDefaultProperties();
+        $defaults = static::getClassDefaults();
         $hidden = $defaults['hidden'] ?? [];
 
         foreach ($hidden as $hiddenField) {
@@ -119,19 +181,23 @@ abstract class Model implements JsonSerializable
     {
         static::syncSchema();
         $table = static::getTableName();
-        $pdo = DB::getPdo();
+        $pdo = static::getPdoConnection(); // Usa a conexão do cache
         $data = $this->getRecordData();
 
         $isInsert = empty($data['id']);
 
-        $ref = new ReflectionClass(static::class);
-        $defaults = $ref->getDefaultProperties();
+        $defaults = static::getClassDefaults();
         $schemaDef = $defaults['schema'] ?? [];
 
         $useTimestamps = $defaults['usesTimestamps'] ?? true;
         if (isset($schemaDef['timestamps']) && $schemaDef['timestamps'] === 'timestamps') {
             $useTimestamps = true;
         }
+
+        // --- FILTRO DE COLUNAS PERMITIDAS ---
+        $allowedColumns = array_keys($schemaDef);
+        $allowedColumns[] = 'id';
+        $data = array_intersect_key($data, array_flip($allowedColumns));
 
         if ($useTimestamps) {
             $now = date('Y-m-d H:i:s');
@@ -145,9 +211,10 @@ abstract class Model implements JsonSerializable
 
         if ($isInsert) {
             $columns = array_keys($data);
+            $escapedColumns = array_map(fn($col) => "`{$col}`", $columns);
             $placeholders = array_map(fn($col) => ":{$col}", $columns);
 
-            $sql = "INSERT INTO {$table} (" . implode(', ', $columns) . ") VALUES (" . implode(', ', $placeholders) . ")";
+            $sql = "INSERT INTO `{$table}` (" . implode(', ', $escapedColumns) . ") VALUES (" . implode(', ', $placeholders) . ")";
             $stmt = $pdo->prepare($sql);
             $result = $stmt->execute($data);
 
@@ -162,10 +229,10 @@ abstract class Model implements JsonSerializable
 
             $sets = [];
             foreach (array_keys($data) as $col) {
-                $sets[] = "{$col} = :{$col}";
+                $sets[] = "`{$col}` = :{$col}";
             }
 
-            $sql = "UPDATE {$table} SET " . implode(', ', $sets) . " WHERE id = :id";
+            $sql = "UPDATE `{$table}` SET " . implode(', ', $sets) . " WHERE `id` = :id";
             $data['id'] = $id;
 
             $stmt = $pdo->prepare($sql);
@@ -179,7 +246,7 @@ abstract class Model implements JsonSerializable
         if (empty($data['id'])) return false;
 
         $table = static::getTableName();
-        $stmt = DB::getPdo()->prepare("DELETE FROM {$table} WHERE id = :id");
+        $stmt = static::getPdoConnection()->prepare("DELETE FROM `{$table}` WHERE `id` = :id");
         return $stmt->execute(['id' => $data['id']]);
     }
 
@@ -189,7 +256,7 @@ abstract class Model implements JsonSerializable
 
     public static function __callStatic($name, $arguments)
     {
-        $instance = new static();
+        $instance = new static([], false); // Bypassa o sync aqui, faremos no get()
         $method = '_' . $name;
 
         if (method_exists($instance, $method)) {
@@ -210,27 +277,36 @@ abstract class Model implements JsonSerializable
         throw new Exception("Method {$name} does not exist on " . static::class);
     }
 
-    protected function _where($column, $value = null): static
+    protected function addWhereCondition($column, $operator = null, $value = null): void
     {
         if (is_array($column)) {
             foreach ($column as $k => $v) {
                 $this->qbParamCounter++;
-                $this->qbWheres[] = "{$k} = :qb_{$this->qbParamCounter}";
+                $this->qbWheres[] = "`{$k}` = :qb_{$this->qbParamCounter}";
                 $this->qbParams["qb_{$this->qbParamCounter}"] = $v;
             }
         } else {
+            if (func_num_args() === 2) {
+                $value = $operator;
+                $operator = '=';
+            }
+
             $this->qbParamCounter++;
-            $this->qbWheres[] = "{$column} = :qb_{$this->qbParamCounter}";
+            $this->qbWheres[] = "`{$column}` {$operator} :qb_{$this->qbParamCounter}";
             $this->qbParams["qb_{$this->qbParamCounter}"] = $value;
         }
+    }
 
-        return $this;
+    protected function _where(...$args): array
+    {
+        $this->addWhereCondition(...$args);
+        return $this->_get();
     }
 
     protected function _orderBy(string $column, string $direction = 'ASC'): static
     {
         $direction = strtoupper($direction) === 'DESC' ? 'DESC' : 'ASC';
-        $this->qbOrderBy = " ORDER BY {$column} {$direction}";
+        $this->qbOrderBy = " ORDER BY `{$column}` {$direction}";
         return $this;
     }
 
@@ -251,12 +327,12 @@ abstract class Model implements JsonSerializable
     {
         if (count($args) === 1) {
             if (is_array($args[0])) {
-                $this->_where($args[0]);
+                $this->addWhereCondition($args[0]);
             } else {
-                $this->_where('id', $args[0]);
+                $this->addWhereCondition('id', $args[0]);
             }
         } elseif (count($args) === 2) {
-            $this->_where($args[0], $args[1]);
+            $this->addWhereCondition($args[0], $args[1]);
         }
         return $this->_first();
     }
@@ -269,9 +345,9 @@ abstract class Model implements JsonSerializable
 
         static::syncSchema();
         $table = static::getTableName();
-        $pdo = DB::getPdo();
+        $pdo = static::getPdoConnection();
 
-        $sql = "SELECT * FROM {$table}";
+        $sql = "SELECT * FROM `{$table}`";
         if (!empty($this->qbWheres)) {
             $sql .= " WHERE " . implode(' AND ', $this->qbWheres);
         }
@@ -280,7 +356,7 @@ abstract class Model implements JsonSerializable
         $stmt = $pdo->prepare($sql);
         $stmt->execute($this->qbParams);
 
-        return self::hydrate($stmt->fetchAll());
+        return self::hydrate($stmt->fetchAll(PDO::FETCH_ASSOC));
     }
 
     protected function _all(): array
@@ -291,8 +367,21 @@ abstract class Model implements JsonSerializable
     protected static function hydrate(array $rows): array
     {
         $results = [];
+        $props = static::getClassProperties();
+
         foreach ($rows as $row) {
-            $results[] = new static($row);
+            // false = pula o syncSchema() na hora de popular dados que já vieram do BD (MUITO mais rápido)
+            $instance = new static([], false);
+
+            // Bypass rápido: define os atributos sem chamar o setAttribute individualmente de novo
+            foreach ($row as $k => $v) {
+                if (in_array($k, $props, true)) {
+                    $instance->$k = $v;
+                } else {
+                    $instance->attributes[$k] = $v;
+                }
+            }
+            $results[] = $instance;
         }
         return $results;
     }
@@ -303,15 +392,22 @@ abstract class Model implements JsonSerializable
 
     public static function getTableName(): string
     {
-        $ref = new ReflectionClass(static::class);
-        $defaults = $ref->getDefaultProperties();
+        $class = static::class;
 
-        if (!empty($defaults['table'])) {
-            return $defaults['table'];
+        if (isset(self::$cachedTableNames[$class])) {
+            return self::$cachedTableNames[$class];
         }
 
-        $path = explode('\\', static::class);
-        return strtolower(end($path)) . 's';
+        $defaults = static::getClassDefaults();
+
+        if (!empty($defaults['table'])) {
+            self::$cachedTableNames[$class] = $defaults['table'];
+        } else {
+            $path = explode('\\', $class);
+            self::$cachedTableNames[$class] = strtolower(end($path)) . 's';
+        }
+
+        return self::$cachedTableNames[$class];
     }
 
     protected static function syncSchema(): void
@@ -322,17 +418,17 @@ abstract class Model implements JsonSerializable
             return;
         }
 
-        $ref = new ReflectionClass(static::class);
-        $defaults = $ref->getDefaultProperties();
+        $defaults = static::getClassDefaults();
         $schemaDef = $defaults['schema'] ?? [];
 
         if (empty($schemaDef)) {
+            self::$syncedTables[$table] = true;
             return;
         }
 
         self::$syncedTables[$table] = true;
 
-        $pdo = DB::getPdo();
+        $pdo = static::getPdoConnection();
         $driver = $pdo->getAttribute(PDO::ATTR_DRIVER_NAME);
 
         $useTimestamps = $defaults['usesTimestamps'] ?? true;
@@ -390,32 +486,32 @@ abstract class Model implements JsonSerializable
 
         if (!$tableExists) {
             $colsSql = [];
-            $colsSql[] = ($driver === 'sqlite') ? "id INTEGER PRIMARY KEY AUTOINCREMENT" : "id INT AUTO_INCREMENT PRIMARY KEY";
+            $colsSql[] = ($driver === 'sqlite') ? "`id` INTEGER PRIMARY KEY AUTOINCREMENT" : "`id` INT AUTO_INCREMENT PRIMARY KEY";
 
             foreach ($parsedColumns as $col => $sqlType) {
-                $colsSql[] = "{$col} {$sqlType} NULL";
+                $colsSql[] = "`{$col}` {$sqlType} NULL";
             }
 
             if ($useTimestamps) {
-                $colsSql[] = "created_at DATETIME NULL";
-                $colsSql[] = "updated_at DATETIME NULL";
+                $colsSql[] = "`created_at` DATETIME NULL";
+                $colsSql[] = "`updated_at` DATETIME NULL";
             }
 
             foreach ($foreignKeys as $col => $refData) {
-                $colsSql[] = "FOREIGN KEY ({$col}) REFERENCES {$refData['table']}({$refData['column']}) ON DELETE SET NULL";
+                $colsSql[] = "FOREIGN KEY (`{$col}`) REFERENCES `{$refData['table']}`(`{$refData['column']}`) ON DELETE SET NULL";
             }
 
-            $pdo->exec("CREATE TABLE {$table} (" . implode(', ', $colsSql) . ")");
+            $pdo->exec("CREATE TABLE `{$table}` (" . implode(', ', $colsSql) . ")");
             return;
         }
 
         $existingCols = [];
         if ($driver === 'sqlite') {
-            $stmt = $pdo->query("PRAGMA table_info({$table})");
-            while ($row = $stmt->fetch()) $existingCols[] = $row['name'];
+            $stmt = $pdo->query("PRAGMA table_info(`{$table}`)");
+            while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) $existingCols[] = $row['name'];
         } else {
-            $stmt = $pdo->query("SHOW COLUMNS FROM {$table}");
-            while ($row = $stmt->fetch()) $existingCols[] = $row['Field'];
+            $stmt = $pdo->query("SHOW COLUMNS FROM `{$table}`");
+            while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) $existingCols[] = $row['Field'];
         }
 
         $expectedCols = array_keys($parsedColumns);
@@ -431,23 +527,23 @@ abstract class Model implements JsonSerializable
         foreach ($toAdd as $col) {
             if (isset($parsedColumns[$col])) {
                 $type = $parsedColumns[$col];
-                $pdo->exec("ALTER TABLE {$table} ADD COLUMN {$col} {$type} NULL");
+                $pdo->exec("ALTER TABLE `{$table}` ADD COLUMN `{$col}` {$type} NULL");
 
                 if (isset($foreignKeys[$col]) && $driver !== 'sqlite') {
                     $refData = $foreignKeys[$col];
                     try {
-                        $pdo->exec("ALTER TABLE {$table} ADD CONSTRAINT fk_{$table}_{$col} FOREIGN KEY ({$col}) REFERENCES {$refData['table']}({$refData['column']}) ON DELETE SET NULL");
+                        $pdo->exec("ALTER TABLE `{$table}` ADD CONSTRAINT `fk_{$table}_{$col}` FOREIGN KEY (`{$col}`) REFERENCES `{$refData['table']}`(`{$refData['column']}`) ON DELETE SET NULL");
                     } catch (\Exception $e) {}
                 }
 
             } elseif (in_array($col, ['created_at', 'updated_at'])) {
-                $pdo->exec("ALTER TABLE {$table} ADD COLUMN {$col} DATETIME NULL");
+                $pdo->exec("ALTER TABLE `{$table}` ADD COLUMN `{$col}` DATETIME NULL");
             }
         }
 
         foreach ($toDrop as $col) {
             try {
-                $pdo->exec("ALTER TABLE {$table} DROP COLUMN {$col}");
+                $pdo->exec("ALTER TABLE `{$table}` DROP COLUMN `{$col}`");
             } catch (\Exception $e) {}
         }
     }

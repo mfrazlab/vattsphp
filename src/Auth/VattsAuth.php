@@ -72,6 +72,12 @@ class VattsAuth
         // GET /api/auth/session
         $router->get('/api/auth/session', function (Request $req, Response $res) {
             $session = $this->getSession();
+
+            // Permite modificar os dados da sessão antes de enviar pro front
+            if ($session && isset($this->config['callbacks']['session']) && is_callable($this->config['callbacks']['session'])) {
+                $session = call_user_func($this->config['callbacks']['session'], $session);
+            }
+
             return $res->json(['session' => $session ? ['user' => $session] : null]);
         });
 
@@ -122,12 +128,18 @@ class VattsAuth
                 ]);
             }
 
-            // Se for um array (User), salva na sessão do PHP
-            $_SESSION['vatts_auth_user'] = $result;
+            // Permite modificar os dados do usuário antes de salvar na sessão do PHP
+            $userToSave = $result;
+            if (isset($this->config['callbacks']['jwt']) && is_callable($this->config['callbacks']['jwt'])) {
+                $userToSave = call_user_func($this->config['callbacks']['jwt'], $userToSave);
+            }
+
+            // Salva na sessão do PHP
+            $_SESSION['vatts_auth_user'] = $userToSave;
 
             return $res->json([
                 'success' => true,
-                'user' => $result,
+                'user' => $userToSave,
                 'type' => 'session'
             ]);
         });

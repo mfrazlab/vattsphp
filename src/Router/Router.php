@@ -106,7 +106,8 @@ class Router
                 try {
                     return ($this->fallbackHandler)($request, $response);
                 } catch (\Throwable $e) {
-                    return $response->status(500)->json(['error' => $e->getMessage()]);
+                    error_log($e);
+                    return $response->status(500)->json(['error' => $e->getMessage(), 'e' => $e]);
                 }
             }
             return $response->status(404)->json(['error' => 'Route not found']);
@@ -201,7 +202,13 @@ class Router
         // Envio da resposta
         http_response_code($response->getStatus());
         foreach ($response->getHeaders() as $key => $value) {
-            header($key . ': ' . $value);
+            if (is_array($value)) {
+                foreach ($value as $v) {
+                    header($key . ': ' . $v);
+                }
+            } else {
+                header($key . ': ' . $value);
+            }
         }
 
         $body = $response->getBody();

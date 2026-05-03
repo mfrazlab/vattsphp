@@ -1,0 +1,1177 @@
+[03-May-2026 13:25:06 UTC] PHP Warning:  Undefined variable $attributes in E:\hightcloud\example_client\t-cache\components.commons.button_9af364b3207890f8c5e37479d955d7af8bdc270c.bladec on line 1
+[03-May-2026 13:37:39 UTC] PHP Warning:  Undefined variable $attributes in E:\hightcloud\example_client\t-cache\components.button_4ad9e339e8c031d14765cb5a74db01cff99ae40a.bladec on line 5
+[03-May-2026 13:39:12 UTC] PHP Warning:  Undefined variable $attributes in E:\hightcloud\example_client\t-cache\components.button_4ad9e339e8c031d14765cb5a74db01cff99ae40a.bladec on line 2
+[03-May-2026 13:39:12 UTC] PHP Warning:  Undefined variable $attributes in E:\hightcloud\example_client\t-cache\components.button_4ad9e339e8c031d14765cb5a74db01cff99ae40a.bladec on line 2
+[03-May-2026 13:39:13 UTC] PHP Warning:  Undefined variable $attributes in E:\hightcloud\example_client\t-cache\components.button_4ad9e339e8c031d14765cb5a74db01cff99ae40a.bladec on line 2
+[03-May-2026 13:39:13 UTC] PHP Warning:  Undefined variable $attributes in E:\hightcloud\example_client\t-cache\components.button_4ad9e339e8c031d14765cb5a74db01cff99ae40a.bladec on line 2
+[03-May-2026 13:39:13 UTC] PHP Warning:  Undefined variable $attributes in E:\hightcloud\example_client\t-cache\components.button_4ad9e339e8c031d14765cb5a74db01cff99ae40a.bladec on line 2
+[03-May-2026 13:39:13 UTC] PHP Warning:  Undefined variable $attributes in E:\hightcloud\example_client\t-cache\components.button_4ad9e339e8c031d14765cb5a74db01cff99ae40a.bladec on line 2
+[03-May-2026 13:39:13 UTC] PHP Warning:  Undefined variable $attributes in E:\hightcloud\example_client\t-cache\components.button_4ad9e339e8c031d14765cb5a74db01cff99ae40a.bladec on line 2
+[03-May-2026 13:39:55 UTC] PHP Warning:  Undefined variable $attributes in E:\hightcloud\example_client\t-cache\components.button_4ad9e339e8c031d14765cb5a74db01cff99ae40a.bladec on line 2
+[03-May-2026 13:41:47 UTC] 1
+[03-May-2026 13:41:49 UTC] getStatus cURL Error (Node 1): Connection timed out after 2003 milliseconds
+[03-May-2026 13:41:56 UTC] 1
+[03-May-2026 13:41:58 UTC] getStatus cURL Error (Node 1): Connection timed out after 2030 milliseconds
+[03-May-2026 13:42:01 UTC] 1
+[03-May-2026 13:42:03 UTC] getStatus cURL Error (Node 1): Connection timed out after 2009 milliseconds
+[03-May-2026 13:43:22 UTC] 1
+[03-May-2026 13:43:24 UTC] getStatus cURL Error (Node 1): Connection timed out after 2001 milliseconds
+[03-May-2026 13:43:24 UTC] 1
+[03-May-2026 13:43:26 UTC] getStatus cURL Error (Node 1): Connection timed out after 2012 milliseconds
+[03-May-2026 13:43:29 UTC] 1
+[03-May-2026 13:43:31 UTC] getStatus cURL Error (Node 1): Connection timed out after 2003 milliseconds
+[03-May-2026 13:43:34 UTC] 1
+[03-May-2026 13:43:36 UTC] getStatus cURL Error (Node 1): Connection timed out after 2006 milliseconds
+[03-May-2026 13:43:39 UTC] 1
+[03-May-2026 13:43:41 UTC] getStatus cURL Error (Node 1): Connection timed out after 2016 milliseconds
+[03-May-2026 13:43:49 UTC] 1
+[03-May-2026 13:43:51 UTC] getStatus cURL Error (Node 1): Connection timed out after 2013 milliseconds
+[03-May-2026 13:43:51 UTC] 1
+[03-May-2026 13:43:53 UTC] getStatus cURL Error (Node 1): Connection timed out after 2003 milliseconds
+[03-May-2026 13:43:56 UTC] 1
+[03-May-2026 13:43:58 UTC] getStatus cURL Error (Node 1): Connection timed out after 2002 milliseconds
+[03-May-2026 13:44:01 UTC] 1
+[03-May-2026 13:44:03 UTC] getStatus cURL Error (Node 1): Connection timed out after 2014 milliseconds
+[03-May-2026 13:44:06 UTC] 1
+[03-May-2026 13:44:08 UTC] getStatus cURL Error (Node 1): Connection timed out after 2016 milliseconds
+[03-May-2026 13:44:11 UTC] 1
+[03-May-2026 13:44:13 UTC] getStatus cURL Error (Node 1): Connection timed out after 2005 milliseconds
+[03-May-2026 13:44:16 UTC] 1
+[03-May-2026 13:44:18 UTC] getStatus cURL Error (Node 1): Connection timed out after 2011 milliseconds
+[03-May-2026 13:53:30 UTC] 1
+[03-May-2026 13:53:32 UTC] [Profiler] Node.js(TTFB): 0ms | Total cURL: 2040.46ms
+[03-May-2026 13:53:32 UTC] apiRequest cURL Error (Node 1): Failed to connect to 127.0.0.1 port 8080 after 2040 ms: Could not connect to server
+[03-May-2026 13:53:32 UTC] 1
+[03-May-2026 13:53:34 UTC] [Profiler] Node.js(TTFB): 0ms | Total cURL: 2034.35ms
+[03-May-2026 13:53:34 UTC] apiRequest cURL Error (Node 1): Failed to connect to 127.0.0.1 port 8080 after 2034 ms: Could not connect to server
+[03-May-2026 13:53:34 UTC] 1
+[03-May-2026 13:53:36 UTC] [Profiler] Node.js(TTFB): 0ms | Total cURL: 2034.03ms
+[03-May-2026 13:53:36 UTC] apiRequest cURL Error (Node 1): Failed to connect to 127.0.0.1 port 8080 after 2034 ms: Could not connect to server
+[03-May-2026 13:53:36 UTC] 1
+[03-May-2026 13:53:38 UTC] [Profiler] Node.js(TTFB): 0ms | Total cURL: 2030.25ms
+[03-May-2026 13:53:38 UTC] apiRequest cURL Error (Node 1): Failed to connect to 127.0.0.1 port 8080 after 2030 ms: Could not connect to server
+[03-May-2026 13:54:17 UTC] 1
+[03-May-2026 13:54:19 UTC] getStatus cURL Error (Node 1): Connection timed out after 2003 milliseconds
+[03-May-2026 13:56:40 UTC] 1
+[03-May-2026 13:56:42 UTC] getStatus cURL Error (Node 1): Connection timed out after 2001 milliseconds
+[03-May-2026 13:58:13 UTC] 1
+[03-May-2026 13:58:15 UTC] getStatus cURL Error (Node 1): Connection timed out after 2016 milliseconds
+[03-May-2026 13:58:18 UTC] 1
+[03-May-2026 13:58:20 UTC] getStatus cURL Error (Node 1): Connection timed out after 2014 milliseconds
+[03-May-2026 13:58:20 UTC] 1
+[03-May-2026 13:58:22 UTC] getStatus cURL Error (Node 1): Connection timed out after 2014 milliseconds
+[03-May-2026 13:58:25 UTC] 1
+[03-May-2026 13:58:28 UTC] getStatus cURL Error (Node 1): Connection timed out after 2008 milliseconds
+[03-May-2026 13:58:31 UTC] 1
+[03-May-2026 13:58:33 UTC] getStatus cURL Error (Node 1): Connection timed out after 2011 milliseconds
+[03-May-2026 13:58:36 UTC] 1
+[03-May-2026 13:58:38 UTC] getStatus cURL Error (Node 1): Connection timed out after 2006 milliseconds
+[03-May-2026 13:58:41 UTC] 1
+[03-May-2026 13:58:43 UTC] getStatus cURL Error (Node 1): Connection timed out after 2016 milliseconds
+[03-May-2026 13:58:46 UTC] 1
+[03-May-2026 13:58:48 UTC] getStatus cURL Error (Node 1): Connection timed out after 2012 milliseconds
+[03-May-2026 13:58:51 UTC] 1
+[03-May-2026 13:58:53 UTC] getStatus cURL Error (Node 1): Connection timed out after 2016 milliseconds
+[03-May-2026 13:58:55 UTC] 1
+[03-May-2026 13:58:58 UTC] getStatus cURL Error (Node 1): Connection timed out after 2012 milliseconds
+[03-May-2026 13:59:01 UTC] 1
+[03-May-2026 13:59:03 UTC] getStatus cURL Error (Node 1): Connection timed out after 2004 milliseconds
+[03-May-2026 13:59:06 UTC] 1
+[03-May-2026 13:59:08 UTC] getStatus cURL Error (Node 1): Connection timed out after 2016 milliseconds
+[03-May-2026 13:59:11 UTC] 1
+[03-May-2026 13:59:13 UTC] getStatus cURL Error (Node 1): Connection timed out after 2016 milliseconds
+[03-May-2026 13:59:16 UTC] 1
+[03-May-2026 13:59:18 UTC] getStatus cURL Error (Node 1): Connection timed out after 2011 milliseconds
+[03-May-2026 13:59:20 UTC] 1
+[03-May-2026 13:59:23 UTC] getStatus cURL Error (Node 1): Connection timed out after 2005 milliseconds
+[03-May-2026 13:59:26 UTC] 1
+[03-May-2026 13:59:28 UTC] getStatus cURL Error (Node 1): Connection timed out after 2011 milliseconds
+[03-May-2026 13:59:31 UTC] 1
+[03-May-2026 13:59:33 UTC] getStatus cURL Error (Node 1): Connection timed out after 2016 milliseconds
+[03-May-2026 14:00:05 UTC] 1
+[03-May-2026 14:00:07 UTC] getStatus cURL Error (Node 1): Connection timed out after 2003 milliseconds
+[03-May-2026 14:00:14 UTC] 1
+[03-May-2026 14:00:16 UTC] getStatus cURL Error (Node 1): Connection timed out after 2008 milliseconds
+[03-May-2026 14:00:16 UTC] 1
+[03-May-2026 14:00:18 UTC] getStatus cURL Error (Node 1): Connection timed out after 2005 milliseconds
+[03-May-2026 14:00:18 UTC] 1
+[03-May-2026 14:00:20 UTC] getStatus cURL Error (Node 1): Connection timed out after 2011 milliseconds
+[03-May-2026 14:00:21 UTC] 1
+[03-May-2026 14:00:23 UTC] getStatus cURL Error (Node 1): Connection timed out after 2001 milliseconds
+[03-May-2026 14:00:26 UTC] 1
+[03-May-2026 14:00:29 UTC] getStatus cURL Error (Node 1): Connection timed out after 2012 milliseconds
+[03-May-2026 14:00:46 UTC] 1
+[03-May-2026 14:00:48 UTC] getStatus cURL Error (Node 1): Connection timed out after 2002 milliseconds
+[03-May-2026 14:00:48 UTC] 1
+[03-May-2026 14:00:50 UTC] getStatus cURL Error (Node 1): Connection timed out after 2016 milliseconds
+[03-May-2026 14:00:53 UTC] 1
+[03-May-2026 14:00:55 UTC] getStatus cURL Error (Node 1): Connection timed out after 2002 milliseconds
+[03-May-2026 14:00:58 UTC] 1
+[03-May-2026 14:01:00 UTC] getStatus cURL Error (Node 1): Connection timed out after 2008 milliseconds
+[03-May-2026 14:01:03 UTC] 1
+[03-May-2026 14:01:05 UTC] getStatus cURL Error (Node 1): Connection timed out after 2007 milliseconds
+[03-May-2026 14:01:08 UTC] 1
+[03-May-2026 14:01:10 UTC] getStatus cURL Error (Node 1): Connection timed out after 2016 milliseconds
+[03-May-2026 14:01:13 UTC] 1
+[03-May-2026 14:01:15 UTC] getStatus cURL Error (Node 1): Connection timed out after 2003 milliseconds
+[03-May-2026 14:01:18 UTC] 1
+[03-May-2026 14:01:20 UTC] getStatus cURL Error (Node 1): Connection timed out after 2014 milliseconds
+[03-May-2026 14:01:23 UTC] 1
+[03-May-2026 14:01:25 UTC] getStatus cURL Error (Node 1): Connection timed out after 2008 milliseconds
+[03-May-2026 14:01:26 UTC] 1
+[03-May-2026 14:01:28 UTC] getStatus cURL Error (Node 1): Connection timed out after 2012 milliseconds
+[03-May-2026 14:01:31 UTC] 1
+[03-May-2026 14:01:33 UTC] getStatus cURL Error (Node 1): Connection timed out after 2011 milliseconds
+[03-May-2026 14:01:36 UTC] 1
+[03-May-2026 14:01:38 UTC] getStatus cURL Error (Node 1): Connection timed out after 2007 milliseconds
+[03-May-2026 14:01:41 UTC] 1
+[03-May-2026 14:01:43 UTC] getStatus cURL Error (Node 1): Connection timed out after 2011 milliseconds
+[03-May-2026 14:01:46 UTC] 1
+[03-May-2026 14:01:48 UTC] getStatus cURL Error (Node 1): Connection timed out after 2014 milliseconds
+[03-May-2026 14:01:51 UTC] 1
+[03-May-2026 14:01:53 UTC] getStatus cURL Error (Node 1): Connection timed out after 2001 milliseconds
+[03-May-2026 14:01:54 UTC] 1
+[03-May-2026 14:01:56 UTC] getStatus cURL Error (Node 1): Connection timed out after 2014 milliseconds
+[03-May-2026 14:01:59 UTC] 1
+[03-May-2026 14:02:01 UTC] getStatus cURL Error (Node 1): Connection timed out after 2012 milliseconds
+[03-May-2026 14:02:04 UTC] 1
+[03-May-2026 14:02:06 UTC] getStatus cURL Error (Node 1): Connection timed out after 2015 milliseconds
+[03-May-2026 14:02:09 UTC] 1
+[03-May-2026 14:02:11 UTC] getStatus cURL Error (Node 1): Connection timed out after 2014 milliseconds
+[03-May-2026 14:02:14 UTC] 1
+[03-May-2026 14:02:16 UTC] getStatus cURL Error (Node 1): Connection timed out after 2013 milliseconds
+[03-May-2026 14:02:19 UTC] 1
+[03-May-2026 14:02:21 UTC] getStatus cURL Error (Node 1): Connection timed out after 2016 milliseconds
+[03-May-2026 14:02:24 UTC] 1
+[03-May-2026 14:02:26 UTC] getStatus cURL Error (Node 1): Connection timed out after 2010 milliseconds
+[03-May-2026 14:02:29 UTC] 1
+[03-May-2026 14:02:31 UTC] getStatus cURL Error (Node 1): Connection timed out after 2014 milliseconds
+[03-May-2026 14:02:34 UTC] 1
+[03-May-2026 14:02:36 UTC] getStatus cURL Error (Node 1): Connection timed out after 2003 milliseconds
+[03-May-2026 14:02:39 UTC] 1
+[03-May-2026 14:02:41 UTC] getStatus cURL Error (Node 1): Connection timed out after 2011 milliseconds
+[03-May-2026 14:02:42 UTC] 1
+[03-May-2026 14:02:44 UTC] getStatus cURL Error (Node 1): Connection timed out after 2003 milliseconds
+[03-May-2026 14:02:47 UTC] 1
+[03-May-2026 14:02:49 UTC] getStatus cURL Error (Node 1): Connection timed out after 2012 milliseconds
+[03-May-2026 14:02:52 UTC] 1
+[03-May-2026 14:02:54 UTC] getStatus cURL Error (Node 1): Connection timed out after 2016 milliseconds
+[03-May-2026 14:02:57 UTC] 1
+[03-May-2026 14:02:59 UTC] getStatus cURL Error (Node 1): Connection timed out after 2011 milliseconds
+[03-May-2026 14:03:02 UTC] 1
+[03-May-2026 14:03:04 UTC] getStatus cURL Error (Node 1): Connection timed out after 2007 milliseconds
+[03-May-2026 14:03:07 UTC] 1
+[03-May-2026 14:03:09 UTC] getStatus cURL Error (Node 1): Connection timed out after 2013 milliseconds
+[03-May-2026 14:03:12 UTC] 1
+[03-May-2026 14:03:14 UTC] getStatus cURL Error (Node 1): Connection timed out after 2001 milliseconds
+[03-May-2026 14:03:17 UTC] 1
+[03-May-2026 14:03:19 UTC] getStatus cURL Error (Node 1): Connection timed out after 2001 milliseconds
+[03-May-2026 14:03:22 UTC] 1
+[03-May-2026 14:03:24 UTC] getStatus cURL Error (Node 1): Connection timed out after 2005 milliseconds
+[03-May-2026 14:03:25 UTC] 1
+[03-May-2026 14:03:27 UTC] getStatus cURL Error (Node 1): Connection timed out after 2006 milliseconds
+[03-May-2026 14:03:30 UTC] 1
+[03-May-2026 14:03:32 UTC] getStatus cURL Error (Node 1): Connection timed out after 2014 milliseconds
+[03-May-2026 14:03:35 UTC] 1
+[03-May-2026 14:03:37 UTC] getStatus cURL Error (Node 1): Connection timed out after 2016 milliseconds
+[03-May-2026 14:03:40 UTC] 1
+[03-May-2026 14:03:42 UTC] getStatus cURL Error (Node 1): Connection timed out after 2011 milliseconds
+[03-May-2026 14:03:44 UTC] 1
+[03-May-2026 14:03:46 UTC] getStatus cURL Error (Node 1): Connection timed out after 2011 milliseconds
+[03-May-2026 14:03:49 UTC] 1
+[03-May-2026 14:03:51 UTC] getStatus cURL Error (Node 1): Connection timed out after 2006 milliseconds
+[03-May-2026 14:03:54 UTC] 1
+[03-May-2026 14:03:56 UTC] getStatus cURL Error (Node 1): Connection timed out after 2012 milliseconds
+[03-May-2026 14:03:59 UTC] 1
+[03-May-2026 14:04:01 UTC] getStatus cURL Error (Node 1): Connection timed out after 2015 milliseconds
+[03-May-2026 14:04:02 UTC] 1
+[03-May-2026 14:04:04 UTC] getStatus cURL Error (Node 1): Connection timed out after 2010 milliseconds
+[03-May-2026 14:13:40 UTC] PHP Warning:  Undefined variable $resource in E:\hightcloud\example_client\t-cache\partials.server.cards.allocation_4668417875ebab7f44f0556531168acfef62251a.bladec on line 30
+[03-May-2026 14:13:40 UTC] 1
+[03-May-2026 14:13:42 UTC] getStatus cURL Error (Node 1): Connection timed out after 2001 milliseconds
+[03-May-2026 14:16:05 UTC] PHP Warning:  Undefined variable $resource in E:\hightcloud\example_client\t-cache\partials.server.cards.allocation_4668417875ebab7f44f0556531168acfef62251a.bladec on line 30
+[03-May-2026 14:16:05 UTC] 1
+[03-May-2026 14:16:07 UTC] getStatus cURL Error (Node 1): Connection timed out after 2006 milliseconds
+[03-May-2026 14:17:32 UTC] PHP Warning:  Undefined variable $resource in E:\hightcloud\example_client\t-cache\partials.server.cards.allocation_4668417875ebab7f44f0556531168acfef62251a.bladec on line 30
+[03-May-2026 14:17:32 UTC] 1
+[03-May-2026 14:17:34 UTC] getStatus cURL Error (Node 1): Connection timed out after 2014 milliseconds
+[03-May-2026 14:19:17 UTC] 1
+[03-May-2026 14:19:19 UTC] getStatus cURL Error (Node 1): Connection timed out after 2012 milliseconds
+[03-May-2026 14:23:09 UTC] 1
+[03-May-2026 14:23:11 UTC] getStatus cURL Error (Node 1): Connection timed out after 2003 milliseconds
+[03-May-2026 14:24:17 UTC] 1
+[03-May-2026 14:24:19 UTC] getStatus cURL Error (Node 1): Connection timed out after 2012 milliseconds
+[03-May-2026 14:28:32 UTC] 1
+[03-May-2026 14:28:34 UTC] getStatus cURL Error (Node 1): Connection timed out after 2013 milliseconds
+[03-May-2026 14:28:39 UTC] 1
+[03-May-2026 14:28:41 UTC] getStatus cURL Error (Node 1): Connection timed out after 2008 milliseconds
+[03-May-2026 14:33:26 UTC] 1
+[03-May-2026 14:33:28 UTC] [Profiler] Node.js(TTFB): 0ms | Total cURL: 2018.5ms
+[03-May-2026 14:33:28 UTC] apiRequest cURL Error (Node 1): Failed to connect to 127.0.0.1 port 8080 after 2018 ms: Could not connect to server
+[03-May-2026 14:33:28 UTC] 1
+[03-May-2026 14:33:30 UTC] [Profiler] Node.js(TTFB): 0ms | Total cURL: 2009.93ms
+[03-May-2026 14:33:30 UTC] apiRequest cURL Error (Node 1): Failed to connect to 127.0.0.1 port 8080 after 2009 ms: Could not connect to server
+[03-May-2026 14:33:30 UTC] 1
+[03-May-2026 14:33:32 UTC] [Profiler] Node.js(TTFB): 0ms | Total cURL: 2029.96ms
+[03-May-2026 14:33:32 UTC] apiRequest cURL Error (Node 1): Failed to connect to 127.0.0.1 port 8080 after 2029 ms: Could not connect to server
+[03-May-2026 14:33:32 UTC] 1
+[03-May-2026 14:33:34 UTC] [Profiler] Node.js(TTFB): 0ms | Total cURL: 2027.89ms
+[03-May-2026 14:33:34 UTC] apiRequest cURL Error (Node 1): Failed to connect to 127.0.0.1 port 8080 after 2027 ms: Could not connect to server
+[03-May-2026 14:34:02 UTC] 1
+[03-May-2026 14:34:04 UTC] [Profiler] Node.js(TTFB): 0ms | Total cURL: 2029.04ms
+[03-May-2026 14:34:04 UTC] apiRequest cURL Error (Node 1): Failed to connect to 127.0.0.1 port 8080 after 2029 ms: Could not connect to server
+[03-May-2026 14:34:04 UTC] 1
+[03-May-2026 14:34:06 UTC] [Profiler] Node.js(TTFB): 0ms | Total cURL: 2039.21ms
+[03-May-2026 14:34:06 UTC] apiRequest cURL Error (Node 1): Failed to connect to 127.0.0.1 port 8080 after 2039 ms: Could not connect to server
+[03-May-2026 14:34:06 UTC] 1
+[03-May-2026 14:34:08 UTC] [Profiler] Node.js(TTFB): 0ms | Total cURL: 2036.24ms
+[03-May-2026 14:34:08 UTC] apiRequest cURL Error (Node 1): Failed to connect to 127.0.0.1 port 8080 after 2036 ms: Could not connect to server
+[03-May-2026 14:34:08 UTC] 1
+[03-May-2026 14:34:10 UTC] [Profiler] Node.js(TTFB): 0ms | Total cURL: 2029.59ms
+[03-May-2026 14:34:10 UTC] apiRequest cURL Error (Node 1): Failed to connect to 127.0.0.1 port 8080 after 2029 ms: Could not connect to server
+[03-May-2026 14:34:10 UTC] 1
+[03-May-2026 14:34:12 UTC] [Profiler] Node.js(TTFB): 0ms | Total cURL: 2023.95ms
+[03-May-2026 14:34:12 UTC] apiRequest cURL Error (Node 1): Failed to connect to 127.0.0.1 port 8080 after 2023 ms: Could not connect to server
+[03-May-2026 14:34:12 UTC] 1
+[03-May-2026 14:34:14 UTC] [Profiler] Node.js(TTFB): 0ms | Total cURL: 2033.6ms
+[03-May-2026 14:34:14 UTC] apiRequest cURL Error (Node 1): Failed to connect to 127.0.0.1 port 8080 after 2033 ms: Could not connect to server
+[03-May-2026 14:34:14 UTC] 1
+[03-May-2026 14:34:16 UTC] [Profiler] Node.js(TTFB): 0ms | Total cURL: 2032.92ms
+[03-May-2026 14:34:16 UTC] apiRequest cURL Error (Node 1): Failed to connect to 127.0.0.1 port 8080 after 2032 ms: Could not connect to server
+[03-May-2026 14:34:16 UTC] 1
+[03-May-2026 14:34:18 UTC] [Profiler] Node.js(TTFB): 0ms | Total cURL: 2037.9ms
+[03-May-2026 14:34:18 UTC] apiRequest cURL Error (Node 1): Failed to connect to 127.0.0.1 port 8080 after 2037 ms: Could not connect to server
+[03-May-2026 14:34:18 UTC] 1
+[03-May-2026 14:34:20 UTC] [Profiler] Node.js(TTFB): 0ms | Total cURL: 2022.25ms
+[03-May-2026 14:34:20 UTC] apiRequest cURL Error (Node 1): Failed to connect to 127.0.0.1 port 8080 after 2022 ms: Could not connect to server
+[03-May-2026 14:34:20 UTC] 1
+[03-May-2026 14:34:22 UTC] [Profiler] Node.js(TTFB): 0ms | Total cURL: 2026.45ms
+[03-May-2026 14:34:22 UTC] apiRequest cURL Error (Node 1): Failed to connect to 127.0.0.1 port 8080 after 2026 ms: Could not connect to server
+[03-May-2026 14:34:22 UTC] 1
+[03-May-2026 14:34:24 UTC] [Profiler] Node.js(TTFB): 0ms | Total cURL: 2040.84ms
+[03-May-2026 14:34:24 UTC] apiRequest cURL Error (Node 1): Failed to connect to 127.0.0.1 port 8080 after 2040 ms: Could not connect to server
+[03-May-2026 14:34:24 UTC] 1
+[03-May-2026 14:34:26 UTC] [Profiler] Node.js(TTFB): 0ms | Total cURL: 2046.16ms
+[03-May-2026 14:34:26 UTC] apiRequest cURL Error (Node 1): Failed to connect to 127.0.0.1 port 8080 after 2046 ms: Could not connect to server
+[03-May-2026 14:34:27 UTC] 1
+[03-May-2026 14:34:29 UTC] [Profiler] Node.js(TTFB): 0ms | Total cURL: 2040.51ms
+[03-May-2026 14:34:29 UTC] apiRequest cURL Error (Node 1): Failed to connect to 127.0.0.1 port 8080 after 2040 ms: Could not connect to server
+[03-May-2026 14:34:29 UTC] 1
+[03-May-2026 14:34:31 UTC] [Profiler] Node.js(TTFB): 0ms | Total cURL: 2031.4ms
+[03-May-2026 14:34:31 UTC] apiRequest cURL Error (Node 1): Failed to connect to 127.0.0.1 port 8080 after 2031 ms: Could not connect to server
+[03-May-2026 14:34:31 UTC] 1
+[03-May-2026 14:34:33 UTC] [Profiler] Node.js(TTFB): 0ms | Total cURL: 2030.23ms
+[03-May-2026 14:34:33 UTC] apiRequest cURL Error (Node 1): Failed to connect to 127.0.0.1 port 8080 after 2030 ms: Could not connect to server
+[03-May-2026 14:34:33 UTC] 1
+[03-May-2026 14:34:34 UTC] [Profiler] Node.js(TTFB): 15.95ms | Total cURL: 1023.08ms
+[03-May-2026 14:34:34 UTC] 1
+[03-May-2026 14:34:34 UTC] [Profiler] Node.js(TTFB): 2.37ms | Total cURL: 14.52ms
+[03-May-2026 14:34:34 UTC] 1
+[03-May-2026 14:34:34 UTC] [Profiler] Node.js(TTFB): 2.27ms | Total cURL: 2.36ms
+[03-May-2026 14:34:34 UTC] 1
+[03-May-2026 14:34:34 UTC] [Profiler] Node.js(TTFB): 3.49ms | Total cURL: 5.24ms
+[03-May-2026 14:34:34 UTC] 1
+[03-May-2026 14:34:34 UTC] [Profiler] Node.js(TTFB): 2.53ms | Total cURL: 2.63ms
+[03-May-2026 14:34:37 UTC] 1
+[03-May-2026 14:34:37 UTC] [Profiler] Node.js(TTFB): 2.57ms | Total cURL: 27.67ms
+[03-May-2026 14:34:37 UTC] 1
+[03-May-2026 14:34:37 UTC] [Profiler] Node.js(TTFB): 2.25ms | Total cURL: 2.36ms
+[03-May-2026 14:34:37 UTC] 1
+[03-May-2026 14:34:37 UTC] [Profiler] Node.js(TTFB): 2.4ms | Total cURL: 2.84ms
+[03-May-2026 14:34:37 UTC] 1
+[03-May-2026 14:34:37 UTC] [Profiler] Node.js(TTFB): 2ms | Total cURL: 2.08ms
+[03-May-2026 14:34:42 UTC] 1
+[03-May-2026 14:34:42 UTC] [Profiler] Node.js(TTFB): 2.85ms | Total cURL: 3.48ms
+[03-May-2026 14:34:42 UTC] 1
+[03-May-2026 14:34:42 UTC] [Profiler] Node.js(TTFB): 1.97ms | Total cURL: 2.08ms
+[03-May-2026 14:34:42 UTC] 1
+[03-May-2026 14:34:42 UTC] [Profiler] Node.js(TTFB): 2.5ms | Total cURL: 3.46ms
+[03-May-2026 14:34:42 UTC] 1
+[03-May-2026 14:34:42 UTC] [Profiler] Node.js(TTFB): 1.93ms | Total cURL: 2.05ms
+[03-May-2026 14:34:47 UTC] 1
+[03-May-2026 14:34:47 UTC] [Profiler] Node.js(TTFB): 4.09ms | Total cURL: 4.87ms
+[03-May-2026 14:34:47 UTC] 1
+[03-May-2026 14:34:47 UTC] [Profiler] Node.js(TTFB): 1.59ms | Total cURL: 1.7ms
+[03-May-2026 14:34:47 UTC] 1
+[03-May-2026 14:34:47 UTC] [Profiler] Node.js(TTFB): 1.97ms | Total cURL: 2.51ms
+[03-May-2026 14:34:47 UTC] 1
+[03-May-2026 14:34:47 UTC] [Profiler] Node.js(TTFB): 1.49ms | Total cURL: 1.6ms
+[03-May-2026 14:34:52 UTC] 1
+[03-May-2026 14:34:53 UTC] [Profiler] Node.js(TTFB): 20.9ms | Total cURL: 526.29ms
+[03-May-2026 14:34:53 UTC] 1
+[03-May-2026 14:34:53 UTC] [Profiler] Node.js(TTFB): 36.87ms | Total cURL: 36.96ms
+[03-May-2026 14:34:53 UTC] 1
+[03-May-2026 14:34:53 UTC] [Profiler] Node.js(TTFB): 8.69ms | Total cURL: 9.19ms
+[03-May-2026 14:34:53 UTC] 1
+[03-May-2026 14:34:53 UTC] [Profiler] Node.js(TTFB): 11.47ms | Total cURL: 11.55ms
+[03-May-2026 14:34:54 UTC] 1
+[03-May-2026 14:34:54 UTC] [Profiler] Node.js(TTFB): 8.46ms | Total cURL: 8.86ms
+[03-May-2026 14:34:54 UTC] 1
+[03-May-2026 14:34:54 UTC] [Profiler] Node.js(TTFB): 23ms | Total cURL: 23.08ms
+[03-May-2026 14:34:54 UTC] 1
+[03-May-2026 14:34:54 UTC] [Profiler] Node.js(TTFB): 10.73ms | Total cURL: 11.05ms
+[03-May-2026 14:34:54 UTC] 1
+[03-May-2026 14:34:54 UTC] [Profiler] Node.js(TTFB): 6.74ms | Total cURL: 6.81ms
+[03-May-2026 14:35:07 UTC] 1
+[03-May-2026 14:35:09 UTC] [Profiler] Node.js(TTFB): 0ms | Total cURL: 2032.69ms
+[03-May-2026 14:35:09 UTC] apiRequest cURL Error (Node 1): Failed to connect to 127.0.0.1 port 8080 after 2032 ms: Could not connect to server
+[03-May-2026 14:35:09 UTC] 1
+[03-May-2026 14:35:11 UTC] [Profiler] Node.js(TTFB): 0ms | Total cURL: 2025.27ms
+[03-May-2026 14:35:11 UTC] apiRequest cURL Error (Node 1): Failed to connect to 127.0.0.1 port 8080 after 2025 ms: Could not connect to server
+[03-May-2026 14:35:11 UTC] 1
+[03-May-2026 14:35:13 UTC] [Profiler] Node.js(TTFB): 0ms | Total cURL: 2056.1ms
+[03-May-2026 14:35:13 UTC] apiRequest cURL Error (Node 1): Failed to connect to 127.0.0.1 port 8080 after 2056 ms: Could not connect to server
+[03-May-2026 14:35:13 UTC] 1
+[03-May-2026 14:35:15 UTC] [Profiler] Node.js(TTFB): 0ms | Total cURL: 2020.84ms
+[03-May-2026 14:35:15 UTC] apiRequest cURL Error (Node 1): Failed to connect to 127.0.0.1 port 8080 after 2020 ms: Could not connect to server
+[03-May-2026 14:35:15 UTC] 1
+[03-May-2026 14:35:17 UTC] [Profiler] Node.js(TTFB): 0ms | Total cURL: 2036ms
+[03-May-2026 14:35:17 UTC] apiRequest cURL Error (Node 1): Failed to connect to 127.0.0.1 port 8080 after 2035 ms: Could not connect to server
+[03-May-2026 14:35:17 UTC] 1
+[03-May-2026 14:35:19 UTC] [Profiler] Node.js(TTFB): 0ms | Total cURL: 2032.03ms
+[03-May-2026 14:35:19 UTC] apiRequest cURL Error (Node 1): Failed to connect to 127.0.0.1 port 8080 after 2032 ms: Could not connect to server
+[03-May-2026 14:35:19 UTC] 1
+[03-May-2026 14:35:21 UTC] [Profiler] Node.js(TTFB): 0ms | Total cURL: 2042.64ms
+[03-May-2026 14:35:21 UTC] apiRequest cURL Error (Node 1): Failed to connect to 127.0.0.1 port 8080 after 2042 ms: Could not connect to server
+[03-May-2026 14:35:21 UTC] 1
+[03-May-2026 14:35:23 UTC] [Profiler] Node.js(TTFB): 0ms | Total cURL: 2019.32ms
+[03-May-2026 14:35:23 UTC] apiRequest cURL Error (Node 1): Failed to connect to 127.0.0.1 port 8080 after 2019 ms: Could not connect to server
+[03-May-2026 14:35:23 UTC] 1
+[03-May-2026 14:35:25 UTC] [Profiler] Node.js(TTFB): 0ms | Total cURL: 2014.89ms
+[03-May-2026 14:35:25 UTC] apiRequest cURL Error (Node 1): Failed to connect to 127.0.0.1 port 8080 after 2014 ms: Could not connect to server
+[03-May-2026 14:35:25 UTC] 1
+[03-May-2026 14:35:27 UTC] [Profiler] Node.js(TTFB): 0ms | Total cURL: 2019.95ms
+[03-May-2026 14:35:27 UTC] apiRequest cURL Error (Node 1): Failed to connect to 127.0.0.1 port 8080 after 2019 ms: Could not connect to server
+[03-May-2026 14:35:27 UTC] 1
+[03-May-2026 14:35:29 UTC] [Profiler] Node.js(TTFB): 0ms | Total cURL: 2024.74ms
+[03-May-2026 14:35:29 UTC] apiRequest cURL Error (Node 1): Failed to connect to 127.0.0.1 port 8080 after 2024 ms: Could not connect to server
+[03-May-2026 14:35:29 UTC] 1
+[03-May-2026 14:35:31 UTC] [Profiler] Node.js(TTFB): 0ms | Total cURL: 2028.78ms
+[03-May-2026 14:35:31 UTC] apiRequest cURL Error (Node 1): Failed to connect to 127.0.0.1 port 8080 after 2028 ms: Could not connect to server
+[03-May-2026 14:35:31 UTC] 1
+[03-May-2026 14:35:33 UTC] [Profiler] Node.js(TTFB): 0ms | Total cURL: 2026.46ms
+[03-May-2026 14:35:33 UTC] apiRequest cURL Error (Node 1): Failed to connect to 127.0.0.1 port 8080 after 2026 ms: Could not connect to server
+[03-May-2026 14:35:33 UTC] 1
+[03-May-2026 14:35:35 UTC] [Profiler] Node.js(TTFB): 0ms | Total cURL: 2039.19ms
+[03-May-2026 14:35:35 UTC] apiRequest cURL Error (Node 1): Failed to connect to 127.0.0.1 port 8080 after 2039 ms: Could not connect to server
+[03-May-2026 14:35:35 UTC] 1
+[03-May-2026 14:35:37 UTC] [Profiler] Node.js(TTFB): 0ms | Total cURL: 2031.01ms
+[03-May-2026 14:35:37 UTC] apiRequest cURL Error (Node 1): Failed to connect to 127.0.0.1 port 8080 after 2031 ms: Could not connect to server
+[03-May-2026 14:35:37 UTC] 1
+[03-May-2026 14:35:39 UTC] [Profiler] Node.js(TTFB): 0ms | Total cURL: 2028.26ms
+[03-May-2026 14:35:39 UTC] apiRequest cURL Error (Node 1): Failed to connect to 127.0.0.1 port 8080 after 2028 ms: Could not connect to server
+[03-May-2026 14:35:39 UTC] 1
+[03-May-2026 14:35:41 UTC] [Profiler] Node.js(TTFB): 0ms | Total cURL: 2025.37ms
+[03-May-2026 14:35:41 UTC] apiRequest cURL Error (Node 1): Failed to connect to 127.0.0.1 port 8080 after 2025 ms: Could not connect to server
+[03-May-2026 14:35:41 UTC] 1
+[03-May-2026 14:35:43 UTC] [Profiler] Node.js(TTFB): 0ms | Total cURL: 2020.95ms
+[03-May-2026 14:35:43 UTC] apiRequest cURL Error (Node 1): Failed to connect to 127.0.0.1 port 8080 after 2020 ms: Could not connect to server
+[03-May-2026 14:35:43 UTC] 1
+[03-May-2026 14:35:45 UTC] [Profiler] Node.js(TTFB): 0ms | Total cURL: 2024.97ms
+[03-May-2026 14:35:45 UTC] apiRequest cURL Error (Node 1): Failed to connect to 127.0.0.1 port 8080 after 2024 ms: Could not connect to server
+[03-May-2026 14:35:45 UTC] 1
+[03-May-2026 14:35:47 UTC] [Profiler] Node.js(TTFB): 0ms | Total cURL: 2026.03ms
+[03-May-2026 14:35:47 UTC] apiRequest cURL Error (Node 1): Failed to connect to 127.0.0.1 port 8080 after 2026 ms: Could not connect to server
+[03-May-2026 14:35:47 UTC] 1
+[03-May-2026 14:35:49 UTC] [Profiler] Node.js(TTFB): 0ms | Total cURL: 2031.93ms
+[03-May-2026 14:35:49 UTC] apiRequest cURL Error (Node 1): Failed to connect to 127.0.0.1 port 8080 after 2031 ms: Could not connect to server
+[03-May-2026 14:35:49 UTC] 1
+[03-May-2026 14:35:51 UTC] [Profiler] Node.js(TTFB): 0ms | Total cURL: 2022.59ms
+[03-May-2026 14:35:51 UTC] apiRequest cURL Error (Node 1): Failed to connect to 127.0.0.1 port 8080 after 2022 ms: Could not connect to server
+[03-May-2026 14:35:51 UTC] 1
+[03-May-2026 14:35:53 UTC] [Profiler] Node.js(TTFB): 0ms | Total cURL: 2038.28ms
+[03-May-2026 14:35:53 UTC] apiRequest cURL Error (Node 1): Failed to connect to 127.0.0.1 port 8080 after 2038 ms: Could not connect to server
+[03-May-2026 14:35:53 UTC] 1
+[03-May-2026 14:35:55 UTC] [Profiler] Node.js(TTFB): 0ms | Total cURL: 2020.65ms
+[03-May-2026 14:35:55 UTC] apiRequest cURL Error (Node 1): Failed to connect to 127.0.0.1 port 8080 after 2020 ms: Could not connect to server
+[03-May-2026 14:35:55 UTC] 1
+[03-May-2026 14:35:57 UTC] [Profiler] Node.js(TTFB): 0ms | Total cURL: 2024.05ms
+[03-May-2026 14:35:57 UTC] apiRequest cURL Error (Node 1): Failed to connect to 127.0.0.1 port 8080 after 2024 ms: Could not connect to server
+[03-May-2026 14:35:57 UTC] 1
+[03-May-2026 14:35:59 UTC] [Profiler] Node.js(TTFB): 0ms | Total cURL: 2035.38ms
+[03-May-2026 14:35:59 UTC] apiRequest cURL Error (Node 1): Failed to connect to 127.0.0.1 port 8080 after 2035 ms: Could not connect to server
+[03-May-2026 14:35:59 UTC] 1
+[03-May-2026 14:36:01 UTC] [Profiler] Node.js(TTFB): 0ms | Total cURL: 2032.35ms
+[03-May-2026 14:36:01 UTC] apiRequest cURL Error (Node 1): Failed to connect to 127.0.0.1 port 8080 after 2033 ms: Could not connect to server
+[03-May-2026 14:36:01 UTC] 1
+[03-May-2026 14:36:04 UTC] [Profiler] Node.js(TTFB): 0ms | Total cURL: 2020.82ms
+[03-May-2026 14:36:04 UTC] apiRequest cURL Error (Node 1): Failed to connect to 127.0.0.1 port 8080 after 2020 ms: Could not connect to server
+[03-May-2026 14:36:04 UTC] 1
+[03-May-2026 14:36:06 UTC] [Profiler] Node.js(TTFB): 0ms | Total cURL: 2023.18ms
+[03-May-2026 14:36:06 UTC] apiRequest cURL Error (Node 1): Failed to connect to 127.0.0.1 port 8080 after 2023 ms: Could not connect to server
+[03-May-2026 14:36:06 UTC] 1
+[03-May-2026 14:36:08 UTC] [Profiler] Node.js(TTFB): 0ms | Total cURL: 2039.04ms
+[03-May-2026 14:36:08 UTC] apiRequest cURL Error (Node 1): Failed to connect to 127.0.0.1 port 8080 after 2039 ms: Could not connect to server
+[03-May-2026 14:36:08 UTC] 1
+[03-May-2026 14:36:10 UTC] [Profiler] Node.js(TTFB): 0ms | Total cURL: 2034.45ms
+[03-May-2026 14:36:10 UTC] apiRequest cURL Error (Node 1): Failed to connect to 127.0.0.1 port 8080 after 2034 ms: Could not connect to server
+[03-May-2026 14:36:10 UTC] 1
+[03-May-2026 14:36:12 UTC] [Profiler] Node.js(TTFB): 0ms | Total cURL: 2022.13ms
+[03-May-2026 14:36:12 UTC] apiRequest cURL Error (Node 1): Failed to connect to 127.0.0.1 port 8080 after 2022 ms: Could not connect to server
+[03-May-2026 14:36:12 UTC] 1
+[03-May-2026 14:36:14 UTC] [Profiler] Node.js(TTFB): 0ms | Total cURL: 2024.62ms
+[03-May-2026 14:36:14 UTC] apiRequest cURL Error (Node 1): Failed to connect to 127.0.0.1 port 8080 after 2024 ms: Could not connect to server
+[03-May-2026 14:36:14 UTC] 1
+[03-May-2026 14:36:16 UTC] [Profiler] Node.js(TTFB): 0ms | Total cURL: 2020.74ms
+[03-May-2026 14:36:16 UTC] apiRequest cURL Error (Node 1): Failed to connect to 127.0.0.1 port 8080 after 2020 ms: Could not connect to server
+[03-May-2026 14:36:16 UTC] 1
+[03-May-2026 14:36:18 UTC] [Profiler] Node.js(TTFB): 0ms | Total cURL: 2035.72ms
+[03-May-2026 14:36:18 UTC] apiRequest cURL Error (Node 1): Failed to connect to 127.0.0.1 port 8080 after 2035 ms: Could not connect to server
+[03-May-2026 14:36:18 UTC] 1
+[03-May-2026 14:36:20 UTC] [Profiler] Node.js(TTFB): 0ms | Total cURL: 2039.86ms
+[03-May-2026 14:36:20 UTC] apiRequest cURL Error (Node 1): Failed to connect to 127.0.0.1 port 8080 after 2039 ms: Could not connect to server
+[03-May-2026 14:36:20 UTC] 1
+[03-May-2026 14:36:22 UTC] [Profiler] Node.js(TTFB): 0ms | Total cURL: 2025.48ms
+[03-May-2026 14:36:22 UTC] apiRequest cURL Error (Node 1): Failed to connect to 127.0.0.1 port 8080 after 2025 ms: Could not connect to server
+[03-May-2026 14:36:22 UTC] 1
+[03-May-2026 14:36:24 UTC] [Profiler] Node.js(TTFB): 0ms | Total cURL: 2033.53ms
+[03-May-2026 14:36:24 UTC] apiRequest cURL Error (Node 1): Failed to connect to 127.0.0.1 port 8080 after 2033 ms: Could not connect to server
+[03-May-2026 14:36:24 UTC] 1
+[03-May-2026 14:36:26 UTC] [Profiler] Node.js(TTFB): 0ms | Total cURL: 2026.8ms
+[03-May-2026 14:36:26 UTC] apiRequest cURL Error (Node 1): Failed to connect to 127.0.0.1 port 8080 after 2026 ms: Could not connect to server
+[03-May-2026 14:36:26 UTC] 1
+[03-May-2026 14:36:28 UTC] [Profiler] Node.js(TTFB): 0ms | Total cURL: 2023.23ms
+[03-May-2026 14:36:28 UTC] apiRequest cURL Error (Node 1): Failed to connect to 127.0.0.1 port 8080 after 2023 ms: Could not connect to server
+[03-May-2026 14:36:28 UTC] 1
+[03-May-2026 14:36:30 UTC] [Profiler] Node.js(TTFB): 0ms | Total cURL: 2021.06ms
+[03-May-2026 14:36:30 UTC] apiRequest cURL Error (Node 1): Failed to connect to 127.0.0.1 port 8080 after 2021 ms: Could not connect to server
+[03-May-2026 14:36:30 UTC] 1
+[03-May-2026 14:36:32 UTC] [Profiler] Node.js(TTFB): 0ms | Total cURL: 2019.09ms
+[03-May-2026 14:36:32 UTC] apiRequest cURL Error (Node 1): Failed to connect to 127.0.0.1 port 8080 after 2019 ms: Could not connect to server
+[03-May-2026 14:36:32 UTC] 1
+[03-May-2026 14:36:34 UTC] [Profiler] Node.js(TTFB): 0ms | Total cURL: 2023.77ms
+[03-May-2026 14:36:34 UTC] apiRequest cURL Error (Node 1): Failed to connect to 127.0.0.1 port 8080 after 2023 ms: Could not connect to server
+[03-May-2026 14:36:34 UTC] 1
+[03-May-2026 14:36:36 UTC] [Profiler] Node.js(TTFB): 0ms | Total cURL: 2036.23ms
+[03-May-2026 14:36:36 UTC] apiRequest cURL Error (Node 1): Failed to connect to 127.0.0.1 port 8080 after 2036 ms: Could not connect to server
+[03-May-2026 14:36:36 UTC] 1
+[03-May-2026 14:36:38 UTC] [Profiler] Node.js(TTFB): 0ms | Total cURL: 2037.46ms
+[03-May-2026 14:36:38 UTC] apiRequest cURL Error (Node 1): Failed to connect to 127.0.0.1 port 8080 after 2037 ms: Could not connect to server
+[03-May-2026 14:36:38 UTC] 1
+[03-May-2026 14:36:40 UTC] [Profiler] Node.js(TTFB): 0ms | Total cURL: 2026.86ms
+[03-May-2026 14:36:40 UTC] apiRequest cURL Error (Node 1): Failed to connect to 127.0.0.1 port 8080 after 2026 ms: Could not connect to server
+[03-May-2026 14:36:40 UTC] 1
+[03-May-2026 14:36:42 UTC] [Profiler] Node.js(TTFB): 0ms | Total cURL: 2058.17ms
+[03-May-2026 14:36:42 UTC] apiRequest cURL Error (Node 1): Failed to connect to 127.0.0.1 port 8080 after 2058 ms: Could not connect to server
+[03-May-2026 14:36:42 UTC] 1
+[03-May-2026 14:36:44 UTC] [Profiler] Node.js(TTFB): 0ms | Total cURL: 2031.95ms
+[03-May-2026 14:36:44 UTC] apiRequest cURL Error (Node 1): Failed to connect to 127.0.0.1 port 8080 after 2031 ms: Could not connect to server
+[03-May-2026 14:36:44 UTC] 1
+[03-May-2026 14:36:46 UTC] [Profiler] Node.js(TTFB): 0ms | Total cURL: 2023.06ms
+[03-May-2026 14:36:46 UTC] apiRequest cURL Error (Node 1): Failed to connect to 127.0.0.1 port 8080 after 2023 ms: Could not connect to server
+[03-May-2026 14:36:46 UTC] 1
+[03-May-2026 14:36:48 UTC] [Profiler] Node.js(TTFB): 0ms | Total cURL: 2025.98ms
+[03-May-2026 14:36:48 UTC] apiRequest cURL Error (Node 1): Failed to connect to 127.0.0.1 port 8080 after 2025 ms: Could not connect to server
+[03-May-2026 14:36:48 UTC] 1
+[03-May-2026 14:36:50 UTC] [Profiler] Node.js(TTFB): 0ms | Total cURL: 2031.43ms
+[03-May-2026 14:36:50 UTC] apiRequest cURL Error (Node 1): Failed to connect to 127.0.0.1 port 8080 after 2031 ms: Could not connect to server
+[03-May-2026 14:36:50 UTC] 1
+[03-May-2026 14:36:52 UTC] [Profiler] Node.js(TTFB): 0ms | Total cURL: 2028.36ms
+[03-May-2026 14:36:52 UTC] apiRequest cURL Error (Node 1): Failed to connect to 127.0.0.1 port 8080 after 2028 ms: Could not connect to server
+[03-May-2026 14:36:52 UTC] 1
+[03-May-2026 14:36:54 UTC] [Profiler] Node.js(TTFB): 0ms | Total cURL: 2030.65ms
+[03-May-2026 14:36:54 UTC] apiRequest cURL Error (Node 1): Failed to connect to 127.0.0.1 port 8080 after 2030 ms: Could not connect to server
+[03-May-2026 14:36:54 UTC] 1
+[03-May-2026 14:36:56 UTC] [Profiler] Node.js(TTFB): 0ms | Total cURL: 2022.91ms
+[03-May-2026 14:36:56 UTC] apiRequest cURL Error (Node 1): Failed to connect to 127.0.0.1 port 8080 after 2022 ms: Could not connect to server
+[03-May-2026 14:36:56 UTC] 1
+[03-May-2026 14:36:58 UTC] [Profiler] Node.js(TTFB): 0ms | Total cURL: 2028.97ms
+[03-May-2026 14:36:58 UTC] apiRequest cURL Error (Node 1): Failed to connect to 127.0.0.1 port 8080 after 2028 ms: Could not connect to server
+[03-May-2026 14:36:58 UTC] 1
+[03-May-2026 14:37:00 UTC] [Profiler] Node.js(TTFB): 0ms | Total cURL: 2023.38ms
+[03-May-2026 14:37:00 UTC] apiRequest cURL Error (Node 1): Failed to connect to 127.0.0.1 port 8080 after 2023 ms: Could not connect to server
+[03-May-2026 14:37:00 UTC] 1
+[03-May-2026 14:37:02 UTC] [Profiler] Node.js(TTFB): 0ms | Total cURL: 2032.01ms
+[03-May-2026 14:37:02 UTC] apiRequest cURL Error (Node 1): Failed to connect to 127.0.0.1 port 8080 after 2032 ms: Could not connect to server
+[03-May-2026 14:37:02 UTC] 1
+[03-May-2026 14:37:04 UTC] [Profiler] Node.js(TTFB): 0ms | Total cURL: 2034.89ms
+[03-May-2026 14:37:04 UTC] apiRequest cURL Error (Node 1): Failed to connect to 127.0.0.1 port 8080 after 2034 ms: Could not connect to server
+[03-May-2026 14:37:04 UTC] 1
+[03-May-2026 14:37:06 UTC] [Profiler] Node.js(TTFB): 0ms | Total cURL: 2023ms
+[03-May-2026 14:37:06 UTC] apiRequest cURL Error (Node 1): Failed to connect to 127.0.0.1 port 8080 after 2023 ms: Could not connect to server
+[03-May-2026 14:37:06 UTC] 1
+[03-May-2026 14:37:08 UTC] [Profiler] Node.js(TTFB): 0ms | Total cURL: 2013.67ms
+[03-May-2026 14:37:08 UTC] apiRequest cURL Error (Node 1): Failed to connect to 127.0.0.1 port 8080 after 2013 ms: Could not connect to server
+[03-May-2026 14:37:08 UTC] 1
+[03-May-2026 14:37:11 UTC] [Profiler] Node.js(TTFB): 0ms | Total cURL: 2016.31ms
+[03-May-2026 14:37:11 UTC] apiRequest cURL Error (Node 1): Failed to connect to 127.0.0.1 port 8080 after 2016 ms: Could not connect to server
+[03-May-2026 14:37:11 UTC] 1
+[03-May-2026 14:37:13 UTC] [Profiler] Node.js(TTFB): 0ms | Total cURL: 2015.45ms
+[03-May-2026 14:37:13 UTC] apiRequest cURL Error (Node 1): Failed to connect to 127.0.0.1 port 8080 after 2015 ms: Could not connect to server
+[03-May-2026 14:37:13 UTC] 1
+[03-May-2026 14:37:15 UTC] [Profiler] Node.js(TTFB): 0ms | Total cURL: 2028.08ms
+[03-May-2026 14:37:15 UTC] apiRequest cURL Error (Node 1): Failed to connect to 127.0.0.1 port 8080 after 2028 ms: Could not connect to server
+[03-May-2026 14:37:15 UTC] 1
+[03-May-2026 14:37:17 UTC] [Profiler] Node.js(TTFB): 0ms | Total cURL: 2034.73ms
+[03-May-2026 14:37:17 UTC] apiRequest cURL Error (Node 1): Failed to connect to 127.0.0.1 port 8080 after 2034 ms: Could not connect to server
+[03-May-2026 14:37:17 UTC] 1
+[03-May-2026 14:37:19 UTC] [Profiler] Node.js(TTFB): 0ms | Total cURL: 2031.08ms
+[03-May-2026 14:37:19 UTC] apiRequest cURL Error (Node 1): Failed to connect to 127.0.0.1 port 8080 after 2031 ms: Could not connect to server
+[03-May-2026 14:37:19 UTC] 1
+[03-May-2026 14:37:21 UTC] [Profiler] Node.js(TTFB): 0ms | Total cURL: 2020.83ms
+[03-May-2026 14:37:21 UTC] apiRequest cURL Error (Node 1): Failed to connect to 127.0.0.1 port 8080 after 2020 ms: Could not connect to server
+[03-May-2026 14:37:21 UTC] 1
+[03-May-2026 14:37:23 UTC] [Profiler] Node.js(TTFB): 0ms | Total cURL: 2022.13ms
+[03-May-2026 14:37:23 UTC] apiRequest cURL Error (Node 1): Failed to connect to 127.0.0.1 port 8080 after 2022 ms: Could not connect to server
+[03-May-2026 14:37:23 UTC] 1
+[03-May-2026 14:37:25 UTC] [Profiler] Node.js(TTFB): 0ms | Total cURL: 2015.47ms
+[03-May-2026 14:37:25 UTC] apiRequest cURL Error (Node 1): Failed to connect to 127.0.0.1 port 8080 after 2015 ms: Could not connect to server
+[03-May-2026 14:37:25 UTC] 1
+[03-May-2026 14:37:27 UTC] [Profiler] Node.js(TTFB): 0ms | Total cURL: 2027.6ms
+[03-May-2026 14:37:27 UTC] apiRequest cURL Error (Node 1): Failed to connect to 127.0.0.1 port 8080 after 2027 ms: Could not connect to server
+[03-May-2026 14:37:27 UTC] 1
+[03-May-2026 14:37:29 UTC] [Profiler] Node.js(TTFB): 0ms | Total cURL: 2022.4ms
+[03-May-2026 14:37:29 UTC] apiRequest cURL Error (Node 1): Failed to connect to 127.0.0.1 port 8080 after 2022 ms: Could not connect to server
+[03-May-2026 14:37:29 UTC] 1
+[03-May-2026 14:37:31 UTC] [Profiler] Node.js(TTFB): 0ms | Total cURL: 2011.66ms
+[03-May-2026 14:37:31 UTC] apiRequest cURL Error (Node 1): Failed to connect to 127.0.0.1 port 8080 after 2011 ms: Could not connect to server
+[03-May-2026 14:37:31 UTC] 1
+[03-May-2026 14:37:33 UTC] [Profiler] Node.js(TTFB): 0ms | Total cURL: 2028.27ms
+[03-May-2026 14:37:33 UTC] apiRequest cURL Error (Node 1): Failed to connect to 127.0.0.1 port 8080 after 2028 ms: Could not connect to server
+[03-May-2026 14:37:33 UTC] 1
+[03-May-2026 14:37:35 UTC] [Profiler] Node.js(TTFB): 0ms | Total cURL: 2030.18ms
+[03-May-2026 14:37:35 UTC] apiRequest cURL Error (Node 1): Failed to connect to 127.0.0.1 port 8080 after 2030 ms: Could not connect to server
+[03-May-2026 14:37:35 UTC] 1
+[03-May-2026 14:37:37 UTC] [Profiler] Node.js(TTFB): 0ms | Total cURL: 2028.43ms
+[03-May-2026 14:37:37 UTC] apiRequest cURL Error (Node 1): Failed to connect to 127.0.0.1 port 8080 after 2028 ms: Could not connect to server
+[03-May-2026 14:37:37 UTC] 1
+[03-May-2026 14:37:39 UTC] [Profiler] Node.js(TTFB): 0ms | Total cURL: 2030.4ms
+[03-May-2026 14:37:39 UTC] apiRequest cURL Error (Node 1): Failed to connect to 127.0.0.1 port 8080 after 2030 ms: Could not connect to server
+[03-May-2026 14:37:39 UTC] 1
+[03-May-2026 14:37:41 UTC] [Profiler] Node.js(TTFB): 0ms | Total cURL: 2024.74ms
+[03-May-2026 14:37:41 UTC] apiRequest cURL Error (Node 1): Failed to connect to 127.0.0.1 port 8080 after 2024 ms: Could not connect to server
+[03-May-2026 14:37:41 UTC] 1
+[03-May-2026 14:37:43 UTC] [Profiler] Node.js(TTFB): 0ms | Total cURL: 2014.11ms
+[03-May-2026 14:37:43 UTC] apiRequest cURL Error (Node 1): Failed to connect to 127.0.0.1 port 8080 after 2014 ms: Could not connect to server
+[03-May-2026 14:37:43 UTC] 1
+[03-May-2026 14:37:45 UTC] [Profiler] Node.js(TTFB): 0ms | Total cURL: 2025.16ms
+[03-May-2026 14:37:45 UTC] apiRequest cURL Error (Node 1): Failed to connect to 127.0.0.1 port 8080 after 2025 ms: Could not connect to server
+[03-May-2026 14:37:45 UTC] 1
+[03-May-2026 14:37:47 UTC] [Profiler] Node.js(TTFB): 0ms | Total cURL: 2032.67ms
+[03-May-2026 14:37:47 UTC] apiRequest cURL Error (Node 1): Failed to connect to 127.0.0.1 port 8080 after 2032 ms: Could not connect to server
+[03-May-2026 14:37:47 UTC] 1
+[03-May-2026 14:37:49 UTC] [Profiler] Node.js(TTFB): 0ms | Total cURL: 2049.59ms
+[03-May-2026 14:37:49 UTC] apiRequest cURL Error (Node 1): Failed to connect to 127.0.0.1 port 8080 after 2049 ms: Could not connect to server
+[03-May-2026 14:37:49 UTC] 1
+[03-May-2026 14:37:51 UTC] [Profiler] Node.js(TTFB): 0ms | Total cURL: 2025.79ms
+[03-May-2026 14:37:51 UTC] apiRequest cURL Error (Node 1): Failed to connect to 127.0.0.1 port 8080 after 2025 ms: Could not connect to server
+[03-May-2026 14:37:51 UTC] 1
+[03-May-2026 14:37:53 UTC] [Profiler] Node.js(TTFB): 0ms | Total cURL: 2030.68ms
+[03-May-2026 14:37:53 UTC] apiRequest cURL Error (Node 1): Failed to connect to 127.0.0.1 port 8080 after 2030 ms: Could not connect to server
+[03-May-2026 14:37:53 UTC] 1
+[03-May-2026 14:37:55 UTC] [Profiler] Node.js(TTFB): 0ms | Total cURL: 2030.67ms
+[03-May-2026 14:37:55 UTC] apiRequest cURL Error (Node 1): Failed to connect to 127.0.0.1 port 8080 after 2030 ms: Could not connect to server
+[03-May-2026 14:37:55 UTC] 1
+[03-May-2026 14:37:57 UTC] [Profiler] Node.js(TTFB): 0ms | Total cURL: 2022ms
+[03-May-2026 14:37:57 UTC] apiRequest cURL Error (Node 1): Failed to connect to 127.0.0.1 port 8080 after 2021 ms: Could not connect to server
+[03-May-2026 14:37:57 UTC] 1
+[03-May-2026 14:37:59 UTC] [Profiler] Node.js(TTFB): 0ms | Total cURL: 2026.73ms
+[03-May-2026 14:37:59 UTC] apiRequest cURL Error (Node 1): Failed to connect to 127.0.0.1 port 8080 after 2026 ms: Could not connect to server
+[03-May-2026 14:37:59 UTC] 1
+[03-May-2026 14:38:01 UTC] [Profiler] Node.js(TTFB): 0ms | Total cURL: 2027.57ms
+[03-May-2026 14:38:01 UTC] apiRequest cURL Error (Node 1): Failed to connect to 127.0.0.1 port 8080 after 2027 ms: Could not connect to server
+[03-May-2026 14:38:01 UTC] 1
+[03-May-2026 14:38:03 UTC] [Profiler] Node.js(TTFB): 0ms | Total cURL: 2033.87ms
+[03-May-2026 14:38:03 UTC] apiRequest cURL Error (Node 1): Failed to connect to 127.0.0.1 port 8080 after 2033 ms: Could not connect to server
+[03-May-2026 14:38:03 UTC] 1
+[03-May-2026 14:38:05 UTC] [Profiler] Node.js(TTFB): 0ms | Total cURL: 2029.58ms
+[03-May-2026 14:38:05 UTC] apiRequest cURL Error (Node 1): Failed to connect to 127.0.0.1 port 8080 after 2029 ms: Could not connect to server
+[03-May-2026 14:38:05 UTC] 1
+[03-May-2026 14:38:07 UTC] [Profiler] Node.js(TTFB): 0ms | Total cURL: 2027.85ms
+[03-May-2026 14:38:07 UTC] apiRequest cURL Error (Node 1): Failed to connect to 127.0.0.1 port 8080 after 2027 ms: Could not connect to server
+[03-May-2026 14:38:07 UTC] 1
+[03-May-2026 14:38:09 UTC] [Profiler] Node.js(TTFB): 0ms | Total cURL: 2028.06ms
+[03-May-2026 14:38:09 UTC] apiRequest cURL Error (Node 1): Failed to connect to 127.0.0.1 port 8080 after 2028 ms: Could not connect to server
+[03-May-2026 14:38:09 UTC] 1
+[03-May-2026 14:38:11 UTC] [Profiler] Node.js(TTFB): 0ms | Total cURL: 2026.9ms
+[03-May-2026 14:38:11 UTC] apiRequest cURL Error (Node 1): Failed to connect to 127.0.0.1 port 8080 after 2026 ms: Could not connect to server
+[03-May-2026 14:38:11 UTC] 1
+[03-May-2026 14:38:13 UTC] [Profiler] Node.js(TTFB): 0ms | Total cURL: 2030.1ms
+[03-May-2026 14:38:13 UTC] apiRequest cURL Error (Node 1): Failed to connect to 127.0.0.1 port 8080 after 2030 ms: Could not connect to server
+[03-May-2026 14:38:13 UTC] 1
+[03-May-2026 14:38:15 UTC] [Profiler] Node.js(TTFB): 0ms | Total cURL: 2039.18ms
+[03-May-2026 14:38:15 UTC] apiRequest cURL Error (Node 1): Failed to connect to 127.0.0.1 port 8080 after 2039 ms: Could not connect to server
+[03-May-2026 14:38:15 UTC] 1
+[03-May-2026 14:38:17 UTC] [Profiler] Node.js(TTFB): 0ms | Total cURL: 2025.92ms
+[03-May-2026 14:38:17 UTC] apiRequest cURL Error (Node 1): Failed to connect to 127.0.0.1 port 8080 after 2026 ms: Could not connect to server
+[03-May-2026 14:38:17 UTC] 1
+[03-May-2026 14:38:20 UTC] [Profiler] Node.js(TTFB): 0ms | Total cURL: 2039.28ms
+[03-May-2026 14:38:20 UTC] apiRequest cURL Error (Node 1): Failed to connect to 127.0.0.1 port 8080 after 2039 ms: Could not connect to server
+[03-May-2026 14:38:20 UTC] 1
+[03-May-2026 14:38:22 UTC] [Profiler] Node.js(TTFB): 0ms | Total cURL: 2024.51ms
+[03-May-2026 14:38:22 UTC] apiRequest cURL Error (Node 1): Failed to connect to 127.0.0.1 port 8080 after 2024 ms: Could not connect to server
+[03-May-2026 14:38:22 UTC] 1
+[03-May-2026 14:38:24 UTC] [Profiler] Node.js(TTFB): 0ms | Total cURL: 2020.36ms
+[03-May-2026 14:38:24 UTC] apiRequest cURL Error (Node 1): Failed to connect to 127.0.0.1 port 8080 after 2020 ms: Could not connect to server
+[03-May-2026 14:38:24 UTC] 1
+[03-May-2026 14:38:26 UTC] [Profiler] Node.js(TTFB): 0ms | Total cURL: 2024.86ms
+[03-May-2026 14:38:26 UTC] apiRequest cURL Error (Node 1): Failed to connect to 127.0.0.1 port 8080 after 2024 ms: Could not connect to server
+[03-May-2026 14:38:26 UTC] 1
+[03-May-2026 14:38:28 UTC] [Profiler] Node.js(TTFB): 0ms | Total cURL: 2022.15ms
+[03-May-2026 14:38:28 UTC] apiRequest cURL Error (Node 1): Failed to connect to 127.0.0.1 port 8080 after 2022 ms: Could not connect to server
+[03-May-2026 14:38:28 UTC] 1
+[03-May-2026 14:38:30 UTC] [Profiler] Node.js(TTFB): 0ms | Total cURL: 2018.29ms
+[03-May-2026 14:38:30 UTC] apiRequest cURL Error (Node 1): Failed to connect to 127.0.0.1 port 8080 after 2018 ms: Could not connect to server
+[03-May-2026 14:38:30 UTC] 1
+[03-May-2026 14:38:32 UTC] [Profiler] Node.js(TTFB): 0ms | Total cURL: 2019.01ms
+[03-May-2026 14:38:32 UTC] apiRequest cURL Error (Node 1): Failed to connect to 127.0.0.1 port 8080 after 2019 ms: Could not connect to server
+[03-May-2026 14:38:32 UTC] 1
+[03-May-2026 14:38:34 UTC] [Profiler] Node.js(TTFB): 0ms | Total cURL: 2041.88ms
+[03-May-2026 14:38:34 UTC] apiRequest cURL Error (Node 1): Failed to connect to 127.0.0.1 port 8080 after 2041 ms: Could not connect to server
+[03-May-2026 14:38:34 UTC] 1
+[03-May-2026 14:38:36 UTC] [Profiler] Node.js(TTFB): 0ms | Total cURL: 2027.82ms
+[03-May-2026 14:38:36 UTC] apiRequest cURL Error (Node 1): Failed to connect to 127.0.0.1 port 8080 after 2027 ms: Could not connect to server
+[03-May-2026 14:38:36 UTC] 1
+[03-May-2026 14:38:38 UTC] [Profiler] Node.js(TTFB): 0ms | Total cURL: 2020.74ms
+[03-May-2026 14:38:38 UTC] apiRequest cURL Error (Node 1): Failed to connect to 127.0.0.1 port 8080 after 2020 ms: Could not connect to server
+[03-May-2026 14:38:38 UTC] 1
+[03-May-2026 14:38:40 UTC] [Profiler] Node.js(TTFB): 0ms | Total cURL: 2008.71ms
+[03-May-2026 14:38:40 UTC] apiRequest cURL Error (Node 1): Failed to connect to 127.0.0.1 port 8080 after 2008 ms: Could not connect to server
+[03-May-2026 14:38:40 UTC] 1
+[03-May-2026 14:38:42 UTC] [Profiler] Node.js(TTFB): 0ms | Total cURL: 2031.52ms
+[03-May-2026 14:38:42 UTC] apiRequest cURL Error (Node 1): Failed to connect to 127.0.0.1 port 8080 after 2031 ms: Could not connect to server
+[03-May-2026 14:38:43 UTC] 1
+[03-May-2026 14:38:45 UTC] [Profiler] Node.js(TTFB): 0ms | Total cURL: 2019.83ms
+[03-May-2026 14:38:45 UTC] apiRequest cURL Error (Node 1): Failed to connect to 127.0.0.1 port 8080 after 2019 ms: Could not connect to server
+[03-May-2026 14:38:45 UTC] 1
+[03-May-2026 14:38:47 UTC] [Profiler] Node.js(TTFB): 0ms | Total cURL: 2019.6ms
+[03-May-2026 14:38:47 UTC] apiRequest cURL Error (Node 1): Failed to connect to 127.0.0.1 port 8080 after 2019 ms: Could not connect to server
+[03-May-2026 14:38:47 UTC] 1
+[03-May-2026 14:38:49 UTC] [Profiler] Node.js(TTFB): 0ms | Total cURL: 2022.14ms
+[03-May-2026 14:38:49 UTC] apiRequest cURL Error (Node 1): Failed to connect to 127.0.0.1 port 8080 after 2022 ms: Could not connect to server
+[03-May-2026 14:38:49 UTC] 1
+[03-May-2026 14:38:51 UTC] [Profiler] Node.js(TTFB): 0ms | Total cURL: 2018.38ms
+[03-May-2026 14:38:51 UTC] apiRequest cURL Error (Node 1): Failed to connect to 127.0.0.1 port 8080 after 2018 ms: Could not connect to server
+[03-May-2026 14:40:33 UTC] 1
+[03-May-2026 14:40:34 UTC] [Profiler] Node.js(TTFB): 0ms | Total cURL: 1013.81ms
+[03-May-2026 14:40:34 UTC] apiRequest cURL Error (Node 1): Connection timed out after 1013 milliseconds
+[03-May-2026 14:40:34 UTC] 1
+[03-May-2026 14:40:35 UTC] [Profiler] Node.js(TTFB): 0ms | Total cURL: 1002.5ms
+[03-May-2026 14:40:35 UTC] apiRequest cURL Error (Node 1): Connection timed out after 1002 milliseconds
+[03-May-2026 14:40:35 UTC] 1
+[03-May-2026 14:40:36 UTC] [Profiler] Node.js(TTFB): 0ms | Total cURL: 1002.01ms
+[03-May-2026 14:40:36 UTC] apiRequest cURL Error (Node 1): Connection timed out after 1002 milliseconds
+[03-May-2026 14:40:36 UTC] 1
+[03-May-2026 14:40:37 UTC] [Profiler] Node.js(TTFB): 0ms | Total cURL: 1012.2ms
+[03-May-2026 14:40:37 UTC] apiRequest cURL Error (Node 1): Connection timed out after 1012 milliseconds
+[03-May-2026 14:40:38 UTC] 1
+[03-May-2026 14:40:39 UTC] [Profiler] Node.js(TTFB): 0ms | Total cURL: 1012.25ms
+[03-May-2026 14:40:39 UTC] apiRequest cURL Error (Node 1): Connection timed out after 1012 milliseconds
+[03-May-2026 14:40:39 UTC] 1
+[03-May-2026 14:40:40 UTC] [Profiler] Node.js(TTFB): 0ms | Total cURL: 1209.17ms
+[03-May-2026 14:40:40 UTC] apiRequest cURL Error (Node 1): Connection timed out after 1209 milliseconds
+[03-May-2026 14:40:40 UTC] 1
+[03-May-2026 14:40:41 UTC] [Profiler] Node.js(TTFB): 0ms | Total cURL: 1001.85ms
+[03-May-2026 14:40:41 UTC] apiRequest cURL Error (Node 1): Connection timed out after 1001 milliseconds
+[03-May-2026 14:40:41 UTC] 1
+[03-May-2026 14:40:42 UTC] [Profiler] Node.js(TTFB): 0ms | Total cURL: 1005.99ms
+[03-May-2026 14:40:42 UTC] apiRequest cURL Error (Node 1): Connection timed out after 1005 milliseconds
+[03-May-2026 14:40:54 UTC] 1
+[03-May-2026 14:40:55 UTC] [Profiler] Node.js(TTFB): 0ms | Total cURL: 1011.17ms
+[03-May-2026 14:40:55 UTC] apiRequest cURL Error (Node 1): Connection timed out after 1011 milliseconds
+[03-May-2026 14:40:55 UTC] 1
+[03-May-2026 14:40:56 UTC] [Profiler] Node.js(TTFB): 0ms | Total cURL: 1006.06ms
+[03-May-2026 14:40:56 UTC] apiRequest cURL Error (Node 1): Connection timed out after 1006 milliseconds
+[03-May-2026 14:40:56 UTC] 1
+[03-May-2026 14:40:57 UTC] [Profiler] Node.js(TTFB): 0ms | Total cURL: 1001.65ms
+[03-May-2026 14:40:57 UTC] apiRequest cURL Error (Node 1): Connection timed out after 1001 milliseconds
+[03-May-2026 14:40:57 UTC] 1
+[03-May-2026 14:40:58 UTC] [Profiler] Node.js(TTFB): 0ms | Total cURL: 1009.82ms
+[03-May-2026 14:40:58 UTC] apiRequest cURL Error (Node 1): Connection timed out after 1009 milliseconds
+[03-May-2026 14:40:59 UTC] 1
+[03-May-2026 14:41:00 UTC] [Profiler] Node.js(TTFB): 0ms | Total cURL: 1009.28ms
+[03-May-2026 14:41:00 UTC] apiRequest cURL Error (Node 1): Connection timed out after 1009 milliseconds
+[03-May-2026 14:41:00 UTC] 1
+[03-May-2026 14:41:01 UTC] [Profiler] Node.js(TTFB): 0ms | Total cURL: 1015.18ms
+[03-May-2026 14:41:01 UTC] apiRequest cURL Error (Node 1): Connection timed out after 1015 milliseconds
+[03-May-2026 14:41:01 UTC] 1
+[03-May-2026 14:41:02 UTC] [Profiler] Node.js(TTFB): 0ms | Total cURL: 1001.64ms
+[03-May-2026 14:41:02 UTC] apiRequest cURL Error (Node 1): Connection timed out after 1001 milliseconds
+[03-May-2026 14:41:02 UTC] 1
+[03-May-2026 14:41:03 UTC] [Profiler] Node.js(TTFB): 0ms | Total cURL: 1004.18ms
+[03-May-2026 14:41:03 UTC] apiRequest cURL Error (Node 1): Connection timed out after 1004 milliseconds
+[03-May-2026 14:42:10 UTC] 1
+[03-May-2026 14:42:11 UTC] [Profiler] Node.js(TTFB): 0ms | Total cURL: 1006.78ms
+[03-May-2026 14:42:11 UTC] apiRequest cURL Error (Node 1): Connection timed out after 1006 milliseconds
+[03-May-2026 14:42:11 UTC] 1
+[03-May-2026 14:42:12 UTC] [Profiler] Node.js(TTFB): 0ms | Total cURL: 1011.69ms
+[03-May-2026 14:42:12 UTC] apiRequest cURL Error (Node 1): Connection timed out after 1011 milliseconds
+[03-May-2026 14:42:12 UTC] 1
+[03-May-2026 14:42:13 UTC] [Profiler] Node.js(TTFB): 0ms | Total cURL: 1004.95ms
+[03-May-2026 14:42:13 UTC] apiRequest cURL Error (Node 1): Connection timed out after 1004 milliseconds
+[03-May-2026 14:42:13 UTC] 1
+[03-May-2026 14:42:14 UTC] [Profiler] Node.js(TTFB): 0ms | Total cURL: 1011.88ms
+[03-May-2026 14:42:14 UTC] apiRequest cURL Error (Node 1): Connection timed out after 1011 milliseconds
+[03-May-2026 14:42:16 UTC] 1
+[03-May-2026 14:42:17 UTC] [Profiler] Node.js(TTFB): 0ms | Total cURL: 1010.8ms
+[03-May-2026 14:42:17 UTC] apiRequest cURL Error (Node 1): Connection timed out after 1010 milliseconds
+[03-May-2026 14:42:17 UTC] 1
+[03-May-2026 14:42:18 UTC] [Profiler] Node.js(TTFB): 0ms | Total cURL: 1011.25ms
+[03-May-2026 14:42:18 UTC] apiRequest cURL Error (Node 1): Connection timed out after 1011 milliseconds
+[03-May-2026 14:42:18 UTC] 1
+[03-May-2026 14:42:19 UTC] [Profiler] Node.js(TTFB): 0ms | Total cURL: 1004.66ms
+[03-May-2026 14:42:19 UTC] apiRequest cURL Error (Node 1): Connection timed out after 1004 milliseconds
+[03-May-2026 14:42:19 UTC] 1
+[03-May-2026 14:42:20 UTC] [Profiler] Node.js(TTFB): 0ms | Total cURL: 1009.15ms
+[03-May-2026 14:42:20 UTC] apiRequest cURL Error (Node 1): Connection timed out after 1009 milliseconds
+[03-May-2026 14:43:29 UTC] 1
+[03-May-2026 14:43:29 UTC] [Profiler] Node.js(TTFB): 0ms | Total cURL: 202.39ms
+[03-May-2026 14:43:29 UTC] apiRequest cURL Error (Node 1): Connection timed out after 202 milliseconds
+[03-May-2026 14:43:29 UTC] 1
+[03-May-2026 14:43:29 UTC] [Profiler] Node.js(TTFB): 0ms | Total cURL: 204.2ms
+[03-May-2026 14:43:29 UTC] apiRequest cURL Error (Node 1): Connection timed out after 204 milliseconds
+[03-May-2026 14:43:29 UTC] 1
+[03-May-2026 14:43:29 UTC] [Profiler] Node.js(TTFB): 0ms | Total cURL: 205.3ms
+[03-May-2026 14:43:29 UTC] apiRequest cURL Error (Node 1): Connection timed out after 206 milliseconds
+[03-May-2026 14:43:29 UTC] 1
+[03-May-2026 14:43:30 UTC] [Profiler] Node.js(TTFB): 0ms | Total cURL: 205.89ms
+[03-May-2026 14:43:30 UTC] apiRequest cURL Error (Node 1): Connection timed out after 205 milliseconds
+[03-May-2026 14:43:59 UTC] 1
+[03-May-2026 14:43:59 UTC] [Profiler] Node.js(TTFB): 6.72ms | Total cURL: 7.2ms
+[03-May-2026 14:43:59 UTC] [sendAction Otimizado] PHP Payload: 0.22ms | cURL Node.js: 7.91ms | Total: 8.13ms
+[03-May-2026 14:44:02 UTC] 1
+[03-May-2026 14:44:02 UTC] [Profiler] Node.js(TTFB): 13.87ms | Total cURL: 14.51ms
+[03-May-2026 14:44:02 UTC] 1
+[03-May-2026 14:44:02 UTC] [Profiler] Node.js(TTFB): 13.48ms | Total cURL: 13.6ms
+[03-May-2026 14:44:02 UTC] 1
+[03-May-2026 14:44:02 UTC] [Profiler] Node.js(TTFB): 13.44ms | Total cURL: 14.05ms
+[03-May-2026 14:44:02 UTC] 1
+[03-May-2026 14:44:02 UTC] [Profiler] Node.js(TTFB): 12.46ms | Total cURL: 12.56ms
+[03-May-2026 14:44:05 UTC] 1
+[03-May-2026 14:44:05 UTC] [Profiler] Node.js(TTFB): 14.38ms | Total cURL: 14.97ms
+[03-May-2026 14:44:05 UTC] 1
+[03-May-2026 14:44:05 UTC] [Profiler] Node.js(TTFB): 11.84ms | Total cURL: 11.94ms
+[03-May-2026 14:44:05 UTC] 1
+[03-May-2026 14:44:05 UTC] [Profiler] Node.js(TTFB): 12.67ms | Total cURL: 13.29ms
+[03-May-2026 14:44:05 UTC] 1
+[03-May-2026 14:44:05 UTC] [Profiler] Node.js(TTFB): 11.81ms | Total cURL: 11.92ms
+[03-May-2026 14:44:08 UTC] 1
+[03-May-2026 14:44:08 UTC] [Profiler] Node.js(TTFB): 14.2ms | Total cURL: 14.92ms
+[03-May-2026 14:44:08 UTC] 1
+[03-May-2026 14:44:08 UTC] [Profiler] Node.js(TTFB): 13.24ms | Total cURL: 13.36ms
+[03-May-2026 14:44:08 UTC] 1
+[03-May-2026 14:44:08 UTC] [Profiler] Node.js(TTFB): 12.51ms | Total cURL: 13.06ms
+[03-May-2026 14:44:08 UTC] 1
+[03-May-2026 14:44:08 UTC] [Profiler] Node.js(TTFB): 13.11ms | Total cURL: 13.2ms
+[03-May-2026 14:44:53 UTC] 1
+[03-May-2026 14:44:53 UTC] [Profiler] Node.js(TTFB): 8.31ms | Total cURL: 8.7ms
+[03-May-2026 14:44:53 UTC] 1
+[03-May-2026 14:44:53 UTC] [Profiler] Node.js(TTFB): 7.48ms | Total cURL: 7.55ms
+[03-May-2026 14:44:53 UTC] 1
+[03-May-2026 14:44:53 UTC] [Profiler] Node.js(TTFB): 6.91ms | Total cURL: 7.29ms
+[03-May-2026 14:44:53 UTC] 1
+[03-May-2026 14:44:53 UTC] [Profiler] Node.js(TTFB): 11.68ms | Total cURL: 11.75ms
+[03-May-2026 14:45:18 UTC] 1
+[03-May-2026 14:45:18 UTC] [Profiler] Node.js(TTFB): 8.91ms | Total cURL: 9.32ms
+[03-May-2026 14:45:18 UTC] 1
+[03-May-2026 14:45:18 UTC] [Profiler] Node.js(TTFB): 6.93ms | Total cURL: 7.03ms
+[03-May-2026 14:45:18 UTC] 1
+[03-May-2026 14:45:18 UTC] [Profiler] Node.js(TTFB): 7.68ms | Total cURL: 8.03ms
+[03-May-2026 14:45:18 UTC] 1
+[03-May-2026 14:45:18 UTC] [Profiler] Node.js(TTFB): 10.55ms | Total cURL: 10.64ms
+[03-May-2026 14:45:49 UTC] 1
+[03-May-2026 14:45:49 UTC] [Profiler] Node.js(TTFB): 17.09ms | Total cURL: 17.64ms
+[03-May-2026 14:45:49 UTC] 1
+[03-May-2026 14:45:49 UTC] [Profiler] Node.js(TTFB): 11.29ms | Total cURL: 11.38ms
+[03-May-2026 14:45:49 UTC] 1
+[03-May-2026 14:45:49 UTC] [Profiler] Node.js(TTFB): 10.53ms | Total cURL: 11.12ms
+[03-May-2026 14:45:49 UTC] 1
+[03-May-2026 14:45:49 UTC] [Profiler] Node.js(TTFB): 10.25ms | Total cURL: 10.37ms
+[03-May-2026 14:47:07 UTC] 1
+[03-May-2026 14:47:08 UTC] [Profiler] Node.js(TTFB): -0.34ms | Total cURL: 511.35ms
+[03-May-2026 14:47:08 UTC] apiRequest cURL Error (Node 1): Operation timed out after 512 milliseconds with 0 bytes received
+[03-May-2026 14:47:08 UTC] 1
+[03-May-2026 14:47:08 UTC] [Profiler] Node.js(TTFB): -0.58ms | Total cURL: 501.33ms
+[03-May-2026 14:47:08 UTC] apiRequest cURL Error (Node 1): Operation timed out after 501 milliseconds with 0 bytes received
+[03-May-2026 14:47:08 UTC] 1
+[03-May-2026 14:47:08 UTC] [Profiler] Node.js(TTFB): 228.23ms | Total cURL: 228.58ms
+[03-May-2026 14:47:08 UTC] 1
+[03-May-2026 14:47:08 UTC] [Profiler] Node.js(TTFB): 6.55ms | Total cURL: 6.63ms
+[03-May-2026 14:47:12 UTC] 1
+[03-May-2026 14:47:12 UTC] [Profiler] Node.js(TTFB): 11.92ms | Total cURL: 12.47ms
+[03-May-2026 14:47:12 UTC] 1
+[03-May-2026 14:47:12 UTC] [Profiler] Node.js(TTFB): 10.56ms | Total cURL: 10.66ms
+[03-May-2026 14:47:12 UTC] 1
+[03-May-2026 14:47:12 UTC] [Profiler] Node.js(TTFB): 11ms | Total cURL: 11.51ms
+[03-May-2026 14:47:12 UTC] 1
+[03-May-2026 14:47:12 UTC] [Profiler] Node.js(TTFB): 16.64ms | Total cURL: 16.76ms
+[03-May-2026 14:47:14 UTC] 1
+[03-May-2026 14:47:14 UTC] [Profiler] Node.js(TTFB): 11.45ms | Total cURL: 11.99ms
+[03-May-2026 14:47:14 UTC] 1
+[03-May-2026 14:47:14 UTC] [Profiler] Node.js(TTFB): 10.46ms | Total cURL: 10.55ms
+[03-May-2026 14:47:14 UTC] 1
+[03-May-2026 14:47:14 UTC] [Profiler] Node.js(TTFB): 10.85ms | Total cURL: 11.42ms
+[03-May-2026 14:47:14 UTC] 1
+[03-May-2026 14:47:14 UTC] [Profiler] Node.js(TTFB): 10.1ms | Total cURL: 10.2ms
+[03-May-2026 14:48:43 UTC] 1
+[03-May-2026 14:48:43 UTC] [Profiler] Node.js(TTFB): 16.77ms | Total cURL: 17.35ms
+[03-May-2026 14:48:43 UTC] 1
+[03-May-2026 14:48:43 UTC] [Profiler] Node.js(TTFB): 10.57ms | Total cURL: 10.67ms
+[03-May-2026 14:48:43 UTC] 1
+[03-May-2026 14:48:43 UTC] [Profiler] Node.js(TTFB): 11.09ms | Total cURL: 11.76ms
+[03-May-2026 14:48:43 UTC] 1
+[03-May-2026 14:48:43 UTC] [Profiler] Node.js(TTFB): 11.52ms | Total cURL: 11.62ms
+[03-May-2026 14:49:13 UTC] 1
+[03-May-2026 14:49:13 UTC] [Profiler] Node.js(TTFB): 12.33ms | Total cURL: 12.92ms
+[03-May-2026 14:49:13 UTC] 1
+[03-May-2026 14:49:13 UTC] [Profiler] Node.js(TTFB): 11.16ms | Total cURL: 11.28ms
+[03-May-2026 14:49:13 UTC] 1
+[03-May-2026 14:49:13 UTC] [Profiler] Node.js(TTFB): 12.25ms | Total cURL: 12.85ms
+[03-May-2026 14:49:13 UTC] 1
+[03-May-2026 14:49:13 UTC] [Profiler] Node.js(TTFB): 10.95ms | Total cURL: 11.06ms
+[03-May-2026 14:49:17 UTC] 1
+[03-May-2026 14:49:17 UTC] [Profiler] Node.js(TTFB): 11.75ms | Total cURL: 12.3ms
+[03-May-2026 14:49:17 UTC] 1
+[03-May-2026 14:49:17 UTC] [Profiler] Node.js(TTFB): 14.78ms | Total cURL: 14.88ms
+[03-May-2026 14:49:17 UTC] 1
+[03-May-2026 14:49:17 UTC] [Profiler] Node.js(TTFB): 11.2ms | Total cURL: 11.73ms
+[03-May-2026 14:49:17 UTC] 1
+[03-May-2026 14:49:17 UTC] [Profiler] Node.js(TTFB): 10.11ms | Total cURL: 10.2ms
+[03-May-2026 14:50:30 UTC] 1
+[03-May-2026 14:50:30 UTC] [Profiler] Node.js(TTFB): 45.67ms | Total cURL: 47.06ms
+[03-May-2026 14:50:30 UTC] 1
+[03-May-2026 14:50:30 UTC] [Profiler] Node.js(TTFB): 6.37ms | Total cURL: 6.44ms
+[03-May-2026 14:50:30 UTC] 1
+[03-May-2026 14:50:30 UTC] [Profiler] Node.js(TTFB): 9.1ms | Total cURL: 9.44ms
+[03-May-2026 14:50:30 UTC] 1
+[03-May-2026 14:50:30 UTC] [Profiler] Node.js(TTFB): 6.05ms | Total cURL: 6.11ms
+[03-May-2026 14:50:35 UTC] 1
+[03-May-2026 14:50:35 UTC] [Profiler] Node.js(TTFB): 10.95ms | Total cURL: 11.42ms
+[03-May-2026 14:50:35 UTC] 1
+[03-May-2026 14:50:35 UTC] [Profiler] Node.js(TTFB): 9.48ms | Total cURL: 9.57ms
+[03-May-2026 14:50:35 UTC] 1
+[03-May-2026 14:50:35 UTC] [Profiler] Node.js(TTFB): 11.29ms | Total cURL: 12.02ms
+[03-May-2026 14:50:35 UTC] 1
+[03-May-2026 14:50:35 UTC] [Profiler] Node.js(TTFB): 10.11ms | Total cURL: 10.21ms
+[03-May-2026 14:50:38 UTC] 1
+[03-May-2026 14:50:38 UTC] [Profiler] Node.js(TTFB): 16.34ms | Total cURL: 16.78ms
+[03-May-2026 14:50:38 UTC] 1
+[03-May-2026 14:50:38 UTC] [Profiler] Node.js(TTFB): 10.33ms | Total cURL: 10.42ms
+[03-May-2026 14:50:38 UTC] 1
+[03-May-2026 14:50:38 UTC] [Profiler] Node.js(TTFB): 10.45ms | Total cURL: 10.9ms
+[03-May-2026 14:50:38 UTC] 1
+[03-May-2026 14:50:38 UTC] [Profiler] Node.js(TTFB): 9.96ms | Total cURL: 10.06ms
+[03-May-2026 14:50:57 UTC] 1
+[03-May-2026 14:50:57 UTC] [Profiler] Node.js(TTFB): 9.15ms | Total cURL: 9.55ms
+[03-May-2026 14:50:57 UTC] 1
+[03-May-2026 14:50:57 UTC] [Profiler] Node.js(TTFB): 7.77ms | Total cURL: 7.85ms
+[03-May-2026 14:50:57 UTC] 1
+[03-May-2026 14:50:57 UTC] [Profiler] Node.js(TTFB): 13.07ms | Total cURL: 13.65ms
+[03-May-2026 14:50:57 UTC] 1
+[03-May-2026 14:50:57 UTC] [Profiler] Node.js(TTFB): 46.81ms | Total cURL: 46.91ms
+[03-May-2026 14:50:59 UTC] 1
+[03-May-2026 14:50:59 UTC] [Profiler] Node.js(TTFB): 7.76ms | Total cURL: 8.3ms
+[03-May-2026 14:50:59 UTC] 1
+[03-May-2026 14:50:59 UTC] [Profiler] Node.js(TTFB): 6.98ms | Total cURL: 7.06ms
+[03-May-2026 14:50:59 UTC] 1
+[03-May-2026 14:50:59 UTC] [Profiler] Node.js(TTFB): 6.93ms | Total cURL: 7.36ms
+[03-May-2026 14:50:59 UTC] 1
+[03-May-2026 14:50:59 UTC] [Profiler] Node.js(TTFB): 6.35ms | Total cURL: 6.43ms
+[03-May-2026 14:51:09 UTC] 1
+[03-May-2026 14:51:09 UTC] [Profiler] Node.js(TTFB): 7.67ms | Total cURL: 8.02ms
+[03-May-2026 14:51:09 UTC] 1
+[03-May-2026 14:51:09 UTC] [Profiler] Node.js(TTFB): 6.86ms | Total cURL: 6.93ms
+[03-May-2026 14:51:09 UTC] 1
+[03-May-2026 14:51:09 UTC] [Profiler] Node.js(TTFB): 7.41ms | Total cURL: 7.75ms
+[03-May-2026 14:51:09 UTC] 1
+[03-May-2026 14:51:09 UTC] [Profiler] Node.js(TTFB): 11.72ms | Total cURL: 11.79ms
+[03-May-2026 14:51:29 UTC] 1
+[03-May-2026 14:51:29 UTC] [Profiler] Node.js(TTFB): 7.91ms | Total cURL: 8.33ms
+[03-May-2026 14:51:29 UTC] 1
+[03-May-2026 14:51:29 UTC] [Profiler] Node.js(TTFB): 7.45ms | Total cURL: 7.52ms
+[03-May-2026 14:51:29 UTC] 1
+[03-May-2026 14:51:29 UTC] [Profiler] Node.js(TTFB): 7.05ms | Total cURL: 7.39ms
+[03-May-2026 14:51:29 UTC] 1
+[03-May-2026 14:51:29 UTC] [Profiler] Node.js(TTFB): 7.32ms | Total cURL: 7.38ms
+[03-May-2026 14:51:31 UTC] 1
+[03-May-2026 14:51:31 UTC] [Profiler] Node.js(TTFB): 7.17ms | Total cURL: 7.61ms
+[03-May-2026 14:51:31 UTC] 1
+[03-May-2026 14:51:31 UTC] [Profiler] Node.js(TTFB): 6.36ms | Total cURL: 6.43ms
+[03-May-2026 14:51:31 UTC] 1
+[03-May-2026 14:51:31 UTC] [Profiler] Node.js(TTFB): 6.89ms | Total cURL: 7.44ms
+[03-May-2026 14:51:31 UTC] 1
+[03-May-2026 14:51:31 UTC] [Profiler] Node.js(TTFB): 5.98ms | Total cURL: 6.05ms
+[03-May-2026 14:51:32 UTC] 1
+[03-May-2026 14:51:32 UTC] [Profiler] Node.js(TTFB): 10.05ms | Total cURL: 13.41ms
+[03-May-2026 14:51:32 UTC] 1
+[03-May-2026 14:51:32 UTC] [Profiler] Node.js(TTFB): 9.9ms | Total cURL: 9.99ms
+[03-May-2026 14:51:32 UTC] 1
+[03-May-2026 14:51:32 UTC] [Profiler] Node.js(TTFB): 10.95ms | Total cURL: 11.38ms
+[03-May-2026 14:51:32 UTC] 1
+[03-May-2026 14:51:32 UTC] [Profiler] Node.js(TTFB): 9.06ms | Total cURL: 9.15ms
+[03-May-2026 14:51:34 UTC] 1
+[03-May-2026 14:51:34 UTC] [Profiler] Node.js(TTFB): 11.36ms | Total cURL: 11.87ms
+[03-May-2026 14:51:34 UTC] 1
+[03-May-2026 14:51:34 UTC] [Profiler] Node.js(TTFB): 10.62ms | Total cURL: 10.71ms
+[03-May-2026 14:51:34 UTC] 1
+[03-May-2026 14:51:34 UTC] [Profiler] Node.js(TTFB): 9.86ms | Total cURL: 10.36ms
+[03-May-2026 14:51:34 UTC] 1
+[03-May-2026 14:51:34 UTC] [Profiler] Node.js(TTFB): 10.94ms | Total cURL: 11.04ms
+[03-May-2026 14:51:35 UTC] 1
+[03-May-2026 14:51:35 UTC] [Profiler] Node.js(TTFB): 10.13ms | Total cURL: 10.9ms
+[03-May-2026 14:51:35 UTC] 1
+[03-May-2026 14:51:35 UTC] [Profiler] Node.js(TTFB): 10.16ms | Total cURL: 10.26ms
+[03-May-2026 14:51:35 UTC] 1
+[03-May-2026 14:51:35 UTC] [Profiler] Node.js(TTFB): 10.84ms | Total cURL: 11.37ms
+[03-May-2026 14:51:35 UTC] 1
+[03-May-2026 14:51:35 UTC] [Profiler] Node.js(TTFB): 9.06ms | Total cURL: 9.15ms
+[03-May-2026 14:52:31 UTC] 1
+[03-May-2026 14:52:31 UTC] [Profiler] Node.js(TTFB): 10.1ms | Total cURL: 11.18ms
+[03-May-2026 14:52:31 UTC] 1
+[03-May-2026 14:52:31 UTC] [Profiler] Node.js(TTFB): 5.97ms | Total cURL: 6.05ms
+[03-May-2026 14:52:31 UTC] 1
+[03-May-2026 14:52:31 UTC] [Profiler] Node.js(TTFB): 7.57ms | Total cURL: 8.14ms
+[03-May-2026 14:52:31 UTC] 1
+[03-May-2026 14:52:31 UTC] [Profiler] Node.js(TTFB): 6.83ms | Total cURL: 6.9ms
+[03-May-2026 14:52:32 UTC] 1
+[03-May-2026 14:52:32 UTC] [Profiler] Node.js(TTFB): 11.66ms | Total cURL: 12.18ms
+[03-May-2026 14:52:32 UTC] 1
+[03-May-2026 14:52:32 UTC] [Profiler] Node.js(TTFB): 16.75ms | Total cURL: 16.84ms
+[03-May-2026 14:52:32 UTC] 1
+[03-May-2026 14:52:32 UTC] [Profiler] Node.js(TTFB): 11.22ms | Total cURL: 11.69ms
+[03-May-2026 14:52:32 UTC] 1
+[03-May-2026 14:52:32 UTC] [Profiler] Node.js(TTFB): 9.47ms | Total cURL: 9.56ms
+[03-May-2026 14:52:34 UTC] 1
+[03-May-2026 14:52:34 UTC] [Profiler] Node.js(TTFB): 12.46ms | Total cURL: 13.29ms
+[03-May-2026 14:52:34 UTC] 1
+[03-May-2026 14:52:34 UTC] [Profiler] Node.js(TTFB): 11.53ms | Total cURL: 11.62ms
+[03-May-2026 14:52:34 UTC] 1
+[03-May-2026 14:52:34 UTC] [Profiler] Node.js(TTFB): 9.88ms | Total cURL: 10.46ms
+[03-May-2026 14:52:34 UTC] 1
+[03-May-2026 14:52:34 UTC] [Profiler] Node.js(TTFB): 8.92ms | Total cURL: 9.02ms
+[03-May-2026 14:52:35 UTC] 1
+[03-May-2026 14:52:35 UTC] [Profiler] Node.js(TTFB): 10.05ms | Total cURL: 10.57ms
+[03-May-2026 14:52:35 UTC] 1
+[03-May-2026 14:52:35 UTC] [Profiler] Node.js(TTFB): 9.8ms | Total cURL: 9.9ms
+[03-May-2026 14:52:35 UTC] 1
+[03-May-2026 14:52:35 UTC] [Profiler] Node.js(TTFB): 10.82ms | Total cURL: 11.52ms
+[03-May-2026 14:52:35 UTC] 1
+[03-May-2026 14:52:35 UTC] [Profiler] Node.js(TTFB): 9.05ms | Total cURL: 9.15ms
+[03-May-2026 14:52:37 UTC] 1
+[03-May-2026 14:52:37 UTC] [Profiler] Node.js(TTFB): 10.35ms | Total cURL: 10.88ms
+[03-May-2026 14:52:37 UTC] 1
+[03-May-2026 14:52:37 UTC] [Profiler] Node.js(TTFB): 10.99ms | Total cURL: 11.09ms
+[03-May-2026 14:52:37 UTC] 1
+[03-May-2026 14:52:37 UTC] [Profiler] Node.js(TTFB): 10.81ms | Total cURL: 11.31ms
+[03-May-2026 14:52:37 UTC] 1
+[03-May-2026 14:52:37 UTC] [Profiler] Node.js(TTFB): 9.31ms | Total cURL: 9.42ms
+[03-May-2026 14:52:38 UTC] 1
+[03-May-2026 14:52:38 UTC] [Profiler] Node.js(TTFB): 10.49ms | Total cURL: 11ms
+[03-May-2026 14:52:38 UTC] 1
+[03-May-2026 14:52:38 UTC] [Profiler] Node.js(TTFB): 10.16ms | Total cURL: 10.25ms
+[03-May-2026 14:52:38 UTC] 1
+[03-May-2026 14:52:38 UTC] [Profiler] Node.js(TTFB): 11.15ms | Total cURL: 11.76ms
+[03-May-2026 14:52:38 UTC] 1
+[03-May-2026 14:52:38 UTC] [Profiler] Node.js(TTFB): 9.55ms | Total cURL: 9.64ms
+[03-May-2026 14:52:40 UTC] 1
+[03-May-2026 14:52:41 UTC] [Profiler] Node.js(TTFB): 253.21ms | Total cURL: 253.7ms
+[03-May-2026 14:52:41 UTC] 1
+[03-May-2026 14:52:41 UTC] [Profiler] Node.js(TTFB): 9.72ms | Total cURL: 9.81ms
+[03-May-2026 14:52:41 UTC] 1
+[03-May-2026 14:52:41 UTC] [Profiler] Node.js(TTFB): 11.6ms | Total cURL: 12.12ms
+[03-May-2026 14:52:41 UTC] 1
+[03-May-2026 14:52:41 UTC] [Profiler] Node.js(TTFB): 10.19ms | Total cURL: 10.28ms
+[03-May-2026 14:52:45 UTC] 1
+[03-May-2026 14:52:45 UTC] [Profiler] Node.js(TTFB): 12.84ms | Total cURL: 13.38ms
+[03-May-2026 14:52:45 UTC] 1
+[03-May-2026 14:52:45 UTC] [Profiler] Node.js(TTFB): 12.16ms | Total cURL: 12.26ms
+[03-May-2026 14:52:45 UTC] 1
+[03-May-2026 14:52:45 UTC] [Profiler] Node.js(TTFB): 11.58ms | Total cURL: 12.18ms
+[03-May-2026 14:52:45 UTC] 1
+[03-May-2026 14:52:45 UTC] [Profiler] Node.js(TTFB): 9.94ms | Total cURL: 10.05ms
+[03-May-2026 14:52:48 UTC] 1
+[03-May-2026 14:52:48 UTC] [Profiler] Node.js(TTFB): 12.07ms | Total cURL: 12.57ms
+[03-May-2026 14:52:48 UTC] 1
+[03-May-2026 14:52:48 UTC] [Profiler] Node.js(TTFB): 9.57ms | Total cURL: 9.66ms
+[03-May-2026 14:52:48 UTC] 1
+[03-May-2026 14:52:48 UTC] [Profiler] Node.js(TTFB): 11.45ms | Total cURL: 12ms
+[03-May-2026 14:52:48 UTC] 1
+[03-May-2026 14:52:48 UTC] [Profiler] Node.js(TTFB): 10.52ms | Total cURL: 10.64ms
+[03-May-2026 14:53:11 UTC] 1
+[03-May-2026 14:53:11 UTC] [Profiler] Node.js(TTFB): 11.63ms | Total cURL: 12.19ms
+[03-May-2026 14:53:11 UTC] 1
+[03-May-2026 14:53:11 UTC] [Profiler] Node.js(TTFB): 9.42ms | Total cURL: 9.51ms
+[03-May-2026 14:53:11 UTC] 1
+[03-May-2026 14:53:11 UTC] [Profiler] Node.js(TTFB): 11.51ms | Total cURL: 11.97ms
+[03-May-2026 14:53:11 UTC] 1
+[03-May-2026 14:53:11 UTC] [Profiler] Node.js(TTFB): 9.26ms | Total cURL: 9.34ms
+[03-May-2026 14:56:23 UTC] 1
+[03-May-2026 14:56:23 UTC] [Profiler] Node.js(TTFB): 13.53ms | Total cURL: 14.06ms
+[03-May-2026 14:56:23 UTC] 1
+[03-May-2026 14:56:23 UTC] [Profiler] Node.js(TTFB): 10.16ms | Total cURL: 10.26ms
+[03-May-2026 14:56:23 UTC] 1
+[03-May-2026 14:56:23 UTC] [Profiler] Node.js(TTFB): 10.8ms | Total cURL: 11.3ms
+[03-May-2026 14:56:23 UTC] 1
+[03-May-2026 14:56:23 UTC] [Profiler] Node.js(TTFB): 9.51ms | Total cURL: 9.61ms
+[03-May-2026 14:56:36 UTC] 1
+[03-May-2026 14:56:36 UTC] [Profiler] Node.js(TTFB): 15.67ms | Total cURL: 16.17ms
+[03-May-2026 14:56:36 UTC] 1
+[03-May-2026 14:56:36 UTC] [Profiler] Node.js(TTFB): 9.96ms | Total cURL: 10.05ms
+[03-May-2026 14:56:36 UTC] 1
+[03-May-2026 14:56:36 UTC] [Profiler] Node.js(TTFB): 10.79ms | Total cURL: 11.26ms
+[03-May-2026 14:56:36 UTC] 1
+[03-May-2026 14:56:36 UTC] [Profiler] Node.js(TTFB): 9.51ms | Total cURL: 9.61ms
+[03-May-2026 14:57:24 UTC] 1
+[03-May-2026 14:57:24 UTC] [Profiler] Node.js(TTFB): 12.95ms | Total cURL: 13.42ms
+[03-May-2026 14:57:24 UTC] 1
+[03-May-2026 14:57:24 UTC] [Profiler] Node.js(TTFB): 5.85ms | Total cURL: 5.91ms
+[03-May-2026 14:57:24 UTC] 1
+[03-May-2026 14:57:24 UTC] [Profiler] Node.js(TTFB): 6.39ms | Total cURL: 30.41ms
+[03-May-2026 14:57:24 UTC] 1
+[03-May-2026 14:57:24 UTC] [Profiler] Node.js(TTFB): 6.81ms | Total cURL: 6.88ms
+[03-May-2026 15:00:29 UTC] 1
+[03-May-2026 15:00:29 UTC] [Profiler] Node.js(TTFB): 10.68ms | Total cURL: 11.04ms
+[03-May-2026 15:00:29 UTC] 1
+[03-May-2026 15:00:29 UTC] [Profiler] Node.js(TTFB): 9.49ms | Total cURL: 9.6ms
+[03-May-2026 15:00:29 UTC] 1
+[03-May-2026 15:00:29 UTC] [Profiler] Node.js(TTFB): 8.33ms | Total cURL: 8.68ms
+[03-May-2026 15:00:29 UTC] 1
+[03-May-2026 15:00:29 UTC] [Profiler] Node.js(TTFB): 6.45ms | Total cURL: 6.52ms
+[03-May-2026 15:00:36 UTC] 1
+[03-May-2026 15:00:36 UTC] [Profiler] Node.js(TTFB): 12.22ms | Total cURL: 13.19ms
+[03-May-2026 15:00:36 UTC] 1
+[03-May-2026 15:00:36 UTC] [Profiler] Node.js(TTFB): 9.41ms | Total cURL: 9.52ms
+[03-May-2026 15:00:36 UTC] 1
+[03-May-2026 15:00:36 UTC] [Profiler] Node.js(TTFB): 11.23ms | Total cURL: 11.73ms
+[03-May-2026 15:00:36 UTC] 1
+[03-May-2026 15:00:36 UTC] [Profiler] Node.js(TTFB): 9.6ms | Total cURL: 9.69ms
+[03-May-2026 15:01:37 UTC] 1
+[03-May-2026 15:01:37 UTC] [Profiler] Node.js(TTFB): 8.05ms | Total cURL: 8.43ms
+[03-May-2026 15:01:37 UTC] 1
+[03-May-2026 15:01:37 UTC] [Profiler] Node.js(TTFB): 7.11ms | Total cURL: 7.19ms
+[03-May-2026 15:01:37 UTC] 1
+[03-May-2026 15:01:37 UTC] [Profiler] Node.js(TTFB): 7.8ms | Total cURL: 8.15ms
+[03-May-2026 15:01:37 UTC] 1
+[03-May-2026 15:01:37 UTC] [Profiler] Node.js(TTFB): 7.57ms | Total cURL: 7.64ms
+[03-May-2026 15:02:05 UTC] 1
+[03-May-2026 15:02:06 UTC] [Profiler] Node.js(TTFB): 12.73ms | Total cURL: 31.4ms
+[03-May-2026 15:02:06 UTC] 1
+[03-May-2026 15:02:06 UTC] [Profiler] Node.js(TTFB): 13.47ms | Total cURL: 13.56ms
+[03-May-2026 15:02:06 UTC] 1
+[03-May-2026 15:02:06 UTC] [Profiler] Node.js(TTFB): 13.01ms | Total cURL: 13.7ms
+[03-May-2026 15:02:06 UTC] 1
+[03-May-2026 15:02:06 UTC] [Profiler] Node.js(TTFB): 10.45ms | Total cURL: 10.54ms
+[03-May-2026 15:02:43 UTC] 1
+[03-May-2026 15:02:43 UTC] [Profiler] Node.js(TTFB): 2.25ms | Total cURL: 14.73ms
+[03-May-2026 15:02:43 UTC] [sendAction Otimizado] PHP Payload: 0.1ms | cURL Node.js: 15.79ms | Total: 15.89ms
+[03-May-2026 15:03:37 UTC] 1
+[03-May-2026 15:03:37 UTC] [Profiler] Node.js(TTFB): 14.24ms | Total cURL: 36.02ms
+[03-May-2026 15:03:37 UTC] 1
+[03-May-2026 15:03:37 UTC] [Profiler] Node.js(TTFB): 20.06ms | Total cURL: 20.17ms
+[03-May-2026 15:03:37 UTC] 1
+[03-May-2026 15:03:37 UTC] [Profiler] Node.js(TTFB): 12.39ms | Total cURL: 13.27ms
+[03-May-2026 15:03:37 UTC] 1
+[03-May-2026 15:03:37 UTC] [Profiler] Node.js(TTFB): 10.82ms | Total cURL: 10.91ms
+[03-May-2026 15:03:56 UTC] 1
+[03-May-2026 15:03:56 UTC] [Profiler] Node.js(TTFB): 12.51ms | Total cURL: 13.02ms
+[03-May-2026 15:03:56 UTC] 1
+[03-May-2026 15:03:56 UTC] [Profiler] Node.js(TTFB): 22.25ms | Total cURL: 22.35ms
+[03-May-2026 15:03:56 UTC] 1
+[03-May-2026 15:03:56 UTC] [Profiler] Node.js(TTFB): 11.13ms | Total cURL: 11.63ms
+[03-May-2026 15:03:56 UTC] 1
+[03-May-2026 15:03:56 UTC] [Profiler] Node.js(TTFB): 11.85ms | Total cURL: 11.95ms
+[03-May-2026 15:04:04 UTC] 1
+[03-May-2026 15:04:04 UTC] [Profiler] Node.js(TTFB): 4.42ms | Total cURL: 4.99ms
+[03-May-2026 15:04:04 UTC] [sendAction Otimizado] PHP Payload: 0.22ms | cURL Node.js: 5.84ms | Total: 6.05ms
+[03-May-2026 15:05:24 UTC] 1
+[03-May-2026 15:05:24 UTC] [Profiler] Node.js(TTFB): 3.34ms | Total cURL: 4.11ms
+[03-May-2026 15:05:24 UTC] [sendAction Otimizado] PHP Payload: 0.08ms | cURL Node.js: 6.37ms | Total: 6.45ms
+[03-May-2026 15:05:52 UTC] 1
+[03-May-2026 15:05:52 UTC] [Profiler] Node.js(TTFB): 10.65ms | Total cURL: 11.01ms
+[03-May-2026 15:05:52 UTC] 1
+[03-May-2026 15:05:52 UTC] [Profiler] Node.js(TTFB): 5.99ms | Total cURL: 6.08ms
+[03-May-2026 15:05:52 UTC] 1
+[03-May-2026 15:05:52 UTC] [Profiler] Node.js(TTFB): 6.82ms | Total cURL: 23.02ms
+[03-May-2026 15:05:52 UTC] 1
+[03-May-2026 15:05:52 UTC] [Profiler] Node.js(TTFB): 16.6ms | Total cURL: 16.68ms
+[03-May-2026 15:05:59 UTC] 1
+[03-May-2026 15:05:59 UTC] [Profiler] Node.js(TTFB): 42.67ms | Total cURL: 43.61ms
+[03-May-2026 15:05:59 UTC] [sendAction Otimizado] PHP Payload: 0.11ms | cURL Node.js: 44.26ms | Total: 44.36ms
+[03-May-2026 15:11:26 UTC] 1
+[03-May-2026 15:11:26 UTC] [Profiler] Node.js(TTFB): 2.91ms | Total cURL: 3.27ms
+[03-May-2026 15:11:26 UTC] [sendAction Otimizado] PHP Payload: 0.04ms | cURL Node.js: 3.95ms | Total: 3.99ms
+[03-May-2026 15:11:46 UTC] 1
+[03-May-2026 15:11:46 UTC] [Profiler] Node.js(TTFB): 2.28ms | Total cURL: 2.77ms
+[03-May-2026 15:11:46 UTC] [sendAction Otimizado] PHP Payload: 0.11ms | cURL Node.js: 3.36ms | Total: 3.47ms
+[03-May-2026 15:15:26 UTC] 1
+[03-May-2026 15:15:26 UTC] [Profiler] Node.js(TTFB): 6.67ms | Total cURL: 7.4ms
+[03-May-2026 15:15:26 UTC] [sendAction Otimizado] PHP Payload: 0.36ms | cURL Node.js: 8.29ms | Total: 8.66ms
+[03-May-2026 15:19:29 UTC] 1
+[03-May-2026 15:19:30 UTC] [Profiler] Node.js(TTFB): -0.31ms | Total cURL: 512.18ms
+[03-May-2026 15:19:30 UTC] apiRequest cURL Error (Node 1): Operation timed out after 513 milliseconds with 0 bytes received
+[03-May-2026 15:19:30 UTC] [sendAction Otimizado] PHP Payload: 0.06ms | cURL Node.js: 513.99ms | Total: 514.05ms
+[03-May-2026 15:21:33 UTC] PHP Deprecated:  Rakit\Validation\Attribute::getValue(): Implicitly marking parameter $key as nullable is deprecated, the explicit nullable type must be used instead in E:\hightcloud\example_client\vendor\rakit\validation\src\Attribute.php on line 214
+[03-May-2026 15:21:33 UTC] PHP Deprecated:  Rakit\Validation\Helper::join(): Implicitly marking parameter $lastSeparator as nullable is deprecated, the explicit nullable type must be used instead in E:\hightcloud\example_client\vendor\rakit\validation\src\Helper.php on line 222
+[03-May-2026 15:21:33 UTC] PHP Deprecated:  Rakit\Validation\Helper::wraps(): Implicitly marking parameter $suffix as nullable is deprecated, the explicit nullable type must be used instead in E:\hightcloud\example_client\vendor\rakit\validation\src\Helper.php on line 248
+[03-May-2026 15:21:43 UTC] 1
+[03-May-2026 15:21:43 UTC] [Profiler] Node.js(TTFB): 4.88ms | Total cURL: 30.11ms
+[03-May-2026 15:21:43 UTC] [sendAction Otimizado] PHP Payload: 0.19ms | cURL Node.js: 30.82ms | Total: 31.01ms
+[03-May-2026 15:22:04 UTC] 1
+[03-May-2026 15:22:04 UTC] [Profiler] Node.js(TTFB): 3.98ms | Total cURL: 4.5ms
+[03-May-2026 15:22:04 UTC] [sendAction Otimizado] PHP Payload: 0.28ms | cURL Node.js: 5.22ms | Total: 5.51ms
+[03-May-2026 18:01:42 UTC] 1
+[03-May-2026 18:01:42 UTC] [Profiler] Node.js(TTFB): 14.96ms | Total cURL: 15.52ms
+[03-May-2026 18:01:42 UTC] 1
+[03-May-2026 18:01:42 UTC] [Profiler] Node.js(TTFB): 11.16ms | Total cURL: 11.27ms
+[03-May-2026 18:01:42 UTC] 1
+[03-May-2026 18:01:42 UTC] [Profiler] Node.js(TTFB): 12.61ms | Total cURL: 13.12ms
+[03-May-2026 18:01:42 UTC] 1
+[03-May-2026 18:01:42 UTC] [Profiler] Node.js(TTFB): 10.73ms | Total cURL: 10.82ms
+[03-May-2026 18:03:07 UTC] 1
+[03-May-2026 18:03:07 UTC] [Profiler] Node.js(TTFB): 11.14ms | Total cURL: 11.52ms
+[03-May-2026 18:03:07 UTC] 1
+[03-May-2026 18:03:07 UTC] [Profiler] Node.js(TTFB): 7.23ms | Total cURL: 7.3ms
+[03-May-2026 18:03:07 UTC] 1
+[03-May-2026 18:03:07 UTC] [Profiler] Node.js(TTFB): 7.48ms | Total cURL: 7.92ms
+[03-May-2026 18:03:07 UTC] 1
+[03-May-2026 18:03:07 UTC] [Profiler] Node.js(TTFB): 7.75ms | Total cURL: 7.82ms
+[03-May-2026 18:03:40 UTC] 1
+[03-May-2026 18:03:40 UTC] [Profiler] Node.js(TTFB): 10ms | Total cURL: 10.72ms
+[03-May-2026 18:03:40 UTC] 1
+[03-May-2026 18:03:40 UTC] [Profiler] Node.js(TTFB): 8.71ms | Total cURL: 8.81ms
+[03-May-2026 18:03:40 UTC] 1
+[03-May-2026 18:03:40 UTC] [Profiler] Node.js(TTFB): 6.56ms | Total cURL: 6.97ms
+[03-May-2026 18:03:40 UTC] 1
+[03-May-2026 18:03:40 UTC] [Profiler] Node.js(TTFB): 6.88ms | Total cURL: 6.96ms
+[03-May-2026 18:26:55 UTC] 1
+[03-May-2026 18:26:55 UTC] [Profiler] Node.js(TTFB): 13.92ms | Total cURL: 34.83ms
+[03-May-2026 18:26:55 UTC] 1
+[03-May-2026 18:26:55 UTC] [Profiler] Node.js(TTFB): 10.71ms | Total cURL: 10.8ms
+[03-May-2026 18:26:55 UTC] 1
+[03-May-2026 18:26:55 UTC] [Profiler] Node.js(TTFB): 12.33ms | Total cURL: 12.77ms
+[03-May-2026 18:26:55 UTC] 1
+[03-May-2026 18:26:55 UTC] [Profiler] Node.js(TTFB): 9.16ms | Total cURL: 9.25ms
+[03-May-2026 18:45:05 UTC] 1
+[03-May-2026 18:45:05 UTC] [Profiler] Node.js(TTFB): 4.17ms | Total cURL: 4.64ms
+[03-May-2026 18:45:05 UTC] [sendAction Otimizado] PHP Payload: 0.2ms | cURL Node.js: 5.53ms | Total: 5.72ms
+[03-May-2026 18:45:17 UTC] 1
+[03-May-2026 18:45:17 UTC] [Profiler] Node.js(TTFB): 14.99ms | Total cURL: 15.44ms
+[03-May-2026 18:45:17 UTC] 1
+[03-May-2026 18:45:17 UTC] [Profiler] Node.js(TTFB): 10.82ms | Total cURL: 10.91ms
+[03-May-2026 18:45:17 UTC] 1
+[03-May-2026 18:45:17 UTC] [Profiler] Node.js(TTFB): 11.39ms | Total cURL: 11.83ms
+[03-May-2026 18:45:17 UTC] 1
+[03-May-2026 18:45:17 UTC] [Profiler] Node.js(TTFB): 9.4ms | Total cURL: 9.49ms
+[03-May-2026 18:45:22 UTC] 1
+[03-May-2026 18:45:23 UTC] [Profiler] Node.js(TTFB): -0.54ms | Total cURL: 513.85ms
+[03-May-2026 18:45:23 UTC] apiRequest cURL Error (Node 1): Operation timed out after 514 milliseconds with 0 bytes received
+[03-May-2026 18:45:23 UTC] [sendAction Otimizado] PHP Payload: 0.09ms | cURL Node.js: 515.19ms | Total: 515.28ms
+[03-May-2026 18:45:42 UTC] 1
+[03-May-2026 18:45:42 UTC] [Profiler] Node.js(TTFB): 2.75ms | Total cURL: 3.23ms
+[03-May-2026 18:45:42 UTC] [sendAction Otimizado] PHP Payload: 0.21ms | cURL Node.js: 4.07ms | Total: 4.28ms
+[03-May-2026 18:46:09 UTC] 1
+[03-May-2026 18:46:09 UTC] [Profiler] Node.js(TTFB): 14.65ms | Total cURL: 15.2ms
+[03-May-2026 18:46:09 UTC] 1
+[03-May-2026 18:46:09 UTC] [Profiler] Node.js(TTFB): 10.67ms | Total cURL: 10.77ms
+[03-May-2026 18:46:09 UTC] 1
+[03-May-2026 18:46:09 UTC] [Profiler] Node.js(TTFB): 14.52ms | Total cURL: 14.95ms
+[03-May-2026 18:46:09 UTC] 1
+[03-May-2026 18:46:09 UTC] [Profiler] Node.js(TTFB): 10.3ms | Total cURL: 10.4ms
+[03-May-2026 18:53:01 UTC] 1
+[03-May-2026 18:53:01 UTC] [Profiler] Node.js(TTFB): 15.92ms | Total cURL: 16.37ms
+[03-May-2026 18:53:01 UTC] 1
+[03-May-2026 18:53:01 UTC] [Profiler] Node.js(TTFB): 10.51ms | Total cURL: 10.6ms
+[03-May-2026 18:53:01 UTC] 1
+[03-May-2026 18:53:01 UTC] [Profiler] Node.js(TTFB): 10.82ms | Total cURL: 11.28ms
+[03-May-2026 18:53:01 UTC] 1
+[03-May-2026 18:53:01 UTC] [Profiler] Node.js(TTFB): 11.19ms | Total cURL: 11.33ms
