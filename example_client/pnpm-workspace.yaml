@@ -1,4 +1,0 @@
-allowBuilds:
-  esbuild: false
-  koffi: false
-  sharp: false
