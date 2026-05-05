@@ -1,8 +1,7 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useServerContext } from "@/web/contexts/ServerContext";
 import LoadingPage from "@/web/components/commons/LoadingPage";
 import Card from "@/web/components/commons/components/Card";
-import Select from "@/web/components/commons/components/Select";
 import Button from "@/web/components/commons/components/Button";
 import { useToast } from "@/web/contexts/ToastContext";
 
@@ -19,12 +18,10 @@ type AdditionalAllocation = AllocationItem & {
 };
 
 export default function AllocationsContainer() {
-    const { sendApiRequest, server, isLoadingServer } = useServerContext();
+    const { sendApiRequest, server, isLoadingServer, allocation } = useServerContext();
     const [isLoading, setIsLoading] = useState(true);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [additionalAllocations, setAdditionalAllocations] = useState<AdditionalAllocation[]>([]);
-    const [availableAllocations, setAvailableAllocations] = useState<AllocationItem[]>([]);
-    const [selectedAllocationId, setSelectedAllocationId] = useState<string>("");
     const toast = useToast();
 
     const loadAllocations = async () => {
@@ -40,7 +37,6 @@ export default function AllocationsContainer() {
             }
 
             setAdditionalAllocations(Array.isArray(data.additionalAllocations) ? data.additionalAllocations : []);
-            setAvailableAllocations(Array.isArray(data.availableAllocations) ? data.availableAllocations : []);
         } catch (error) {
             console.error("Erro ao carregar alocações adicionais:", error);
             toast.addToast("Erro ao conectar com o servidor.", "error");
@@ -54,32 +50,18 @@ export default function AllocationsContainer() {
         loadAllocations();
     }, [server]);
 
-    const availableOptions = useMemo(() => {
-        return availableAllocations.map((alloc) => ({
-            label: `${alloc.ip}:${alloc.port}${alloc.externalIp ? ` (${alloc.externalIp})` : ""}`,
-            value: String(alloc.id),
-        }));
-    }, [availableAllocations]);
-
     const handleAddAllocation = async () => {
-        if (!selectedAllocationId) {
-            toast.addToast("Selecione uma porta para adicionar.", "warning");
-            return;
-        }
-
         setIsSubmitting(true);
         try {
             const request = await sendApiRequest("/allocations/add", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ allocationId: Number(selectedAllocationId) })
+                body: JSON.stringify({})
             });
             const data = await request.json();
 
             if (request.ok) {
-                setSelectedAllocationId("");
                 setAdditionalAllocations(Array.isArray(data.additionalAllocations) ? data.additionalAllocations : []);
-                setAvailableAllocations(Array.isArray(data.availableAllocations) ? data.availableAllocations : []);
                 toast.addToast("Porta adicional adicionada.", "success");
             } else {
                 toast.addToast(data.error || "Erro ao adicionar allocation.", "error");
@@ -104,7 +86,6 @@ export default function AllocationsContainer() {
 
             if (request.ok) {
                 setAdditionalAllocations(Array.isArray(data.additionalAllocations) ? data.additionalAllocations : []);
-                setAvailableAllocations(Array.isArray(data.availableAllocations) ? data.availableAllocations : []);
                 toast.addToast("Porta removida.", "success");
             } else {
                 toast.addToast(data.error || "Erro ao remover allocation.", "error");
@@ -129,23 +110,36 @@ export default function AllocationsContainer() {
 
     return (
         <main className="flex-1 flex flex-col p-6 md:p-8 overflow-x-hidden gap-8">
-            <div className="grid grid-cols-1 lg:grid-cols-[1.2fr_1fr] gap-6 items-start">
+            <div className="grid grid-cols-1 lg:grid-cols-[1fr_1.2fr_1fr] gap-6 items-start">
+                <Card title="ALOCACAO PRIMARIA">
+                    <div className="text-sm text-(--color-text-sub) space-y-2">
+                        <div className="flex items-center justify-between">
+                            <span>IP:Porta</span>
+                            <span className="text-(--color-text-label)">
+                                {allocation ? `${allocation.ip}:${allocation.port}` : "-"}
+                            </span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                            <span>IP externo</span>
+                            <span className="text-(--color-text-label)">
+                                {allocation?.externalIp || "-"}
+                            </span>
+                        </div>
+                    </div>
+                </Card>
+
                 <Card title="ADICIONAR ALOCACAO">
                     <div className="flex flex-col gap-4">
-                        <Select
-                            options={availableOptions}
-                            value={selectedAllocationId}
-                            onChange={(value) => setSelectedAllocationId(String(value))}
-                            placeholder={availableOptions.length ? "Selecione uma porta..." : "Sem portas disponiveis"}
-                            desc="Portas livres do node atual para adicionar como alocacoes extras."
-                        />
+                        <div className="text-sm text-(--color-text-sub)">
+                            Ao clicar, vamos escolher uma porta aleatoria livre do node do servidor.
+                        </div>
                         <Button
                             type="button"
                             onClick={handleAddAllocation}
-                            disabled={isSubmitting || !selectedAllocationId}
+                            disabled={isSubmitting}
                             variant="primary"
                         >
-                            Adicionar porta
+                            Adicionar porta aleatoria
                         </Button>
                     </div>
                 </Card>
@@ -203,4 +197,3 @@ export default function AllocationsContainer() {
         </main>
     );
 }
-

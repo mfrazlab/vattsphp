@@ -21,7 +21,7 @@ export default function Button({
     const baseClass = `
     cursor-pointer
         inline-flex items-center justify-center gap-2
-        px-4 py-3 rounded-xl
+        px-4 py-3 rounded-md
         font-medium text-sm tracking-wide
         transition-all duration-200
         outline-none border-none

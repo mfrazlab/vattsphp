@@ -27,7 +27,7 @@ export default function MoveModal({ targets, onClose, onSuccess }: MoveModalProp
 
             // Executa a movimentação para cada arquivo selecionado em paralelo
             await Promise.all(targets.map(target => {
-                const fromPath = `${currentPath}/${target}`;
+                const fromPath = target.includes("/") ? target : `${currentPath}/${target}`;
                 return moveItem(fromPath, formattedDest);
             }));
 
@@ -40,10 +40,12 @@ export default function MoveModal({ targets, onClose, onSuccess }: MoveModalProp
         }
     };
 
-    const targetLabel = targets.length === 1 ? targets[0] : `${targets.length} itens selecionados`;
+    const targetLabel = targets.length === 1
+        ? (targets[0].split("/").pop() || targets[0])
+        : `${targets.length} itens selecionados`;
 
     return (
-        <div className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4" onClick={onClose}>
+        <div className="fixed inset-0 z-[11000] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4" onClick={onClose}>
             <div className="bg-[var(--color-secondary)] p-6 rounded-2xl shadow-[var(--card-shadow)] w-full max-w-md border border-white/5" onClick={e => e.stopPropagation()}>
                 <h3 className="text-lg font-semibold text-white mb-4">Mover Item</h3>
                 <p className="text-sm text-[var(--color-text-sub)] mb-4">

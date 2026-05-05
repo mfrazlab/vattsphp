@@ -30,7 +30,7 @@ class NodesHelper
         if (!$user) {
             return $response->json(['error' => 'invalid user']);
         }
-        $server = \models\Server::get("serverUuid", $serverUuid);
+        $server = \models\Server::getByShortUuid($serverUuid);
         if(!$server) {
             return $response->json(['error' => 'invalid server']);
         }
@@ -82,7 +82,6 @@ class NodesHelper
 
     public function isAdmin(Request $request, Response $response): Response
     {
-        error_log("aqui");
         $body = $request->getBody();
         $token = $body["token"];
         $userUuid = $body["userUuid"];

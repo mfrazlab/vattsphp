@@ -150,7 +150,7 @@ class Node extends Model
             CURLOPT_TCP_NODELAY => true,
             CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1
         ];
-
+        error_log(json_encode($data));
         if ($method === 'GET') {
             if (!empty($data)) $options[CURLOPT_URL] = $url . '?' . http_build_query($data);
             $options[CURLOPT_POSTFIELDS] = null; // Reset de payload para GET
@@ -162,7 +162,6 @@ class Node extends Model
         }
 
         $options[CURLOPT_HTTPHEADER] = $headers;
-        error_log($this->ssl . '');
         if ($this->ssl) {
             $options[CURLOPT_SSL_VERIFYPEER] = false;
             $options[CURLOPT_SSL_VERIFYHOST] = false;
@@ -180,7 +179,6 @@ class Node extends Model
         $ttfb = round(($info['starttransfer_time'] - $info['pretransfer_time']) * 1000, 2);
         $total = round($info['total_time'] * 1000, 2);
 
-        error_log("[Profiler] Node.js(TTFB): {$ttfb}ms | Total cURL: {$total}ms");
 
         if ($response === false) {
             error_log("apiRequest cURL Error (Node {$this->id}): " . curl_error($ch));

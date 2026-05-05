@@ -63,11 +63,14 @@ export default function StartupContainer() {
                 },
                 body: JSON.stringify({ dockerImage: value })
             });
-            const data = await request.json();
+            const text = await request.text();
+
+            const data = JSON.parse(text);
 
             if (request.ok) {
                 toast.addToast(data.message || "Imagem Docker atualizada com sucesso!", "success");
             } else {
+                console.log(text)
                 toast.addToast(data.error || "Erro ao atualizar imagem Docker.", "error");
             }
         } catch (error) {

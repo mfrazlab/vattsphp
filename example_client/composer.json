@@ -15,7 +15,7 @@
     "repositories": [
         {
             "type": "path",
-            "url": "E:/hightcloud",
+            "url": "../",
             "options": {
                 "symlink": true
             }

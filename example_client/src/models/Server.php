@@ -27,6 +27,7 @@ class Server extends Model
             ['label' => 'Memória RAM (MB)', 'key' => 'ram', 'type' => 'number', 'desc' => 'Limite de memória RAM.'],
             ['label' => 'CPU (%)', 'key' => 'cpu', 'type' => 'number', 'desc' => 'Limite de processamento.'],
             ['label' => 'Disco (MB)', 'key' => 'disk', 'type' => 'number', 'desc' => 'Limite de armazenamento.'],
+            ['label' => 'Máx. Alocações Adicionais do Usuário', 'key' => 'maxAdditionalAllocations', 'type' => 'number', 'desc' => 'Quantidade máxima de alocações adicionais que o usuário pode adicionar sozinho. Deixe vazio para ilimitado.'],
         ],
     ];
 
@@ -45,6 +46,8 @@ class Server extends Model
         'envVars'     => 'text',
         'group'       => 'string',
         'serverUuid'  => 'string',
+        'additionalAllocations' => 'text',
+        'maxAdditionalAllocations' => 'int',
 
         'allocationId' => 'foreign:allocations.id',
     ];
@@ -65,11 +68,67 @@ class Server extends Model
     public ?string $group = null;
     public ?string $startupCommand = null;
     public ?string $envVars = null;
+    public ?string $additionalAllocations = null;
+    public ?int $maxAdditionalAllocations = null;
 
     // Allocation (definida na criação)
     public ?int $allocationId = null;
     // UUID do servidor (gerado antes do envio para o node ou retornado pelo node)
     public ?string $serverUuid = null;
+
+    public function getAdditionalAllocationsMap(): array
+    {
+        $data = json_decode($this->additionalAllocations ?? '', true);
+        if (!is_array($data)) {
+            $data = [];
+        }
+
+        $normalizeList = function ($value): array {
+            $items = is_array($value) ? $value : [$value];
+            $out = [];
+            foreach ($items as $item) {
+                if ($item === null || $item === '') continue;
+                $id = (int) $item;
+                if ($id > 0) $out[] = $id;
+            }
+            return $out;
+        };
+
+        $fixed = [];
+        $byUser = [];
+
+        if (array_key_exists('FIXED', $data) || array_key_exists('BYUSER', $data)) {
+            $fixed = $normalizeList($data['FIXED'] ?? []);
+            $byUser = $normalizeList($data['BYUSER'] ?? []);
+        } else {
+            foreach ($data as $key => $value) {
+                $type = null;
+                $ids = [];
+
+                if (is_string($key) && in_array(strtoupper($key), ['FIXED', 'BYUSER'], true)) {
+                    $type = strtoupper($key);
+                    $ids = $normalizeList($value);
+                } elseif (is_string($value) && in_array(strtoupper($value), ['FIXED', 'BYUSER'], true)) {
+                    $type = strtoupper($value);
+                    $ids = $normalizeList($key);
+                }
+
+                if ($type === 'FIXED') {
+                    $fixed = array_merge($fixed, $ids);
+                } elseif ($type === 'BYUSER') {
+                    $byUser = array_merge($byUser, $ids);
+                }
+            }
+        }
+
+        $fixed = array_values(array_unique($fixed));
+        $byUser = array_values(array_diff(array_unique($byUser), $fixed));
+
+        return [
+            'FIXED' => $fixed,
+            'BYUSER' => $byUser,
+        ];
+    }
 
     public function getFirstAllocation(): Allocation
     {
@@ -152,6 +211,8 @@ class Server extends Model
                             c.installImage,
                             c.installEntrypoint,
                             c.startupParser, c.configSystem,
+                            c.rootAcess,
+                            c.maintainable,
                             c.variables,
                             a.ip, a.port, a.externalIp
                         FROM `cores` c
@@ -169,7 +230,29 @@ class Server extends Model
                     $payload['cpu'] = (int) $this->cpu;
                     $payload['disk'] = (int) $this->disk;
                     $payload['image'] = $this->dockerImage;
-                    $payload['additionalAllocation'] = []; // Pode expandir dps, mantido vazio por padrão
+                    $payload['additionalAllocation'] = [];
+
+                    $additionalMap = $this->getAdditionalAllocationsMap();
+                    $additionalIds = array_values(array_unique(array_merge($additionalMap['FIXED'], $additionalMap['BYUSER'])));
+                    if ($this->allocationId) {
+                        $additionalIds = array_values(array_diff($additionalIds, [$this->allocationId]));
+                    }
+
+                    if (!empty($additionalIds)) {
+                        $placeholders = implode(',', array_fill(0, count($additionalIds), '?'));
+                        $stmtAlloc = $pdo->prepare("SELECT `id`, `ip`, `externalIp`, `port` FROM `allocations` WHERE `id` IN ({$placeholders})");
+                        $stmtAlloc->execute($additionalIds);
+                        $rows = $stmtAlloc->fetchAll(\PDO::FETCH_ASSOC);
+
+                        $payload['additionalAllocation'] = array_map(function ($row) {
+                            return [
+                                'id' => (int) ($row['id'] ?? 0),
+                                'ip' => $row['ip'] ?? null,
+                                'port' => (int) ($row['port'] ?? 0),
+                                'externalIp' => $row['externalIp'] ?? null,
+                            ];
+                        }, $rows);
+                    }
 
                     // --- INÍCIO PROCESSAMENTO DE VARIÁVEIS COM DEFAULTS ---
                     $serverEnv = json_decode($this->envVars ?? '{}', true) ?: [];
@@ -219,7 +302,9 @@ class Server extends Model
                             'configSystem'   => json_decode($related['configSystem'] ?? '{}', true),
                             'installScript' => $related["installScript"] ?? null,
                             'installImage' => $related["installImage"] ?? null,
-                            'installEntrypoint' => $related['installEntrypoint'] ?? null
+                            'installEntrypoint' => $related['installEntrypoint'] ?? null,
+                            'rootAcess' => $related['rootAcess'] ?? null,
+                            'maintainable' => $related['maintainable'] ?? null
                         ];
                     } else {
                         $payload['primaryAllocation'] = null;

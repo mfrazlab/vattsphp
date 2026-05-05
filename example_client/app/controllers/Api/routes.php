@@ -32,6 +32,10 @@ class ApiRoutes
                 $router->get("/[server_id]/startup", [ServerStartupApiController::class, 'getCoreInfo']);
                 $router->post("/[server_id]/startup/docker", [ServerStartupApiController::class, 'saveDockerImage']);
                 $router->post("/[server_id]/startup/variable", [ServerStartupApiController::class, 'saveVariable']);
+
+                $router->get("/[server_id]/allocations", [UsersApiController::class, 'getAdditionalAllocations']);
+                $router->post("/[server_id]/allocations/add", [UsersApiController::class, 'addAdditionalAllocation']);
+                $router->post("/[server_id]/allocations/remove", [UsersApiController::class, 'removeAdditionalAllocation']);
             });
 
         });

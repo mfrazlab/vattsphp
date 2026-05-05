@@ -4,3 +4,4 @@ vendor/
 composer.lock
 
 .idea
+example_client/

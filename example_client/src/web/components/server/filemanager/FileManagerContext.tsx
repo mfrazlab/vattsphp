@@ -202,9 +202,10 @@ export function FileManagerProvider({ children }: { children: React.ReactNode })
             })
         });
 
+        const textData = await response.text();
+
         if (!response.ok) {
             let errorData;
-            const textData = await response.text();
 
             try {
                 errorData = JSON.parse(textData);
@@ -221,7 +222,7 @@ export function FileManagerProvider({ children }: { children: React.ReactNode })
             throw new Error(`Erro ${response.status}: ${typeof errorData === 'object' ? JSON.stringify(errorData) : errorData}`);
         }
 
-        return response.json();
+        return JSON.parse(textData)
     };
 
     const listFiles = async (path: string = currentPath) => {

@@ -17,6 +17,7 @@ interface DropdownProps {
     onRename: (name: string) => void;
     onMove: (name: string) => void;
     onSuccess?: () => void;
+    fullPathOverride?: string;
 }
 
 const isArchive = (name: string) => /\.(zip|tar\.gz|tgz|rar)$/i.test(name);
@@ -36,7 +37,8 @@ export default function FileDropdown({
                                          selectedFiles,
                                          onRename,
                                          onMove,
-                                         onSuccess
+                                         onSuccess,
+                                         fullPathOverride
                                      }: DropdownProps) {
     const [isOpen, setIsOpen] = useState(false);
     const {
@@ -70,7 +72,8 @@ export default function FileDropdown({
         }
     };
 
-    const fullPath = `${currentPath}/${file.name}`;
+    const fullPath = fullPathOverride ?? `${currentPath}/${file.name}`;
+    const actionTarget = fullPathOverride ?? file.name;
 
     const handleEdit = () => {
         navigateToEdit(fullPath);
@@ -104,7 +107,7 @@ export default function FileDropdown({
             </button>
 
             {isOpen && (
-                <div className="absolute right-0 top-10 mt-1 w-48 bg-[var(--color-terciary)] rounded-xl shadow-[var(--card-shadow)] z-50 text-[var(--color-text-label)] py-2 font-medium text-sm border border-white/5">
+                <div className="absolute right-0 top-10 mt-1 w-48 bg-[var(--color-terciary)] rounded-xl shadow-[var(--card-shadow)] z-[10500] text-[var(--color-text-label)] py-2 font-medium text-sm border border-white/5">
                     {isEditable(file.name) && (
                         <button
                             onClick={handleEdit}
@@ -115,14 +118,14 @@ export default function FileDropdown({
                     )}
 
                     <button
-                        onClick={() => { onRename(file.name); setIsOpen(false); }}
+                        onClick={() => { onRename(actionTarget); setIsOpen(false); }}
                         className="w-full text-left px-4 py-2 hover:bg-white/5 flex items-center gap-3"
                     >
                         <Pencil className="w-4 h-4" /> Renomear
                     </button>
 
                     <button
-                        onClick={() => { onMove(file.name); setIsOpen(false); }}
+                        onClick={() => { onMove(actionTarget); setIsOpen(false); }}
                         className="w-full text-left px-4 py-2 hover:bg-white/5 flex items-center gap-3"
                     >
                         <ArrowRightLeft className="w-4 h-4" /> Mover

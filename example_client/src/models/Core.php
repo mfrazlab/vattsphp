@@ -14,10 +14,12 @@ class Core extends Model
             ['label' => 'Nome do Core', 'key' => 'name', 'type' => 'text', 'desc' => 'Nome único de identificação do core.'],
             ['label' => 'Descrição', 'key' => 'description', 'type' => 'textarea', 'desc' => 'Breve resumo sobre a finalidade deste core.'],
             ['label' => 'E-mail do Criador', 'key' => 'creatorEmail', 'type' => 'email', 'desc' => 'Identificação do autor original.'],
+            ['label' => "Acesso root", 'key' => "rootAcess", 'type' => 'select', 'options' => ['0' => 'Não', '1' => 'Sim'], 'desc' => 'Se os containers com esse egg serão criados com acesso root.'],
+            ['label' => 'Container mantível', 'key' => 'maintainable', 'type' => 'select', 'options' => ['0' => 'Não', '1' => 'Sim'], 'desc' => 'Se os containers com esse egg deverão ser mantidos ao desligar.']
         ],
         'Scripts de Automação' => [
             ['label' => 'Comando de Início', 'key' => 'startupCommand', 'type' => 'text', 'desc' => 'Comando base para iniciar o processo.'],
-            ['label' => 'Comando de Parada', 'key' => 'stopCommand', 'type' => 'text', 'desc' => 'Comando enviado para encerrar o processo graciosamente.'],
+            ['label' => 'Comando de Parada', 'key' => 'stopCommand', 'type' => 'text', 'desc' => 'Comando enviado para encerrar o processo graciosamente. Utilize ^C para dar o sinal de SIGNINT (Ctrl+C).'],
         ],
         'Configurações Avançadas' => [
             ['label' => 'Imagens Docker (JSON)', 'key' => 'dockerImages', 'type' => 'monaco:json', 'desc' => 'Lista de imagens compatíveis no formato JSON.'],
@@ -37,6 +39,8 @@ class Core extends Model
         'name'           => 'string',
         'startupCommand' => 'string',
         'stopCommand'    => 'string',
+        'rootAcess' => 'boolean',
+        'maintainable' => 'string',
         'dockerImages'   => 'text', // Corrigido de string para text para suportar JSONs grandes
         'startupParser'  => 'text', // Corrigido para text
         'configSystem'   => 'text', // Corrigido para text
@@ -65,6 +69,8 @@ class Core extends Model
     public ?string $installEntrypoint = null;
     public ?string $configSystem = null;
     public ?string $variables = null;
+    public ?string $rootAcess = null;
+    public ?string $maintainable = null;
 
     /**
      * Decodifica as imagens docker para uso direto no PHP.

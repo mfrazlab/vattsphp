@@ -9,6 +9,7 @@ import { useLoading } from "@/web/components/wrappers/Wrapper";
 import { motion, AnimatePresence } from "framer-motion";
 import StartupContainer from "@/web/components/server/startup/StartupContainer";
 import FileManagerContainer from "@/web/components/server/filemanager/FileManagerContainer";
+import AllocationsContainer from "@/web/components/server/allocations/AllocationsContainer";
 
 type ServerProps = {
     action?: string;
@@ -80,6 +81,8 @@ export default function ServerContainer({ action }: ServerProps) {
                 return <ConfigurationContainer />;
             case 'startup':
                 return <StartupContainer/>
+            case 'allocations':
+                return <AllocationsContainer />
             default:
                 return <ConsoleContainer />;
         }
@@ -109,7 +112,6 @@ export default function ServerContainer({ action }: ServerProps) {
                 </AnimatePresence>
             </main>
 
-            <Footer />
         </div>
     </div>
     );

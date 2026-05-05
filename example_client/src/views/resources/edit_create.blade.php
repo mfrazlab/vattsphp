@@ -386,7 +386,9 @@
 
             <div class="bg-cards shadow-main rounded-md p-7 flex flex-col sm:flex-row items-center justify-between gap-5 mt-4">
                 <div>
-                    @if(isset($canDelete) && $canDelete && isset($deleteUrl))
+                    @if(isset($custom_delete_button) && !empty($custom_delete_button))
+                        @include($custom_delete_button)
+                    @elseif(isset($canDelete) && $canDelete && isset($deleteUrl))
                         <button type="button" onclick="window.AdminModal.confirmDelete({
                             title: 'Excluir Registro',
                             message: 'Tem certeza que deseja excluir este registro?',
@@ -555,3 +557,5 @@
         }
     </style>
 @endsection
+
+

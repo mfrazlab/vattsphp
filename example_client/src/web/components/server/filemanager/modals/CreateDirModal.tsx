@@ -33,7 +33,7 @@ export default function CreateDirModal({ isOpen, onClose, onSuccess }: CreateDir
     };
 
     return (
-        <div className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4" onClick={onClose}>
+        <div className="fixed inset-0 z-[11000] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4" onClick={onClose}>
             <div className="bg-[var(--color-secondary)] p-6 rounded-2xl shadow-[var(--card-shadow)] w-full max-w-md border border-white/5" onClick={e => e.stopPropagation()}>
                 <h3 className="text-lg font-semibold text-white mb-4">Criar Novo Diretório</h3>
                 <div className="mb-6">

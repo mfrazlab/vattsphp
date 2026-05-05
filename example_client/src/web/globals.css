@@ -84,3 +84,13 @@ body {
 *::-webkit-scrollbar-thumb:hover {
     background: var(--color-primary);
 }
+
+/* Monaco overlays should stay above editor cards */
+.monaco-editor .suggest-widget,
+.monaco-editor .parameter-hints-widget,
+.monaco-editor .monaco-hover,
+.monaco-editor .monaco-editor-hover,
+.monaco-editor .overflowingContentWidgets,
+.monaco-editor .contentWidgets {
+    z-index: 12000 !important;
+}

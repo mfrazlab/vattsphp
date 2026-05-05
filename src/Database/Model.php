@@ -143,10 +143,14 @@ abstract class Model implements JsonSerializable
     {
         $data = $this->attributes;
 
+        // Extrai as variáveis do objeto de forma segura (ignora uninitialized types e mantem os NULLs)
+        $objectVars = get_object_vars($this);
+
         // Puxa as propriedades via cache, milissegundos mais rápido que Reflection
         foreach (static::getClassProperties() as $propName) {
-            if (isset($this->$propName)) {
-                $data[$propName] = $this->$propName;
+            // Usa array_key_exists em vez de isset() porque isset() retorna false para propriedades com valor NULL.
+            if (array_key_exists($propName, $objectVars)) {
+                $data[$propName] = $objectVars[$propName];
             }
         }
         return $data;

@@ -31,7 +31,7 @@ export default function DashboardWrapper({ children }: { children: ReactNode }) 
             setDisplayChildren(children);
             setIsChangingPage(false);
             setTimeout(() => setIsBarActive(false), 200);
-        }, 400);
+        }, 150);
 
         return () => clearTimeout(timer);
     }, [children]);

@@ -1,4 +1,3 @@
-
 export interface ServerData {
     id: number;
     name: string;
@@ -16,6 +15,7 @@ export interface ServerData {
     startupCommand?: string;
     stopCommand?: string;
     envVars?: string;
+    additionalAllocations?: string;
     allocationId?: number;
     group?: any;
     allocation?: {

@@ -1,6 +1,8 @@
 import { motion, AnimatePresence } from "framer-motion";
 import React, { useState, useEffect } from 'react';
-import { ListStartIcon, ChevronLeft, ChevronRight } from "lucide-react"; // Adicionei ícones pro botão de recolher
+import {ListStartIcon, ChevronLeft, ChevronRight, ShieldCog} from "lucide-react";
+import {useSession} from "@vatts/auth/react";
+import {useServerContext} from "@/web/contexts/ServerContext"; // Adicionei ícones pro botão de recolher
 
 type Sidebar = {
     serverId: string;
@@ -28,7 +30,7 @@ const menuCategories = [
     {
         title: "Avançado",
         items: [
-            { id: 'network', name: 'Rede', icon: <path d="M22 12h-4l-3 9L9 3l-3 9H2" /> },
+            { id: 'allocations', name: 'Rede', icon: <path d="M4 7h16M4 12h16M4 17h16" /> },
             { id: 'startup', name: 'Inicialização', icon: <ListStartIcon />},
             { id: 'settings', name: 'Configurações', icon: <path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" /> },
         ]
@@ -38,7 +40,8 @@ const menuCategories = [
 export default function ServerSidebar({ serverId, activeTab, changeAction }: Sidebar) {
     const [isCollapsed, setIsCollapsed] = useState(false);
     const [isMounted, setIsMounted] = useState(false);
-
+    const user = useSession()
+    const server = useServerContext()
     useEffect(() => {
         setIsMounted(true);
         const storedValue = localStorage.getItem('@hightcloud:sidebar-collapsed');
@@ -148,7 +151,28 @@ export default function ServerSidebar({ serverId, activeTab, changeAction }: Sid
                     </div>
                 ))}
             </div>
-
+            {user.data?.user.role == 'admin' && (
+                <div className="mt-auto pt-4 px-4">
+                    <a
+                        href={`/admin/servers/${server.server?.id}/edit`}
+                        className={`flex items-center w-full py-3 rounded-xl text-sm font-bold transition-all duration-300 hover:bg-white/[0.04] ${
+                            isCollapsed ? 'justify-center' : 'justify-between px-4'
+                        }`}
+                        style={{ color: 'var(--color-text-label)' }}
+                    >
+                        {!isCollapsed && (
+                            <motion.span
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                className="whitespace-nowrap"
+                            >
+                                Administração
+                            </motion.span>
+                        )}
+                        <ShieldCog size={20} />
+                    </a>
+                </div>
+            )}
             {/* Rodapé da Sidebar */}
             <div className="mt-auto pt-4 px-4">
                 <button

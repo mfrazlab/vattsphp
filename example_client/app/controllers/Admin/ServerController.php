@@ -84,9 +84,10 @@ class ServerController
                 ['label' => 'Descrição', 'key' => 'description', 'type' => 'textarea', 'desc' => 'Breve descrição do servidor.', 'default' => $old['description'] ?? ''],
             ],
             'Recursos' => [
-                ['label' => 'Memória RAM (MB)', 'key' => 'ram', 'type' => 'number', 'desc' => 'Quantidade de RAM em MB.', 'default' => $old['ram'] ?? 1024],
-                ['label' => 'CPU (%)', 'key' => 'cpu', 'type' => 'number', 'desc' => 'Porcentagem de CPU.', 'default' => $old['cpu'] ?? 10],
-                ['label' => 'Disco (MB)', 'key' => 'disk', 'type' => 'number', 'desc' => 'Espaço em disco em MB.', 'default' => $old['disk'] ?? 2048],
+                ['label' => 'Memória RAM (MB)', 'key' => 'ram', 'type' => 'number', 'desc' => 'Quantidade de RAM em MB. Deixe em 0 para ilimitado.', 'default' => $old['ram'] ?? 0],
+                ['label' => 'CPU (%)', 'key' => 'cpu', 'type' => 'number', 'desc' => 'Porcentagem de CPU. Deixe em 0 para ilimitado.', 'default' => $old['cpu'] ?? 0],
+                ['label' => 'Disco (MB)', 'key' => 'disk', 'type' => 'number', 'desc' => 'Espaço em disco em MB. Deixe em 0 para ilimitado.', 'default' => $old['disk'] ?? 0],
+                ['label' => 'Máx. Alocações Adicionais do Usuário', 'key' => 'maxAdditionalAllocations', 'type' => 'number', 'desc' => 'Quantidade máxima de alocações adicionais que o usuário pode adicionar sozinho. Deixe vazio para ilimitado.', 'default' => $old['maxAdditionalAllocations'] ?? '0'],
             ],
         ];
     }
@@ -137,6 +138,9 @@ class ServerController
         $startupCommand = (string)($body['startupCommand'] ?? '');
         $envVars = isset($body['env']) && is_array($body['env']) ? $body['env'] : [];
         $allocationId = (int) ($body['allocationId'] ?? 0);
+        $additionalFixed = $body['additionalAllocationsFixed'] ?? null;
+        $maxAdditionalAllocations = trim((string) ($body['maxAdditionalAllocations'] ?? ''));
+        $maxAdditionalAllocations = $maxAdditionalAllocations === '' ? null : max(0, (int) $maxAdditionalAllocations);
 
         if ($name === '' || $ownerId === '' || $nodeId === '' || $coreId === '') {
             $this->flashOldInput($body);
@@ -158,6 +162,14 @@ class ServerController
         if (!$core) {
             $this->flashOldInput($body);
             return $response->setFlash(['error' => 'Core não encontrado'])->redirect('/admin/servers/create');
+        }
+
+        // Se a dockerImage vier em branco, pega a primeira disponível no Core
+        if ($dockerImage === '' || !$dockerImage) {
+            $coreImages = json_decode($core->dockerImages ?? '[]', true);
+            if (is_array($coreImages) && !empty($coreImages) && isset($coreImages[0]['image'])) {
+                $dockerImage = $coreImages[0]['image'];
+            }
         }
 
         // aplica defaults e valida as env vars conforme regras do core
@@ -234,9 +246,16 @@ class ServerController
         $server->startupCommand = trim($startupCommand) !== '' ? trim($startupCommand) : ($core->startupCommand ?? null);
         $server->envVars = !empty($envVars) ? json_encode($envVars, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT) : null;
         $server->serverUuid = $serverUuid;
+        $server->maxAdditionalAllocations = $maxAdditionalAllocations;
 
         // salva a allocation escolhida
         $server->allocationId = $allocation->id ?? null;
+
+        $fixedIds = $this->parseAdditionalFixed($additionalFixed);
+        $fixedIds = array_values(array_diff($fixedIds, [$server->allocationId]));
+        $server->additionalAllocations = !empty($fixedIds)
+            ? json_encode(['FIXED' => $fixedIds, 'BYUSER' => []], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)
+            : null;
 
         $server->save();
 
@@ -247,6 +266,8 @@ class ServerController
         } catch (\Throwable $e) {
             // não bloqueia o fluxo, mas deixa rastreável
         }
+
+        $this->syncFixedAllocations($server, [], $fixedIds);
 
         return $response->setFlash(['success' => 'Servidor criado com sucesso e requisitado ao node'])->redirect("/admin/servers/{$server->id}/edit");
     }
@@ -304,6 +325,7 @@ class ServerController
             'map' => $server->view_map,
             'canDelete' => true,
             'deleteUrl' => 'servers/[id]/delete?return=edit',
+            'custom_delete_button' => 'partials.server.cards.delete_buttons',
             // Ao editar, o startup e env estarão inclusos dinamicamente dentro do core_docker
             'custom_tabs' => [
                 ['view' => 'partials.server.cards.allocation', 'label' => 'Alocação'],
@@ -330,6 +352,10 @@ class ServerController
 
         if (isset($body['coreId'])) $server->coreId = (string)$body['coreId'];
         if (isset($body['dockerImage'])) $server->dockerImage = (string)$body['dockerImage'];
+        if (array_key_exists('maxAdditionalAllocations', $body)) {
+            $rawMax = trim((string) $body['maxAdditionalAllocations']);
+            $server->maxAdditionalAllocations = $rawMax === '' ? null : max(0, (int) $rawMax);
+        }
 
         // Handling Allocation changes
         $newAllocationId = isset($body['allocationId']) ? (int) $body['allocationId'] : 0;
@@ -393,6 +419,19 @@ class ServerController
         $server->ram = isset($body['ram']) ? (int)$body['ram'] : $server->ram;
         $server->cpu = isset($body['cpu']) ? (int)$body['cpu'] : $server->cpu;
         $server->disk = isset($body['disk']) ? (int)$body['disk'] : $server->disk;
+
+        $existingMap = $server->getAdditionalAllocationsMap();
+        $newFixed = $this->parseAdditionalFixed($body['additionalAllocationsFixed'] ?? null);
+        $newFixed = array_values(array_diff($newFixed, [$server->allocationId]));
+        $oldFixed = $existingMap['FIXED'] ?? [];
+        $this->syncFixedAllocations($server, $oldFixed, $newFixed);
+
+        $existingMap['FIXED'] = $newFixed;
+        $existingMap['BYUSER'] = array_values(array_diff($existingMap['BYUSER'] ?? [], $newFixed));
+        $server->additionalAllocations = (!empty($existingMap['FIXED']) || !empty($existingMap['BYUSER']))
+            ? json_encode($existingMap, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)
+            : null;
+
         $server->save();
 
         return $response->setFlash(['success' => 'Servidor atualizado'])->redirect("/admin/servers/{$server->id}/edit");
@@ -403,17 +442,61 @@ class ServerController
         $server = $this->getServer($request->getParam('server'));
         if (!$server) return $response->setFlash(['error'=>'Server não encontrado'])->redirect('/admin/servers');
 
+        $mode = $request->getQuery()['mode'] ?? 'safe';
+        $user = $request->getParsed('user');
+        $userUuid = $user->id ?? $server->ownerId;
+
+        if ($mode !== 'force') {
+            $result = $this->requestDeleteOnNode($server, (string) $userUuid);
+            if ($result !== true) {
+                $msg = is_string($result) && $result !== '' ? $result : 'Falha ao deletar no node.';
+                return $response->setFlash(['error' => $msg])->redirect('/admin/servers');
+            }
+        } else {
+            $this->requestDeleteOnNode($server, (string) $userUuid);
+        }
+
         // libera allocations atribuídas a esse server
         try {
-            $allocs = Allocation::where(['assignedTo' => (string) $server->id]);
+            $allocs = Allocation::where("assignedTo", $server->id);
             foreach ($allocs as $a) {
+                unset($a->view_map);
                 $a->assignedTo = null;
+                error_log(json_encode($a));
                 $a->save();
             }
-        } catch (\Throwable $e) {}
+        } catch (\Throwable $e) {
+            error_log($e);
+        }
 
         $server->delete();
-        return $response->setFlash(['success'=>'Servidor excluído'])->redirect('/admin/servers');
+        return $response->setFlash(['success' => 'Servidor excluído'])->redirect('/admin/servers');
+    }
+
+    private function requestDeleteOnNode(Server $server, string $userUuid): bool|string
+    {
+        try {
+            $node = $server->getNode();
+
+            $response = $node->apiRequest('POST', '/api/v1/servers/delete', [
+                'serverId' => $server->serverUuid,
+                'userUuid' => $userUuid,
+            ]);
+
+            // Verifica se a resposta é um array e se o 'success' é verdadeiro
+            if (is_array($response) && isset($response['success']) && $response['success']) {
+                return true;
+            }
+
+            // Retorna a mensagem de erro da API ou uma mensagem padrão caso a requisição falhe
+            if (is_array($response) && isset($response['body'])) {
+                return is_string($response['body']) ? $response['body'] : json_encode($response['body']);
+            }
+
+            return 'Falha ao comunicar com o Node.';
+        } catch (\Throwable $e) {
+            return $e->getMessage();
+        }
     }
 
     // --- API helpers used by partials ---
@@ -514,5 +597,52 @@ class ServerController
         }, $rows);
 
         return $response->json($out);
+    }
+
+    private function parseAdditionalFixed($value): array
+    {
+        if ($value === null) return [];
+
+        if (is_array($value)) {
+            $items = $value;
+        } else {
+            $decoded = json_decode((string) $value, true);
+            $items = is_array($decoded) ? $decoded : [];
+        }
+
+        $out = [];
+        foreach ($items as $item) {
+            $id = (int) $item;
+            if ($id > 0) $out[] = $id;
+        }
+
+        return array_values(array_unique($out));
+    }
+
+    private function syncFixedAllocations(Server $server, array $oldFixed, array $newFixed): void
+    {
+        $nodeId = (string) $server->nodeUuid;
+        $removed = array_values(array_diff($oldFixed, $newFixed));
+        $added = array_values(array_diff($newFixed, $oldFixed));
+
+        foreach ($removed as $allocId) {
+            $alloc = Allocation::find((int) $allocId);
+            if (!$alloc) continue;
+            if ((string) $alloc->nodeId !== $nodeId) continue;
+            if ((string) $alloc->assignedTo !== (string) $server->id) continue;
+            if ((int) $alloc->id === (int) $server->allocationId) continue;
+            $alloc->assignedTo = null;
+            $alloc->save();
+        }
+
+        foreach ($added as $allocId) {
+            $alloc = Allocation::find((int) $allocId);
+            if (!$alloc) continue;
+            if ((string) $alloc->nodeId !== $nodeId) continue;
+            if (!empty($alloc->assignedTo) && (string) $alloc->assignedTo !== (string) $server->id) continue;
+            if ((int) $alloc->id === (int) $server->allocationId) continue;
+            $alloc->assignedTo = (string) $server->id;
+            $alloc->save();
+        }
     }
 }
