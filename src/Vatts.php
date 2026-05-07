@@ -8,7 +8,6 @@ use Vatts\Router\Router;
 use Vatts\Router\Request;
 use Vatts\Router\Response;
 use Vatts\Rpc\RpcController;
-use Vatts\Utils\Middleware;
 use Vatts\Handlers\FrontendHandler;
 
 class Vatts

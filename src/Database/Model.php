@@ -11,9 +11,11 @@ use Exception;
 
 /**
  * @method static static[] where(string|array $column, mixed $operator = null, mixed $value = null)
+ * @method static static witch(string|array $column, mixed $operator = null, mixed $value = null)
  * @method static static orderBy(string $column, string $direction = 'ASC')
  * @method static static limit(int $limit)
- * @method static static|null get(mixed ...$args)
+ * @method static int count()
+ * @method static static[] get(mixed ...$args)
  * @method static static|null find(mixed ...$args)
  * @method static static|null first()
  * @method static static[] all()
@@ -301,10 +303,39 @@ abstract class Model implements JsonSerializable
         }
     }
 
+    /**
+     * O comportamento clássico do where, que já busca e retorna os registros na hora (Array)
+     */
     protected function _where(...$args): array
     {
         $this->addWhereCondition(...$args);
         return $this->_get();
+    }
+
+    /**
+     * Novo método para adicionar a condição WHERE permitindo encadear novos métodos como count(), limit(), etc.
+     */
+    protected function _witch(...$args): static
+    {
+        $this->addWhereCondition(...$args);
+        return $this;
+    }
+
+    protected function _count(): int
+    {
+        static::syncSchema();
+        $table = static::getTableName();
+        $pdo = static::getPdoConnection();
+
+        $sql = "SELECT COUNT(*) FROM `{$table}`";
+        if (!empty($this->qbWheres)) {
+            $sql .= " WHERE " . implode(' AND ', $this->qbWheres);
+        }
+
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute($this->qbParams);
+
+        return (int) $stmt->fetchColumn();
     }
 
     protected function _orderBy(string $column, string $direction = 'ASC'): static
