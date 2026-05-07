@@ -117,7 +117,7 @@ class Vatts
         $this->projectPath = rtrim($projectPath, "\\/ ");
 
         // Registra as variáveis de ambiente do .env antes de qualquer outra coisa
-        $this->loadEnv();
+        $this->loadEnv($this->projectPath);
 
         $this->resolver = new ControllerResolver($this->projectPath);
     }
@@ -125,9 +125,9 @@ class Vatts
     /**
      * Carrega e registra as variáveis do arquivo .env
      */
-    protected function loadEnv(): void
+    public static function loadEnv($projectPath): void
     {
-        $path = $this->projectPath . DIRECTORY_SEPARATOR . '.env';
+        $path = $projectPath . DIRECTORY_SEPARATOR . '.env';
 
         if (!is_file($path)) {
             return;
@@ -159,7 +159,7 @@ class Vatts
         $this->router = new Router();
     }
 
-    protected function bootDatabase(array $dbConfig): void
+    public static function bootDatabase(array $dbConfig): void
     {
         // Inicializa o seu próprio DB Manager usando PDO
         DB::init($dbConfig);
