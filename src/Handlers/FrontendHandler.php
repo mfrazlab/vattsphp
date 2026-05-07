@@ -80,7 +80,7 @@ class FrontendHandler
         // Alteração: Verifica se o arquivo original OU versões comprimidas existem
         if (!$this->fileExistsOrCompressed($filePath)) {
             $fallbackPath = $exportPath . 'index.html';
-            return $this->serveFile($fallbackPath, $request, $response->status(404), 'no-cache, no-store, must-revalidate');
+            return $this->serveFile($fallbackPath, $request, $response, 'no-cache, no-store, must-revalidate');
         }
 
         return $this->serveFile($filePath, $request, $response, $this->resolveCachePolicy($filePath));
