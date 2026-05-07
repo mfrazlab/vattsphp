@@ -68,7 +68,7 @@ class FrontendHandler
                 return null;
             }
 
-            return $this->serveFile($realFilePath, $response);
+            return $this->serveFile($realFilePath, $request, $response, 'public, max-age=3600');
         }
 
         return null;
@@ -92,23 +92,23 @@ class FrontendHandler
             $acceptEncoding = $_SERVER['HTTP_ACCEPT_ENCODING'] ?? '';
 
             if (str_contains($acceptEncoding, 'br') && file_exists($filePath . '.br')) {
-                return $this->serveFile($filePath, $response);
+                return $this->serveFile($filePath, $request, $response, 'public, max-age=31536000, immutable');
             }
 
             if (str_contains($acceptEncoding, 'gzip') && file_exists($filePath . '.gz')) {
-                return $this->serveFile($filePath, $response);
+                return $this->serveFile($filePath, $request, $response, 'public, max-age=31536000, immutable');
             }
 
-            return $this->serveFile($exportPath . 'index.html', $response->status(404));
+            return $this->serveFile($exportPath . 'index.html', $request, $response->status(404), 'no-cache, no-store, must-revalidate');
         }
 
-        return $this->serveFile($realFilePath, $response);
+        return $this->serveFile($realFilePath, $request, $response, $this->resolveCachePolicy($realFilePath));
     }
 
     /**
      * Serve um arquivo específico tratando compressão Brotli/Gzip
      */
-    protected function serveFile(string $filePath, Response $response): Response
+    protected function serveFile(string $filePath, Request $request, Response $response, ?string $cacheControl = null): Response
     {
         $mimeType = $this->getMimeType($filePath);
         $encoding = null;
@@ -131,6 +131,24 @@ class FrontendHandler
         if ($encoding) {
             $response->header('Content-Encoding', $encoding);
             $response->header('Vary', 'Accept-Encoding');
+        }
+
+        $cacheControl = $cacheControl ?? $this->resolveCachePolicy($servedPath);
+        $response->header('Cache-Control', $cacheControl);
+
+        $etag = $this->buildEtag($servedPath);
+        $lastModified = gmdate('D, d M Y H:i:s', filemtime($servedPath)) . ' GMT';
+        $response->header('ETag', $etag);
+        $response->header('Last-Modified', $lastModified);
+
+        $ifNoneMatch = $this->getRequestHeader($request, 'If-None-Match');
+        if (!empty($ifNoneMatch) && trim($ifNoneMatch) === $etag) {
+            return $response->status(304)->send('');
+        }
+
+        $ifModifiedSince = $this->getRequestHeader($request, 'If-Modified-Since');
+        if (!empty($ifModifiedSince) && strtotime($ifModifiedSince) >= filemtime($servedPath)) {
+            return $response->status(304)->send('');
         }
 
         $content = file_get_contents($servedPath);
@@ -222,5 +240,33 @@ class FrontendHandler
         ];
 
         return $mimes[$extension] ?? 'application/octet-stream';
+    }
+
+    protected function resolveCachePolicy(string $path): string
+    {
+        $extension = strtolower(pathinfo(preg_replace('/\.(gz|br)$/', '', $path), PATHINFO_EXTENSION));
+        if ($extension === 'html') {
+            return 'no-cache, no-store, must-revalidate';
+        }
+        return 'public, max-age=31536000, immutable';
+    }
+
+    protected function buildEtag(string $path): string
+    {
+        $stat = @stat($path);
+        if (!$stat) {
+            return '"0"';
+        }
+        return '"' . sha1($path . '|' . $stat['mtime'] . '|' . $stat['size']) . '"';
+    }
+
+    protected function getRequestHeader(Request $request, string $name): ?string
+    {
+        foreach ($request->getHeaders() as $key => $value) {
+            if (strcasecmp($key, $name) === 0) {
+                return is_array($value) ? implode(', ', $value) : $value;
+            }
+        }
+        return null;
     }
 }

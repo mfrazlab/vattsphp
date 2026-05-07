@@ -17,6 +17,7 @@ class VattsAuth
         $this->config = $config;
 
         if (session_status() === PHP_SESSION_NONE) {
+            $this->configureSession($config['session'] ?? []);
             session_start();
         }
 
@@ -52,6 +53,36 @@ class VattsAuth
         }
         unset($_SESSION['vatts_auth_user']);
         return true;
+    }
+
+    /**
+     * Configura as opções da sessão, incluindo tempo de vida, segurança e cookies
+     */
+    protected function configureSession(array $sessionConfig): void
+    {
+        $lifetimeDays = (int) ($sessionConfig['lifetime_days'] ?? 30);
+        $lifetime = max(0, $lifetimeDays * 86400);
+
+        $secure = $sessionConfig['secure'] ?? (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off');
+        $httpOnly = $sessionConfig['httponly'] ?? true;
+        $sameSite = $sessionConfig['samesite'] ?? 'Lax';
+        $path = $sessionConfig['path'] ?? '/';
+        $domain = $sessionConfig['domain'] ?? '';
+
+        ini_set('session.gc_maxlifetime', (string) $lifetime);
+
+        if (PHP_VERSION_ID >= 70300) {
+            session_set_cookie_params([
+                'lifetime' => $lifetime,
+                'path' => $path,
+                'domain' => $domain,
+                'secure' => $secure,
+                'httponly' => $httpOnly,
+                'samesite' => $sameSite,
+            ]);
+        } else {
+            session_set_cookie_params($lifetime, $path, $domain, $secure, $httpOnly);
+        }
     }
 
     /**
@@ -136,6 +167,7 @@ class VattsAuth
 
             // Salva na sessão do PHP
             $_SESSION['vatts_auth_user'] = $userToSave;
+            session_regenerate_id(true);
 
             return $res->json([
                 'success' => true,

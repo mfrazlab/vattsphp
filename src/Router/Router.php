@@ -11,6 +11,7 @@ class Router
      * Pilha para gerenciar prefixos e middlewares de grupos aninhados
      */
     protected array $groupStack = [];
+    protected array $globalMiddlewares = [];
 
     public function get(string $pattern, $handler): Route
     {
@@ -46,6 +47,17 @@ class Router
         $this->groupStack[] = $attributes;
         $callback($this);
         array_pop($this->groupStack);
+    }
+
+    public function addMiddleware(string|callable|array|object $middleware): self
+    {
+        if (is_array($middleware) && !is_callable($middleware)) {
+            $this->globalMiddlewares = array_merge($this->globalMiddlewares, $middleware);
+        } else {
+            $this->globalMiddlewares[] = $middleware;
+        }
+
+        return $this;
     }
 
     public function register(string $method, string $pattern, $handler): Route
@@ -92,6 +104,13 @@ class Router
     {
         $method = $request->getMethod();
         $path = $request->getPath();
+
+        foreach ($this->globalMiddlewares as $middleware) {
+            $result = $this->resolveMiddleware($middleware, $request, $response);
+
+            if ($result instanceof Response) return $result;
+            if ($result instanceof Request) $request = $result;
+        }
 
         $route = null;
         foreach ($this->routes as $r) {
@@ -217,3 +236,4 @@ class Router
         }
     }
 }
+

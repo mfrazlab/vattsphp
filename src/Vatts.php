@@ -9,6 +9,8 @@ use Vatts\Router\Request;
 use Vatts\Router\Response;
 use Vatts\Rpc\RpcController;
 use Vatts\Handlers\FrontendHandler;
+use Vatts\Middleware\SecurityHeadersMiddleware;
+use Vatts\Middleware\RateLimitMiddleware;
 
 class Vatts
 {
@@ -22,6 +24,8 @@ class Vatts
      * - project_path: caminho do projeto cliente (onde estão app/, public/, models/)
      * - db: array com configuração do banco de dados (PDO)
      * - autoload_helpers: bool (default: true) - registra helpers globais
+     * - security: array com headers de segurança e CSP
+     * - rate_limit: array com configurações de rate limit
      */
     public static function init(array $config = []): Router
     {
@@ -36,6 +40,47 @@ class Vatts
         }
 
         $self->bootRouter();
+
+        $securityDefaults = [
+            'enabled' => true,
+            'csp' => "default-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; object-src 'none'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline';",
+            'csp_report_only' => false,
+            'referrer_policy' => 'no-referrer',
+            'x_content_type_options' => 'nosniff',
+            'x_frame_options' => 'DENY',
+            'x_xss_protection' => '0',
+            'permissions_policy' => 'geolocation=(), microphone=(), camera=()',
+            'cross_origin_opener_policy' => 'same-origin',
+            'cross_origin_resource_policy' => 'same-origin',
+            'cross_origin_embedder_policy' => null,
+            'hsts' => [
+                'enabled' => true,
+                'max_age' => 31536000,
+                'include_subdomains' => true,
+                'preload' => false,
+                'require_https' => true
+            ]
+        ];
+
+        $rateLimitDefaults = [
+            'enabled' => true,
+            'window' => 60,
+            'max' => 120,
+            'trust_proxy' => false,
+            'proxy_header' => 'X-Forwarded-For',
+            'allowlist' => [],
+            'exclude' => [],
+            'rules' => [
+                ['pattern' => '/api/auth/*', 'window' => 60, 'max' => 30],
+                ['pattern' => '/api/*', 'window' => 60, 'max' => 120]
+            ]
+        ];
+
+        $securityConfig = array_replace_recursive($securityDefaults, $config['security'] ?? []);
+        $rateLimitConfig = array_replace_recursive($rateLimitDefaults, $config['rate_limit'] ?? []);
+
+        $self->router->addMiddleware(new SecurityHeadersMiddleware($securityConfig));
+        $self->router->addMiddleware(new RateLimitMiddleware($rateLimitConfig));
 
         // auto-require models e controllers se configurado
         if ($config['autoload_models'] ?? true) {

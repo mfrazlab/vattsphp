@@ -27,6 +27,7 @@ class GoogleProvider implements AuthProviderInterface
         $this->name = $config['name'] ?? 'Google';
 
         if (session_status() === PHP_SESSION_NONE) {
+            $this->configureSession($config['session'] ?? []);
             session_start();
         }
     }
@@ -103,6 +104,33 @@ class GoogleProvider implements AuthProviderInterface
         }
     }
 
+    protected function configureSession(array $sessionConfig): void
+    {
+        $lifetimeDays = (int) ($sessionConfig['lifetime_days'] ?? 30);
+        $lifetime = max(0, $lifetimeDays * 86400);
+
+        $secure = $sessionConfig['secure'] ?? (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off');
+        $httpOnly = $sessionConfig['httponly'] ?? true;
+        $sameSite = $sessionConfig['samesite'] ?? 'Lax';
+        $path = $sessionConfig['path'] ?? '/';
+        $domain = $sessionConfig['domain'] ?? '';
+
+        ini_set('session.gc_maxlifetime', (string) $lifetime);
+
+        if (PHP_VERSION_ID >= 70300) {
+            session_set_cookie_params([
+                'lifetime' => $lifetime,
+                'path' => $path,
+                'domain' => $domain,
+                'secure' => $secure,
+                'httponly' => $httpOnly,
+                'samesite' => $sameSite,
+            ]);
+        } else {
+            session_set_cookie_params($lifetime, $path, $domain, $secure, $httpOnly);
+        }
+    }
+
     public function getAuthorizationUrl(bool $isPopup = false): string
     {
         $params = [
@@ -144,6 +172,7 @@ class GoogleProvider implements AuthProviderInterface
                     if ($user) {
                         // Seta a sessão nativamente no PHP (Simulando o POST interno do JS)
                         $_SESSION['vatts_auth_user'] = $user;
+                        session_regenerate_id(true);
 
                         if ($isPopup) {
                             $callbackUrl = $this->config['successUrl'] ?? '/';
