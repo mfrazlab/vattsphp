@@ -7,8 +7,7 @@ use Vatts\Router\Response;
 
 /**
  * Handler para fallback do Frontend
- *
- * Em produção: serve arquivos estáticos do projeto (exported/index.html para SPA)
+ * * Em produção: serve arquivos estáticos do projeto (exported/index.html para SPA)
  * Em desenvolvimento: faz proxy para o servidor de desenvolvimento (localhost:3000)
  */
 class FrontendHandler
@@ -31,8 +30,6 @@ class FrontendHandler
      */
     public function __invoke(Request $request, Response $response): Response
     {
-        // 1. Tenta buscar arquivos extras em serve/ (ex: serve/admin/modal.js)
-        // Mas ignora se o caminho começar com 'dist/' para não conflitar
         $extraFileResponse = $this->tryServeExtraStatic($request, $response);
         if ($extraFileResponse !== null) {
             return $extraFileResponse;
@@ -45,40 +42,33 @@ class FrontendHandler
         return $this->proxyToDevServer($request, $response);
     }
 
-    /**
-     * Tenta servir arquivos que estão diretamente na pasta 'serve',
-     * exceto o que estiver em 'serve/dist'.
-     */
     protected function tryServeExtraStatic(Request $request, Response $response): ?Response
     {
         $uri = ltrim($request->getPath(), '/');
 
-        // Se estiver vazio (home) ou tentar acessar a dist por aqui, ignora
         if (empty($uri) || str_starts_with($uri, 'dist/')) {
             return null;
         }
 
         $servePath = $this->projectPath . DIRECTORY_SEPARATOR . 'serve' . DIRECTORY_SEPARATOR;
         $filePath = $servePath . $uri;
-        $realFilePath = realpath($filePath);
 
-        // Verifica se o arquivo existe e se está dentro da pasta serve (segurança)
-        if ($realFilePath && str_starts_with($realFilePath, realpath($servePath)) && is_file($realFilePath)) {
-            // Se o arquivo real estiver dentro de 'serve/dist', ignoramos para seguir a lógica da SPA
-            $distPath = realpath($servePath . 'dist');
-            if ($distPath && str_starts_with($realFilePath, $distPath)) {
-                return null;
+        // Verifica se o arquivo existe (ou se existe uma versão comprimida dele)
+        if ($this->fileExistsOrCompressed($filePath)) {
+            $realPath = realpath($filePath) ?: realpath($filePath . '.gz') ?: realpath($filePath . '.br');
+
+            if ($realPath && str_starts_with($realPath, realpath($servePath))) {
+                $distPath = realpath($servePath . 'dist');
+                if ($distPath && str_starts_with($realPath, $distPath)) {
+                    return null;
+                }
+                return $this->serveFile($filePath, $request, $response, 'public, max-age=3600');
             }
-
-            return $this->serveFile($realFilePath, $request, $response, 'public, max-age=3600');
         }
 
         return null;
     }
 
-    /**
-     * Tenta servir um arquivo estático (com compressão) ou cai no index.html da SPA
-     */
     protected function serveStaticOrSPA(Request $request, Response $response): Response
     {
         $uri = ltrim($request->getPath(), '/');
@@ -86,20 +76,24 @@ class FrontendHandler
 
         $targetFile = empty($uri) ? 'index.html' : $uri;
         $filePath = $exportPath . $targetFile;
-        $realFilePath = realpath($filePath);
 
-        // Segurança e verificação de existência
-        if (!$realFilePath || !str_starts_with($realFilePath, realpath($exportPath)) || !is_file($realFilePath)) {
+        // Alteração: Verifica se o arquivo original OU versões comprimidas existem
+        if (!$this->fileExistsOrCompressed($filePath)) {
             $fallbackPath = $exportPath . 'index.html';
             return $this->serveFile($fallbackPath, $request, $response->status(404), 'no-cache, no-store, must-revalidate');
         }
 
-        return $this->serveFile($realFilePath, $request, $response, $this->resolveCachePolicy($realFilePath));
+        return $this->serveFile($filePath, $request, $response, $this->resolveCachePolicy($filePath));
     }
 
     /**
-     * Serve um arquivo específico tratando compressão Brotli/Gzip e injeção de tags HTML
+     * Helper para verificar se o arquivo existe ou se existe uma versão .gz/.br
      */
+    protected function fileExistsOrCompressed(string $filePath): bool
+    {
+        return is_file($filePath) || is_file($filePath . '.gz') || is_file($filePath . '.br');
+    }
+
     protected function serveFile(string $filePath, Request $request, Response $response, ?string $cacheControl = null): Response
     {
         $mimeType = $this->getMimeType($filePath);
@@ -109,7 +103,8 @@ class FrontendHandler
         $encoding = null;
         $servedPath = $filePath;
 
-        // Se precisarmos injetar tags dinamicamente, evitamos usar os arquivos pré-comprimidos
+        // Se o arquivo original não existir, mas o comprimido sim, forçamos o uso do comprimido
+        // independente de injeção (já que injeção só faz sentido em HTML e HTML raramente é servido só .gz)
         if (!$needsInjection) {
             $acceptEncoding = $_SERVER['HTTP_ACCEPT_ENCODING'] ?? '';
 
@@ -121,9 +116,20 @@ class FrontendHandler
                 $servedPath = $filePath . '.gz';
                 $encoding = 'gzip';
             }
+            // Fallback caso o arquivo original não exista mas o .gz sim (mesmo se o browser não pediu,
+            // melhor tentar entregar gzippado do que dar 404, embora browsers modernos sempre peçam)
+            elseif (!file_exists($filePath)) {
+                if (file_exists($filePath . '.br')) {
+                    $servedPath = $filePath . '.br';
+                    $encoding = 'br';
+                } elseif (file_exists($filePath . '.gz')) {
+                    $servedPath = $filePath . '.gz';
+                    $encoding = 'gzip';
+                }
+            }
         }
 
-        if (!file_exists($servedPath) && !file_exists($filePath)) {
+        if (!file_exists($servedPath)) {
             return $response->status(404)->send('File not found');
         }
 
@@ -135,24 +141,22 @@ class FrontendHandler
         $cacheControl = $cacheControl ?? $this->resolveCachePolicy($servedPath);
         $response->header('Cache-Control', $cacheControl);
 
-        // Se precisa injetar, lemos o conteúdo antes para injetar as tags e recalcular o ETag
-        if ($needsInjection) {
+        if ($needsInjection && file_exists($filePath)) {
             $content = file_get_contents($filePath);
             $tagsString = implode("\n", $this->additionalTags) . "\n";
 
-            // Tenta injetar antes do fechamento do head, senão apenas adiciona no final
             if (stripos($content, '</head>') !== false) {
                 $content = str_ireplace('</head>', $tagsString . '</head>', $content);
             } else {
                 $content .= $tagsString;
             }
 
-            // O ETag deve ser baseado no conteúdo final (injetado) para evitar invalidações falsas
             $etag = '"' . sha1($content) . '"';
             $lastModified = gmdate('D, d M Y H:i:s', filemtime($filePath)) . ' GMT';
         } else {
             $etag = $this->buildEtag($servedPath);
             $lastModified = gmdate('D, d M Y H:i:s', filemtime($servedPath)) . ' GMT';
+            $content = file_get_contents($servedPath);
         }
 
         $response->header('ETag', $etag);
@@ -163,22 +167,9 @@ class FrontendHandler
             return $response->status(304)->send('');
         }
 
-        $ifModifiedSince = $this->getRequestHeader($request, 'If-Modified-Since');
-        if (!empty($ifModifiedSince) && strtotime($ifModifiedSince) >= filemtime($servedPath)) {
-            return $response->status(304)->send('');
-        }
-
-        // Se não injetou antes, pega o conteúdo agora (seja ele comprimido ou normal)
-        if (!$needsInjection) {
-            $content = file_get_contents($servedPath);
-        }
-
         return $response->header('Content-Type', $mimeType)->send($content);
     }
 
-    /**
-     * Faz proxy para o servidor de desenvolvimento (Vite, Next.js, etc)
-     */
     protected function proxyToDevServer(Request $request, Response $response): Response
     {
         $path = $request->getPath();
@@ -194,12 +185,9 @@ class FrontendHandler
         $headers = [];
         foreach ($request->getHeaders() as $name => $values) {
             $lowerName = strtolower($name);
-            // Remove o Accept-Encoding se formos injetar tags, para garantir que o Dev Server
-            // nos devolva HTML em plain text e não gzippado.
             if ($lowerName === 'accept-encoding' && !empty($this->additionalTags)) {
                 continue;
             }
-
             if ($lowerName !== 'host') {
                 $headers[] = $name . ': ' . (is_array($values) ? implode(', ', $values) : $values);
             }
@@ -222,42 +210,28 @@ class FrontendHandler
         $headerSize = curl_getinfo($ch, CURLINFO_HEADER_SIZE);
 
         if (curl_errno($ch)) {
-            $error = curl_error($ch);
-            return $response->status(502)->html(
-                '<h1>502 Bad Gateway</h1><p>' . htmlspecialchars($error) . '</p>'
-            );
+            return $response->status(502)->html('<h1>502 Bad Gateway</h1>');
         }
 
         $resHeaders = substr($result, 0, $headerSize);
         $resBody = substr($result, $headerSize);
 
         $response = $response->status($httpCode);
-
         $isHtml = false;
-        $headerLines = explode("\r\n", rtrim($resHeaders));
-        foreach ($headerLines as $line) {
+        foreach (explode("\r\n", rtrim($resHeaders)) as $line) {
             if (str_contains($line, ':')) {
                 [$key, $value] = explode(':', $line, 2);
                 $key = strtolower(trim($key));
-
-                if ($key === 'content-type' && str_contains(strtolower($value), 'text/html')) {
-                    $isHtml = true;
-                }
-
+                if ($key === 'content-type' && str_contains(strtolower($value), 'text/html')) $isHtml = true;
                 if (!in_array($key, ['transfer-encoding', 'connection', 'content-length', 'content-encoding'])) {
                     $response->header($key, trim($value));
                 }
             }
         }
 
-        // Se a resposta for um HTML e tivermos tags adicionais, injetamos no dev mode também
         if ($isHtml && !empty($this->additionalTags)) {
             $tagsString = implode("\n", $this->additionalTags) . "\n";
-            if (stripos($resBody, '</head>') !== false) {
-                $resBody = str_ireplace('</head>', $tagsString . '</head>', $resBody);
-            } else {
-                $resBody .= $tagsString;
-            }
+            $resBody = stripos($resBody, '</head>') !== false ? str_ireplace('</head>', $tagsString . '</head>', $resBody) : $resBody . $tagsString;
         }
 
         return $response->send($resBody);
@@ -267,49 +241,26 @@ class FrontendHandler
     {
         $cleanPath = preg_replace('/\.(gz|br)$/', '', $path);
         $extension = pathinfo($cleanPath, PATHINFO_EXTENSION);
-
-        $mimes = [
-            'html' => 'text/html',
-            'js'   => 'application/javascript',
-            'css'  => 'text/css',
-            'json' => 'application/json',
-            'png'  => 'image/png',
-            'jpg'  => 'image/jpeg',
-            'gif'  => 'image/gif',
-            'svg'  => 'image/svg+xml',
-            'ico'  => 'image/x-icon',
-            'webp' => 'image/webp',
-            'woff' => 'font/woff',
-            'woff2'=> 'font/woff2',
-        ];
-
+        $mimes = ['html' => 'text/html', 'js' => 'application/javascript', 'css' => 'text/css', 'json' => 'application/json', 'png' => 'image/png', 'jpg' => 'image/jpeg', 'gif' => 'image/gif', 'svg' => 'image/svg+xml', 'ico' => 'image/x-icon', 'webp' => 'image/webp', 'woff' => 'font/woff', 'woff2'=> 'font/woff2'];
         return $mimes[$extension] ?? 'application/octet-stream';
     }
 
     protected function resolveCachePolicy(string $path): string
     {
         $extension = strtolower(pathinfo(preg_replace('/\.(gz|br)$/', '', $path), PATHINFO_EXTENSION));
-        if ($extension === 'html') {
-            return 'no-cache, no-store, must-revalidate';
-        }
-        return 'public, max-age=31536000, immutable';
+        return $extension === 'html' ? 'no-cache, no-store, must-revalidate' : 'public, max-age=31536000, immutable';
     }
 
     protected function buildEtag(string $path): string
     {
         $stat = @stat($path);
-        if (!$stat) {
-            return '"0"';
-        }
-        return '"' . sha1($path . '|' . $stat['mtime'] . '|' . $stat['size']) . '"';
+        return $stat ? '"' . sha1($path . '|' . $stat['mtime'] . '|' . $stat['size']) . '"' : '"0"';
     }
 
     protected function getRequestHeader(Request $request, string $name): ?string
     {
         foreach ($request->getHeaders() as $key => $value) {
-            if (strcasecmp($key, $name) === 0) {
-                return is_array($value) ? implode(', ', $value) : $value;
-            }
+            if (strcasecmp($key, $name) === 0) return is_array($value) ? implode(', ', $value) : $value;
         }
         return null;
     }
