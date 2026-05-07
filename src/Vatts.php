@@ -26,6 +26,7 @@ class Vatts
      * - autoload_helpers: bool (default: true) - registra helpers globais
      * - security: array com headers de segurança e CSP
      * - rate_limit: array com configurações de rate limit
+     * - frontend_tags: array de tags html (strings) para serem injetadas no front-end
      */
     public static function init(array $config = []): Router
     {
@@ -96,8 +97,8 @@ class Vatts
         // registra rota RPC automaticamente
         $self->registerRpcRoute();
 
-        // registra fallback para frontend (prod/dev) automaticamente
-        $self->registerFrontendFallback();
+        // registra fallback para frontend (prod/dev) automaticamente com as tags extras
+        $self->registerFrontendFallback($config['frontend_tags'] ?? []);
 
         // carrega as rotas do projeto cliente, se existir
         $routesFile = $self->projectPath . DIRECTORY_SEPARATOR . 'app' . DIRECTORY_SEPARATOR . 'routes.php';
@@ -219,12 +220,12 @@ class Vatts
         });
     }
 
-    protected function registerFrontendFallback(): void
+    protected function registerFrontendFallback(array $additionalTags = []): void
     {
         $env = getenv('APP_ENV') ?: 'dev';
         $port = getenv('DEV_SERVER_PORT') ?: 3000;
 
-        $handler = new FrontendHandler($this->projectPath, $env, (int) $port);
+        $handler = new FrontendHandler($this->projectPath, $env, (int) $port, $additionalTags);
         $this->router->fallback($handler);
     }
 

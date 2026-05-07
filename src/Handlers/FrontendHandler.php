@@ -16,12 +16,14 @@ class FrontendHandler
     protected string $projectPath;
     protected string $environment;
     protected int $devServerPort;
+    protected array $additionalTags;
 
-    public function __construct(string $projectPath, string $environment = 'dev', int $devServerPort = 3000)
+    public function __construct(string $projectPath, string $environment = 'dev', int $devServerPort = 3000, array $additionalTags = [])
     {
         $this->projectPath = rtrim($projectPath, '/\\');
         $this->environment = $environment;
         $this->devServerPort = $devServerPort;
+        $this->additionalTags = $additionalTags;
     }
 
     /**
@@ -88,43 +90,40 @@ class FrontendHandler
 
         // Segurança e verificação de existência
         if (!$realFilePath || !str_starts_with($realFilePath, realpath($exportPath)) || !is_file($realFilePath)) {
-
-            $acceptEncoding = $_SERVER['HTTP_ACCEPT_ENCODING'] ?? '';
-
-            if (str_contains($acceptEncoding, 'br') && file_exists($filePath . '.br')) {
-                return $this->serveFile($filePath, $request, $response, 'public, max-age=31536000, immutable');
-            }
-
-            if (str_contains($acceptEncoding, 'gzip') && file_exists($filePath . '.gz')) {
-                return $this->serveFile($filePath, $request, $response, 'public, max-age=31536000, immutable');
-            }
-
-            return $this->serveFile($exportPath . 'index.html', $request, $response->status(404), 'no-cache, no-store, must-revalidate');
+            $fallbackPath = $exportPath . 'index.html';
+            return $this->serveFile($fallbackPath, $request, $response->status(404), 'no-cache, no-store, must-revalidate');
         }
 
         return $this->serveFile($realFilePath, $request, $response, $this->resolveCachePolicy($realFilePath));
     }
 
     /**
-     * Serve um arquivo específico tratando compressão Brotli/Gzip
+     * Serve um arquivo específico tratando compressão Brotli/Gzip e injeção de tags HTML
      */
     protected function serveFile(string $filePath, Request $request, Response $response, ?string $cacheControl = null): Response
     {
         $mimeType = $this->getMimeType($filePath);
+        $isHtml = ($mimeType === 'text/html');
+        $needsInjection = $isHtml && !empty($this->additionalTags);
+
         $encoding = null;
         $servedPath = $filePath;
 
-        $acceptEncoding = $_SERVER['HTTP_ACCEPT_ENCODING'] ?? '';
+        // Se precisarmos injetar tags dinamicamente, evitamos usar os arquivos pré-comprimidos
+        if (!$needsInjection) {
+            $acceptEncoding = $_SERVER['HTTP_ACCEPT_ENCODING'] ?? '';
 
-        if (str_contains($acceptEncoding, 'br') && file_exists($filePath . '.br')) {
-            $servedPath = $filePath . '.br';
-            $encoding = 'br';
+            if (str_contains($acceptEncoding, 'br') && file_exists($filePath . '.br')) {
+                $servedPath = $filePath . '.br';
+                $encoding = 'br';
+            }
+            elseif (str_contains($acceptEncoding, 'gzip') && file_exists($filePath . '.gz')) {
+                $servedPath = $filePath . '.gz';
+                $encoding = 'gzip';
+            }
         }
-        elseif (str_contains($acceptEncoding, 'gzip') && file_exists($filePath . '.gz')) {
-            $servedPath = $filePath . '.gz';
-            $encoding = 'gzip';
-        }
-        elseif (!file_exists($filePath)) {
+
+        if (!file_exists($servedPath) && !file_exists($filePath)) {
             return $response->status(404)->send('File not found');
         }
 
@@ -136,8 +135,26 @@ class FrontendHandler
         $cacheControl = $cacheControl ?? $this->resolveCachePolicy($servedPath);
         $response->header('Cache-Control', $cacheControl);
 
-        $etag = $this->buildEtag($servedPath);
-        $lastModified = gmdate('D, d M Y H:i:s', filemtime($servedPath)) . ' GMT';
+        // Se precisa injetar, lemos o conteúdo antes para injetar as tags e recalcular o ETag
+        if ($needsInjection) {
+            $content = file_get_contents($filePath);
+            $tagsString = implode("\n", $this->additionalTags) . "\n";
+
+            // Tenta injetar antes do fechamento do head, senão apenas adiciona no final
+            if (stripos($content, '</head>') !== false) {
+                $content = str_ireplace('</head>', $tagsString . '</head>', $content);
+            } else {
+                $content .= $tagsString;
+            }
+
+            // O ETag deve ser baseado no conteúdo final (injetado) para evitar invalidações falsas
+            $etag = '"' . sha1($content) . '"';
+            $lastModified = gmdate('D, d M Y H:i:s', filemtime($filePath)) . ' GMT';
+        } else {
+            $etag = $this->buildEtag($servedPath);
+            $lastModified = gmdate('D, d M Y H:i:s', filemtime($servedPath)) . ' GMT';
+        }
+
         $response->header('ETag', $etag);
         $response->header('Last-Modified', $lastModified);
 
@@ -151,7 +168,11 @@ class FrontendHandler
             return $response->status(304)->send('');
         }
 
-        $content = file_get_contents($servedPath);
+        // Se não injetou antes, pega o conteúdo agora (seja ele comprimido ou normal)
+        if (!$needsInjection) {
+            $content = file_get_contents($servedPath);
+        }
+
         return $response->header('Content-Type', $mimeType)->send($content);
     }
 
@@ -172,7 +193,14 @@ class FrontendHandler
 
         $headers = [];
         foreach ($request->getHeaders() as $name => $values) {
-            if (strtolower($name) !== 'host') {
+            $lowerName = strtolower($name);
+            // Remove o Accept-Encoding se formos injetar tags, para garantir que o Dev Server
+            // nos devolva HTML em plain text e não gzippado.
+            if ($lowerName === 'accept-encoding' && !empty($this->additionalTags)) {
+                continue;
+            }
+
+            if ($lowerName !== 'host') {
                 $headers[] = $name . ': ' . (is_array($values) ? implode(', ', $values) : $values);
             }
         }
@@ -205,14 +233,30 @@ class FrontendHandler
 
         $response = $response->status($httpCode);
 
+        $isHtml = false;
         $headerLines = explode("\r\n", rtrim($resHeaders));
         foreach ($headerLines as $line) {
             if (str_contains($line, ':')) {
                 [$key, $value] = explode(':', $line, 2);
                 $key = strtolower(trim($key));
-                if (!in_array($key, ['transfer-encoding', 'connection', 'content-length'])) {
+
+                if ($key === 'content-type' && str_contains(strtolower($value), 'text/html')) {
+                    $isHtml = true;
+                }
+
+                if (!in_array($key, ['transfer-encoding', 'connection', 'content-length', 'content-encoding'])) {
                     $response->header($key, trim($value));
                 }
+            }
+        }
+
+        // Se a resposta for um HTML e tivermos tags adicionais, injetamos no dev mode também
+        if ($isHtml && !empty($this->additionalTags)) {
+            $tagsString = implode("\n", $this->additionalTags) . "\n";
+            if (stripos($resBody, '</head>') !== false) {
+                $resBody = str_ireplace('</head>', $tagsString . '</head>', $resBody);
+            } else {
+                $resBody .= $tagsString;
             }
         }
 
