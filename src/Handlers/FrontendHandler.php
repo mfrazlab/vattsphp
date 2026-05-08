@@ -50,7 +50,7 @@ class FrontendHandler
             return null;
         }
 
-        $servePath = $this->projectPath . DIRECTORY_SEPARATOR . 'serve' . DIRECTORY_SEPARATOR;
+        $servePath = $this->projectPath . DIRECTORY_SEPARATOR . 'public' . DIRECTORY_SEPARATOR;
         $filePath = $servePath . $uri;
 
         // Verifica se o arquivo existe (ou se existe uma versão comprimida dele)
@@ -72,7 +72,7 @@ class FrontendHandler
     protected function serveStaticOrSPA(Request $request, Response $response): Response
     {
         $uri = ltrim($request->getPath(), '/');
-        $exportPath = $this->projectPath . DIRECTORY_SEPARATOR . 'serve' . DIRECTORY_SEPARATOR . 'dist' . DIRECTORY_SEPARATOR;
+        $exportPath = $this->projectPath . DIRECTORY_SEPARATOR . 'public' . DIRECTORY_SEPARATOR . 'dist' . DIRECTORY_SEPARATOR;
 
         $targetFile = empty($uri) ? 'index.html' : $uri;
         $filePath = $exportPath . $targetFile;
