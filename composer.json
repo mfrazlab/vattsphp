@@ -25,5 +25,8 @@
         "files": [
             "src/Utils/helpers.php"
         ]
-    }
+    },
+    "bin": [
+        "vatts"
+    ]
 }

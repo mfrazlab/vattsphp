@@ -1,0 +1,60 @@
+#!/usr/bin/env php
+<?php
+
+// Tenta encontrar o autoloader em diferentes locais
+$autoloaders = [
+    __DIR__ . '/vendor/autoload.php',      // Desenvolvimento local (raiz da lib)
+    __DIR__ . '/../../autoload.php',      // Instalado via Composer (vendor/mfrazlab/vattsphp/vatts)
+];
+
+$loaded = false;
+foreach ($autoloaders as $file) {
+    if (file_exists($file)) {
+        require $file;
+        $loaded = true;
+        break;
+    }
+}
+
+if (!$loaded) {
+    fwrite(STDERR, "Error: Autoloader not found. Please run 'composer install'.\n");
+    exit(1);
+}
+
+use Vatts\Console\ConsoleApplication;
+use Vatts\Console\Commands\MakeController;
+use Vatts\Console\Commands\MakeModel;
+use Vatts\Console\Commands\MakeMiddleware;
+
+$app = new ConsoleApplication();
+
+// Registro de comandos core
+$app->registerCommand(new MakeController());
+$app->registerCommand(new MakeModel());
+$app->registerCommand(new MakeMiddleware());
+
+// Autoload de comandos do projeto (app/commands)
+$projectPath = getcwd();
+$commandsDir = $projectPath . DIRECTORY_SEPARATOR . 'app' . DIRECTORY_SEPARATOR . 'commands';
+
+if (is_dir($commandsDir)) {
+    $iterator = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($commandsDir));
+    foreach ($iterator as $file) {
+        if ($file->isFile() && $file->getExtension() === 'php') {
+            require_once $file->getPathname();
+
+            // Tenta descobrir a classe definida no arquivo
+            $content = file_get_contents($file->getPathname());
+            if (preg_match('/class\s+([a-zA-Z0-9_\\\\]+)\s+extends\s+Command/', $content, $matches)) {
+                $className = $matches[1];
+                // Se o namespace não estiver completo no regex, precisamos resolver
+                // Mas como usamos require_once, se a classe estiver correta, class_exists funciona
+                if (class_exists($className)) {
+                    $app->registerCommand(new $className());
+                }
+            }
+        }
+    }
+}
+
+$app->run($argv);
