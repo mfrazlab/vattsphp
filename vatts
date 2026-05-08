@@ -1,10 +1,9 @@
 #!/usr/bin/env php
 <?php
 
-// Tenta encontrar o autoloader em diferentes locais
 $autoloaders = [
-    __DIR__ . '/vendor/autoload.php',      // Desenvolvimento local (raiz da lib)
-    __DIR__ . '/../../autoload.php',      // Instalado via Composer (vendor/mfrazlab/vattsphp/vatts)
+    __DIR__ . '/vendor/autoload.php',
+    __DIR__ . '/../../autoload.php',
 ];
 
 $loaded = false;
@@ -25,6 +24,7 @@ use Vatts\Console\ConsoleApplication;
 use Vatts\Console\Commands\MakeController;
 use Vatts\Console\Commands\MakeModel;
 use Vatts\Console\Commands\MakeMiddleware;
+// use Vatts\Console\Command; // Descomente ou ajuste caso precise referenciar a classe base
 
 $app = new ConsoleApplication();
 
@@ -33,24 +33,38 @@ $app->registerCommand(new MakeController());
 $app->registerCommand(new MakeModel());
 $app->registerCommand(new MakeMiddleware());
 
-// Autoload de comandos do projeto (app/commands)
-$projectPath = getcwd();
-$commandsDir = $projectPath . DIRECTORY_SEPARATOR . 'app' . DIRECTORY_SEPARATOR . 'commands';
+// Autoload de comandos do projeto
+$commandsDir = getcwd() . DIRECTORY_SEPARATOR . 'app' . DIRECTORY_SEPARATOR . 'commands';
 
 if (is_dir($commandsDir)) {
     $iterator = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($commandsDir));
+
     foreach ($iterator as $file) {
         if ($file->isFile() && $file->getExtension() === 'php') {
+
+            // 1. Fotografa as classes existentes antes do require
+            $classesBefore = get_declared_classes();
+
             require_once $file->getPathname();
 
-            // Tenta descobrir a classe definida no arquivo
-            $content = file_get_contents($file->getPathname());
-            if (preg_match('/class\s+([a-zA-Z0-9_\\\\]+)\s+extends\s+Command/', $content, $matches)) {
-                $className = $matches[1];
-                // Se o namespace não estiver completo no regex, precisamos resolver
-                // Mas como usamos require_once, se a classe estiver correta, class_exists funciona
-                if (class_exists($className)) {
-                    $app->registerCommand(new $className());
+            // 2. Compara com as classes após o require para descobrir a classe nova
+            $classesAfter = get_declared_classes();
+            $newClasses = array_diff($classesAfter, $classesBefore);
+
+            foreach ($newClasses as $className) {
+                try {
+                    $reflection = new \ReflectionClass($className);
+
+                    // 3. Garante que é uma classe instanciável (ignora abstract/interfaces)
+                    // e que realmente é um comando válido antes de registrar
+                    if (!$reflection->isAbstract()) {
+                        // Opcional: Você pode adicionar && $reflection->isSubclassOf(Command::class) no IF acima
+                        // para garantir que a classe herda da sua base de comandos.
+
+                        $app->registerCommand($reflection->newInstance());
+                    }
+                } catch (\ReflectionException $e) {
+                    continue; // Ignora se houver problema ao refletir a classe
                 }
             }
         }
