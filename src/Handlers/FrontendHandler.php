@@ -46,10 +46,11 @@ class FrontendHandler
     {
         $uri = ltrim($request->getPath(), '/');
 
-        if (empty($uri) || str_starts_with($uri, 'dist/')) {
+        if (empty($uri)) {
             return null;
         }
 
+        // Tenta servir arquivos estáticos extras (que não são do build do front) da pasta "public"
         $servePath = $this->projectPath . DIRECTORY_SEPARATOR . 'public' . DIRECTORY_SEPARATOR;
         $filePath = $servePath . $uri;
 
@@ -58,10 +59,6 @@ class FrontendHandler
             $realPath = realpath($filePath) ?: realpath($filePath . '.gz') ?: realpath($filePath . '.br');
 
             if ($realPath && str_starts_with($realPath, realpath($servePath))) {
-                $distPath = realpath($servePath . 'dist');
-                if ($distPath && str_starts_with($realPath, $distPath)) {
-                    return null;
-                }
                 return $this->serveFile($filePath, $request, $response, 'public, max-age=3600');
             }
         }
@@ -72,12 +69,14 @@ class FrontendHandler
     protected function serveStaticOrSPA(Request $request, Response $response): Response
     {
         $uri = ltrim($request->getPath(), '/');
-        $exportPath = $this->projectPath . DIRECTORY_SEPARATOR . 'public' . DIRECTORY_SEPARATOR . 'dist' . DIRECTORY_SEPARATOR;
+
+        // Alterado para buscar os arquivos do build do frontend na pasta "serve"
+        $exportPath = $this->projectPath . DIRECTORY_SEPARATOR . 'serve' . DIRECTORY_SEPARATOR;
 
         $targetFile = empty($uri) ? 'index.html' : $uri;
         $filePath = $exportPath . $targetFile;
 
-        // Alteração: Verifica se o arquivo original OU versões comprimidas existem
+        // Verifica se o arquivo original OU versões comprimidas existem na pasta "serve"
         if (!$this->fileExistsOrCompressed($filePath)) {
             $fallbackPath = $exportPath . 'index.html';
             return $this->serveFile($fallbackPath, $request, $response, 'no-cache, no-store, must-revalidate');
