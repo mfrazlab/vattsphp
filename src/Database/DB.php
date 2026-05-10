@@ -54,7 +54,6 @@ class DB
             if ($driver === 'sqlite') {
                 $database = self::$config['database'] ?? ':memory:';
                 $dsn = "sqlite:{$database}";
-                error_log($database);
                 self::$pdo = new PDO($dsn);
             } else {
                 $host = self::$config['host'] ?? '127.0.0.1';
