@@ -40,7 +40,6 @@ class Router
 
     /**
      * Agrupa rotas sob um prefixo ou conjunto de middlewares
-     * Ex: $app->group(['prefix' => '/admin', 'middleware' => 'auth'], function($router) { ... })
      */
     public function group(array $attributes, callable $callback): void
     {
@@ -80,9 +79,14 @@ class Router
             }
         }
 
-        // Formata o pattern final com o prefixo
-        $finalPattern = $prefix . '/' . trim($pattern, '/');
-        $finalPattern = ($finalPattern === '//') ? '/' : $finalPattern;
+        // Normalização do pattern final:
+        // 1. Remove barras extras no final do prefixo e início do pattern
+        // 2. Garante que o pattern final não termine com barra, a menos que seja a própria raiz '/'
+        $finalPattern = rtrim($prefix, '/') . '/' . ltrim($pattern, '/');
+
+        if ($finalPattern !== '/') {
+            $finalPattern = rtrim($finalPattern, '/');
+        }
 
         $route = new Route($method, $finalPattern, $handler);
 
@@ -105,9 +109,13 @@ class Router
         $method = $request->getMethod();
         $path = $request->getPath();
 
+        // Normaliza o path buscado para bater com a rota registrada (remove slash final se não for raiz)
+        if ($path !== '/') {
+            $path = rtrim($path, '/');
+        }
+
         foreach ($this->globalMiddlewares as $middleware) {
             $result = $this->resolveMiddleware($middleware, $request, $response);
-
             if ($result instanceof Response) return $result;
             if ($result instanceof Request) $request = $result;
         }
@@ -132,18 +140,14 @@ class Router
             return $response->status(404)->json(['error' => 'Route not found']);
         }
 
-        // Define os parâmetros da URL no request (sempre array)
         $request->setParams($route->extractParams($path));
 
-        // Executa middlewares
         foreach ($route->getMiddlewares() as $middleware) {
             $result = $this->resolveMiddleware($middleware, $request, $response);
-
             if ($result instanceof Response) return $result;
             if ($result instanceof Request) $request = $result;
         }
 
-        // Executa o handler final
         try {
             return $route->call($request, $response);
         } catch (\Throwable $e) {
@@ -151,9 +155,6 @@ class Router
         }
     }
 
-    /**
-     * Resolve a execução do middleware (Callable, String/Classe ou Objeto)
-     */
     protected function resolveMiddleware($middleware, Request $request, Response $response)
     {
         if (is_callable($middleware)) {
@@ -166,7 +167,6 @@ class Router
                 return $instance->handle($request, $response);
             }
 
-            // Busca por alias/name definido na classe do middleware
             foreach (get_declared_classes() as $class) {
                 if (is_subclass_of($class, \Vatts\Utils\Middleware::class)) {
                     if (property_exists($class, 'name') && $class::$name === $middleware) {
@@ -190,14 +190,12 @@ class Router
         $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
         $path = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH);
 
-        // Remove prefixo de subpastas se necessário
         $scriptPath = dirname($_SERVER['SCRIPT_NAME'] ?? '');
-        if ($scriptPath !== '/' && strpos($path, $scriptPath) === 0) {
+        if ($scriptPath !== '/' && $scriptPath !== '.' && strpos($path, $scriptPath) === 0) {
             $path = substr($path, strlen($scriptPath));
         }
         $path = $path ?: '/';
 
-        // Parse do Body
         $body = [];
         $contentType = $_SERVER['CONTENT_TYPE'] ?? '';
         if (in_array($method, ['POST', 'PUT', 'PATCH'])) {
@@ -218,7 +216,6 @@ class Router
 
         $response = $this->dispatch($request, $response);
 
-        // Envio da resposta
         http_response_code($response->getStatus());
         foreach ($response->getHeaders() as $key => $value) {
             if (is_array($value)) {
@@ -236,4 +233,3 @@ class Router
         }
     }
 }
-
