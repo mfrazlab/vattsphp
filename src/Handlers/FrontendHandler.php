@@ -46,11 +46,13 @@ class FrontendHandler
     {
         $uri = ltrim($request->getPath(), '/');
 
-        if (empty($uri)) {
+        // Ignora requisições que são especificamente do build do frontend.
+        // O restante dos arquivos cai na regra da pasta public/.
+        if (empty($uri) || $uri === 'index.html' || str_starts_with($uri, 'dist/') || str_starts_with($uri, '.vatts/')) {
             return null;
         }
 
-        // Tenta servir arquivos estáticos extras (que não são do build do front) da pasta "public"
+        // Tenta servir arquivos estáticos extras da pasta "public"
         $servePath = $this->projectPath . DIRECTORY_SEPARATOR . 'public' . DIRECTORY_SEPARATOR;
         $filePath = $servePath . $uri;
 
@@ -70,13 +72,13 @@ class FrontendHandler
     {
         $uri = ltrim($request->getPath(), '/');
 
-        // Alterado para buscar os arquivos do build do frontend na pasta "serve"
-        $exportPath = $this->projectPath . DIRECTORY_SEPARATOR . 'serve' . DIRECTORY_SEPARATOR;
+        // Arquivos do build do frontend (index.html, dist/, .vatts/) ficam em serve/dist/
+        $exportPath = $this->projectPath . DIRECTORY_SEPARATOR . 'serve' . DIRECTORY_SEPARATOR . 'dist' . DIRECTORY_SEPARATOR;
 
         $targetFile = empty($uri) ? 'index.html' : $uri;
         $filePath = $exportPath . $targetFile;
 
-        // Verifica se o arquivo original OU versões comprimidas existem na pasta "serve"
+        // Verifica se o arquivo original OU versões comprimidas existem na pasta "serve/dist"
         if (!$this->fileExistsOrCompressed($filePath)) {
             $fallbackPath = $exportPath . 'index.html';
             return $this->serveFile($fallbackPath, $request, $response, 'no-cache, no-store, must-revalidate');
