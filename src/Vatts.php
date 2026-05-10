@@ -83,6 +83,11 @@ class Vatts
         $self->router->addMiddleware(new SecurityHeadersMiddleware($securityConfig));
         $self->router->addMiddleware(new RateLimitMiddleware($rateLimitConfig));
 
+        // Registra helpers globais
+        if ($config['autoload_helpers'] ?? true) {
+            $self->autoloadHelpers();
+        }
+
         // auto-require models e controllers se configurado
         if ($config['autoload_models'] ?? true) {
             $self->autoloadModels();
@@ -163,6 +168,21 @@ class Vatts
     {
         // Inicializa o seu próprio DB Manager usando PDO
         DB::init($dbConfig);
+    }
+
+    protected function autoloadHelpers(): void
+    {
+        // Carrega os helpers nativos do framework (onde o env() está)
+        $frameworkHelpers = __DIR__ . DIRECTORY_SEPARATOR . 'helpers.php';
+        if (is_file($frameworkHelpers)) {
+            require_once $frameworkHelpers;
+        }
+
+        // Carrega helpers do projeto cliente, se existir
+        $projectHelpers = $this->projectPath . DIRECTORY_SEPARATOR . 'app' . DIRECTORY_SEPARATOR . 'helpers.php';
+        if (is_file($projectHelpers)) {
+            require_once $projectHelpers;
+        }
     }
 
     protected function autoloadMiddlewares(): void
