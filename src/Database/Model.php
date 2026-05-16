@@ -15,7 +15,7 @@ use Exception;
  * @method static static orderBy(string $column, string $direction = 'ASC')
  * @method static static limit(int $limit)
  * @method static int count()
- * @method static static[] get(mixed ...$args)
+ * @method static static get(mixed ...$args)
  * @method static static|null find(mixed ...$args)
  * @method static static|null first()
  * @method static static[] all()

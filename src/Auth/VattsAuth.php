@@ -30,6 +30,7 @@ class VattsAuth
 
     /**
      * Retorna a sessão atual do usuário autenticado para uso interno no backend
+     * Valida segurança contra Hijacking e inatividade
      *
      * @return array|null Retorna os dados do usuário ou null se não estiver logado
      */
@@ -38,7 +39,39 @@ class VattsAuth
         if (session_status() === PHP_SESSION_NONE) {
             session_start();
         }
-        return $_SESSION['vatts_auth_user'] ?? null;
+
+        if (!isset($_SESSION['vatts_auth_user'])) {
+            return null;
+        }
+
+        // --- VERIFICAÇÕES DE SEGURANÇA (ANTI-HIJACKING) ---
+        $currentUa = $_SERVER['HTTP_USER_AGENT'] ?? 'unknown';
+        $currentIp = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
+
+        // 1. Valida se o navegador/dispositivo mudou repentinamente
+        if (isset($_SESSION['vatts_auth_ua']) && $_SESSION['vatts_auth_ua'] !== $currentUa) {
+            $this->signOut();
+            return null;
+        }
+
+        // 2. Valida se o IP mudou (Opcional, pois redes móveis mudam muito de IP)
+        $bindIp = $this->config['session']['bind_ip'] ?? false;
+        if ($bindIp && isset($_SESSION['vatts_auth_ip']) && $_SESSION['vatts_auth_ip'] !== $currentIp) {
+            $this->signOut();
+            return null;
+        }
+
+        // 3. Valida Inatividade (Idle Timeout)
+        $idleTimeout = $this->config['session']['idle_timeout'] ?? 7200; // Padrão: 2 horas (7200s)
+        if (isset($_SESSION['vatts_auth_last_activity']) && (time() - $_SESSION['vatts_auth_last_activity']) > $idleTimeout) {
+            $this->signOut();
+            return null;
+        }
+
+        // Atualiza a última atividade
+        $_SESSION['vatts_auth_last_activity'] = time();
+
+        return $_SESSION['vatts_auth_user'];
     }
 
     /**
@@ -51,7 +84,18 @@ class VattsAuth
         if (session_status() === PHP_SESSION_NONE) {
             session_start();
         }
-        unset($_SESSION['vatts_auth_user']);
+
+        // Limpa todos os dados de segurança e o usuário
+        unset(
+            $_SESSION['vatts_auth_user'],
+            $_SESSION['vatts_auth_ua'],
+            $_SESSION['vatts_auth_ip'],
+            $_SESSION['vatts_auth_last_activity']
+        );
+
+        // Destrói a sessão completamente e apaga o cookie
+        session_destroy();
+
         return true;
     }
 
@@ -64,11 +108,14 @@ class VattsAuth
         $lifetime = max(0, $lifetimeDays * 86400);
 
         $secure = $sessionConfig['secure'] ?? (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off');
-        $httpOnly = $sessionConfig['httponly'] ?? true;
-        $sameSite = $sessionConfig['samesite'] ?? 'Lax';
+        $httpOnly = $sessionConfig['httponly'] ?? true; // Crucial contra XSS
+        $sameSite = $sessionConfig['samesite'] ?? 'Lax'; // 'Strict' é ainda mais seguro, se o app permitir
         $path = $sessionConfig['path'] ?? '/';
         $domain = $sessionConfig['domain'] ?? '';
 
+        // --- HARDENING DO PHP SESSIONS ---
+        ini_set('session.use_strict_mode', '1'); // Impede Session Fixation (rejeita IDs criados pelo atacante)
+        ini_set('session.use_only_cookies', '1'); // Força uso exclusivo de cookies (nada de ID na URL)
         ini_set('session.gc_maxlifetime', (string) $lifetime);
 
         if (PHP_VERSION_ID >= 70300) {
@@ -116,6 +163,11 @@ class VattsAuth
         $router->get('/api/auth/csrf', function (Request $req, Response $res) {
             // Token criptograficamente seguro equivalente ao do Node.js
             $csrfToken = rtrim(strtr(base64_encode(random_bytes(32)), '+/', '-_'), '=');
+
+            // Salva na sessão para validação posterior (Recomendado)
+            if (session_status() === PHP_SESSION_NONE) session_start();
+            $_SESSION['csrf_token'] = $csrfToken;
+
             return $res->json(['csrfToken' => $csrfToken]);
         });
 
@@ -165,9 +217,18 @@ class VattsAuth
                 $userToSave = call_user_func($this->config['callbacks']['jwt'], $userToSave);
             }
 
-            // Salva na sessão do PHP
-            $_SESSION['vatts_auth_user'] = $userToSave;
+            // Garante que a sessão tá iniciada
+            if (session_status() === PHP_SESSION_NONE) session_start();
+
+            // Salva na sessão do PHP e gera um novo ID de sessão (Mitiga Session Fixation na hora do login)
             session_regenerate_id(true);
+
+            $_SESSION['vatts_auth_user'] = $userToSave;
+
+            // --- REGISTRA OS DADOS PARA SEGURANÇA (FINGERPRINTING) ---
+            $_SESSION['vatts_auth_ua'] = $_SERVER['HTTP_USER_AGENT'] ?? 'unknown';
+            $_SESSION['vatts_auth_ip'] = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
+            $_SESSION['vatts_auth_last_activity'] = time();
 
             return $res->json([
                 'success' => true,
