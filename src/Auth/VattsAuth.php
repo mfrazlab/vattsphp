@@ -246,10 +246,14 @@ class VattsAuth
         // GET /api/auth/popup-callback
 // GET /api/auth/popup-callback
         $router->get('/api/auth/popup-callback', function (Request $req, Response $res) {
+
+            // A MÁGICA ESTÁ AQUI: Diz pro navegador não "cortar" a comunicação entre a aba principal e o popup
+            header('Cross-Origin-Opener-Policy: unsafe-none');
+            header('Cross-Origin-Resource-Policy: cross-origin');
+            header('Cross-Origin-Embedder-Policy: unsafe-none');
+
             $query = $req->getQuery();
 
-            // Frameworks podem passar query params como booleanos REAIS ou strings.
-            // Isso garante que ele pegue "true", "1" ou true booleano.
             $successParam = $query['success'] ?? false;
             $success = $successParam === 'true' || $successParam === true || $successParam === '1' || $successParam === 1;
 
@@ -257,7 +261,6 @@ class VattsAuth
             $provider = $query['provider'] ?? 'unknown';
             $callbackUrl = $query['callbackUrl'] ?? '/';
 
-            // Usar json_encode BLINDA o código contra erros de sintaxe no Javascript
             $payload = [
                 'type' => $success ? 'oauth-success' : 'oauth-error',
                 'provider' => $provider,
@@ -315,21 +318,19 @@ class VattsAuth
         <script>
             (function() {
                 try {
-                    // O json_encode do PHP já cospe o objeto Javascript certinho
                     const payload = {$jsonPayload};
-                    console.log("[Vatts.js OAuth Popup] Preparando para enviar payload:", payload);
+                    console.log("[Vatts.js OAuth] Tentando postMessage com payload:", payload);
                     
-                    if (window.opener && !window.opener.closed) {
+                    if (window.opener) {
                         window.opener.postMessage(payload, "*");
-                        console.log("[Vatts.js OAuth Popup] Mensagem enviada com sucesso para o opener!");
+                        console.log("[Vatts.js OAuth] Mensagem enviada com sucesso!");
                     } else {
-                        console.error("[Vatts.js OAuth Popup] window.opener não foi encontrado ou a aba principal foi fechada.");
+                        console.error("[Vatts.js OAuth] window.opener AINDA está nulo. O navegador bloqueou a referência.");
                     }
                     
-                    // Aumentei pra 1.5s só pro React ter tempo de respirar e dar o fetchSession antes da janela sumir
-                    setTimeout(() => window.close(), 1500);
+                    setTimeout(() => window.close(), 1000);
                 } catch (e) { 
-                    console.error("[Vatts.js OAuth Popup] Erro Crítico:", e); 
+                    console.error("[Vatts.js OAuth] Erro Crítico:", e); 
                 }
             })();
         </script>
@@ -337,6 +338,7 @@ class VattsAuth
     </html>
     HTML;
 
+            // Dependendo do seu framework (parece Leaf PHP ou similar), o header() nativo já resolve.
             return $res->html($html);
         });
     }
