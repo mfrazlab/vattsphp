@@ -276,65 +276,51 @@ class VattsAuth
 
             $headingText = $success ? "✓ Autenticação bem-sucedida" : "✗ Erro na autenticação";
             $messageText = $success ? "Fechando janela..." : ($error ?: "Algo deu errado");
-
+            $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) ? "https://" : "http://";
+            $safeOrigin = $protocol . $_SERVER['HTTP_HOST'];
             $html = <<<HTML
-    <!DOCTYPE html>
-    <html>
-    <head>
-        <meta charset="UTF-8">
-        <title>Authenticating...</title>
-        <style>
-            body { 
-                font-family: sans-serif; 
-                display: flex; 
-                justify-content: center; 
-                align-items: center; 
-                height: 100vh; 
-                margin: 0; 
-                background: #000000; 
-                color: #ffffff; 
-            }
-            .container { text-align: center; }
-            .spinner { 
-                border: 3px solid rgba(255,255,255,0.05); 
-                border-radius: 50%; 
-                border-top: 3px solid #00e5ff; 
-                width: 40px; 
-                height: 40px; 
-                animation: spin 1s linear infinite; 
-                margin: 0 auto 20px; 
-            }
-            @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-            h2 { margin: 0; font-size: 24px; font-weight: 500; }
-            p { margin: 10px 0 0; opacity: 0.7; font-size: 14px; }
-        </style>
-    </head>
-    <body>
-        <div class="container">
-            <div class="spinner"></div>
-            <h2>{$headingText}</h2>
-            <p>{$messageText}</p>
-        </div>
-        <script>
-            (function() {
-                try {
-                    const payload = {$jsonPayload};
-                    
-                    if (window.opener) {
-                        window.opener.postMessage(payload, "*");
-                    } else {
-                        console.error("[Vatts.js OAuth] window.opener AINDA está nulo. O navegador bloqueou a referência.");
-                    }
-                    
-                    setTimeout(() => window.close(), 1000);
-                } catch (e) { 
-                    console.error("[Vatts.js OAuth] Erro Crítico:", e); 
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Authenticating...</title>
+    <style>
+        body { font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background: #000000; color: #ffffff; }
+        .container { text-align: center; }
+        .spinner { border: 3px solid rgba(255,255,255,0.05); border-radius: 50%; border-top: 3px solid #00e5ff; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto 20px; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        h2 { margin: 0; font-size: 24px; font-weight: 500; }
+        p { margin: 10px 0 0; opacity: 0.7; font-size: 14px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="spinner"></div>
+        <h2>{$headingText}</h2>
+        <p>{$messageText}</p>
+    </div>
+    <script>
+        (function() {
+            try {
+                const payload = {$jsonPayload};
+                const targetOrigin = "{$safeOrigin}"; // <-- ORIGEM RESTRITA AQUI
+                
+                if (window.opener) {
+                    // Removemos o "*" e colocamos a origem exata do seu site
+                    window.opener.postMessage(payload, targetOrigin);
+                } else {
+                    console.error("[Vatts.js OAuth] window.opener AINDA está nulo. O navegador bloqueou a referência.");
                 }
-            })();
-        </script>
-    </body>
-    </html>
-    HTML;
+                
+                setTimeout(() => window.close(), 1000);
+            } catch (e) { 
+                console.error("[Vatts.js OAuth] Erro Crítico:", e); 
+            }
+        })();
+    </script>
+</body>
+</html>
+HTML;
 
             // Dependendo do seu framework (parece Leaf PHP ou similar), o header() nativo já resolve.
             return $res->html($html);
