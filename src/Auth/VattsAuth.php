@@ -244,6 +244,7 @@ class VattsAuth
         });
 
         // GET /api/auth/popup-callback
+        // GET /api/auth/popup-callback
         $router->get('/api/auth/popup-callback', function (Request $req, Response $res) {
             $query = $req->getQuery();
             $success = ($query['success'] ?? '') === 'true';
@@ -253,6 +254,11 @@ class VattsAuth
 
             $type = $success ? "'oauth-success'" : "'oauth-error'";
             $errorJs = $error ? "\"$error\"" : "'Authentication failed'";
+
+            // Resolvemos os textos ANTES do Heredoc
+            $headingText = $success ? "✓ Autenticação bem-sucedida" : "✗ Erro na autenticação";
+            $messageText = $success ? "Fechando janela..." : ($error ?: "Algo deu errado");
+            $jsPayload = $success ? "callbackUrl: '{$callbackUrl}'" : "error: {$errorJs}";
 
             $html = <<<HTML
             <!DOCTYPE html>
@@ -272,8 +278,8 @@ class VattsAuth
             <body>
                 <div class="container">
                     <div class="spinner"></div>
-                    <h2>" . ($success ? "✓ Autenticação bem-sucedida" : "✗ Erro na autenticação") . "</h2>
-                    <p>" . ($success ? "Fechando janela..." : ($error ?: "Algo deu errado")) . "</p>
+                    <h2>{$headingText}</h2>
+                    <p>{$messageText}</p>
                 </div>
                 <script>
                     (function() {
@@ -282,7 +288,7 @@ class VattsAuth
                                 window.opener.postMessage({
                                     type: {$type},
                                     provider: "{$provider}",
-                                    " . ($success ? "callbackUrl: '{$callbackUrl}'" : "error: {$errorJs}") . "
+                                    {$jsPayload}
                                 }, window.location.origin);
                             }
                             setTimeout(() => window.close(), 1000);
