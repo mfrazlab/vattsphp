@@ -247,18 +247,32 @@ class VattsAuth
 // GET /api/auth/popup-callback
         $router->get('/api/auth/popup-callback', function (Request $req, Response $res) {
             $query = $req->getQuery();
-            $success = ($query['success'] ?? '') === 'true';
+
+            // Frameworks podem passar query params como booleanos REAIS ou strings.
+            // Isso garante que ele pegue "true", "1" ou true booleano.
+            $successParam = $query['success'] ?? false;
+            $success = $successParam === 'true' || $successParam === true || $successParam === '1' || $successParam === 1;
+
             $error = $query['error'] ?? null;
             $provider = $query['provider'] ?? 'unknown';
             $callbackUrl = $query['callbackUrl'] ?? '/';
 
-            $type = $success ? "'oauth-success'" : "'oauth-error'";
-            $errorJs = $error ? "\"$error\"" : "'Authentication failed'";
+            // Usar json_encode BLINDA o código contra erros de sintaxe no Javascript
+            $payload = [
+                'type' => $success ? 'oauth-success' : 'oauth-error',
+                'provider' => $provider,
+            ];
 
-            // Resolvemos os textos e o payload Javascript ANTES do bloco HTML
+            if ($success) {
+                $payload['callbackUrl'] = $callbackUrl;
+            } else {
+                $payload['error'] = $error ?: 'Authentication failed';
+            }
+
+            $jsonPayload = json_encode($payload);
+
             $headingText = $success ? "✓ Autenticação bem-sucedida" : "✗ Erro na autenticação";
             $messageText = $success ? "Fechando janela..." : ($error ?: "Algo deu errado");
-            $jsPayload = $success ? "callbackUrl: '{$callbackUrl}'" : "error: {$errorJs}";
 
             $html = <<<HTML
     <!DOCTYPE html>
@@ -301,16 +315,22 @@ class VattsAuth
         <script>
             (function() {
                 try {
-                    if (window.opener) {
-                        // O "*" garante que o frontend receba a mensagem independente da porta/domínio
-                        window.opener.postMessage({
-                            type: {$type},
-                            provider: "{$provider}",
-                            {$jsPayload}
-                        }, "*");
+                    // O json_encode do PHP já cospe o objeto Javascript certinho
+                    const payload = {$jsonPayload};
+                    console.log("[Vatts.js OAuth Popup] Preparando para enviar payload:", payload);
+                    
+                    if (window.opener && !window.opener.closed) {
+                        window.opener.postMessage(payload, "*");
+                        console.log("[Vatts.js OAuth Popup] Mensagem enviada com sucesso para o opener!");
+                    } else {
+                        console.error("[Vatts.js OAuth Popup] window.opener não foi encontrado ou a aba principal foi fechada.");
                     }
-                    setTimeout(() => window.close(), 1000);
-                } catch (e) { console.error(e); }
+                    
+                    // Aumentei pra 1.5s só pro React ter tempo de respirar e dar o fetchSession antes da janela sumir
+                    setTimeout(() => window.close(), 1500);
+                } catch (e) { 
+                    console.error("[Vatts.js OAuth Popup] Erro Crítico:", e); 
+                }
             })();
         </script>
     </body>
