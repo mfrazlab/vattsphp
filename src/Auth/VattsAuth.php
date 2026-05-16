@@ -244,7 +244,6 @@ class VattsAuth
         });
 
         // GET /api/auth/popup-callback
-        // GET /api/auth/popup-callback
         $router->get('/api/auth/popup-callback', function (Request $req, Response $res) {
             $query = $req->getQuery();
             $success = ($query['success'] ?? '') === 'true';
@@ -255,7 +254,7 @@ class VattsAuth
             $type = $success ? "'oauth-success'" : "'oauth-error'";
             $errorJs = $error ? "\"$error\"" : "'Authentication failed'";
 
-            // Resolvemos os textos ANTES do Heredoc
+            // Resolvemos os textos e o payload Javascript ANTES do bloco HTML para não quebrar a sintaxe
             $headingText = $success ? "✓ Autenticação bem-sucedida" : "✗ Erro na autenticação";
             $messageText = $success ? "Fechando janela..." : ($error ?: "Algo deu errado");
             $jsPayload = $success ? "callbackUrl: '{$callbackUrl}'" : "error: {$errorJs}";
@@ -285,6 +284,7 @@ class VattsAuth
                     (function() {
                         try {
                             if (window.opener) {
+                                // Envia a mensagem pro React (SessionProvider)
                                 window.opener.postMessage({
                                     type: {$type},
                                     provider: "{$provider}",
