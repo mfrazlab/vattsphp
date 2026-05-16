@@ -493,9 +493,27 @@ abstract class Model implements JsonSerializable
                 }
             }
             elseif (str_starts_with($typeStr, 'foreign:')) {
-                $sqlType = 'INT';
-                $refData = substr($type, 8);
-                $parts = explode('.', $refData);
+                // Nova lógica para chaves estrangeiras
+                // Ex: "foreign:users.id" (Padrao BIGINT) ou "foreign:users.id:int"
+                $refDataRaw = substr($type, 8);
+                $refOptions = explode(':', $refDataRaw);
+                $refPath = $refOptions[0]; // "users.id"
+                $refCustomType = $refOptions[1] ?? 'bigint'; // Padrão agora é bigint unsigned
+
+                if ($driver === 'sqlite') {
+                    $sqlType = 'INTEGER';
+                } else {
+                    // Mapeia o tipo real da chave estrangeira caso não seja BIGINT
+                    if ($refCustomType === 'int') {
+                        $sqlType = 'INT';
+                    } elseif ($refCustomType === 'int_unsigned') {
+                        $sqlType = 'INT UNSIGNED';
+                    } else {
+                        $sqlType = 'BIGINT UNSIGNED';
+                    }
+                }
+
+                $parts = explode('.', $refPath);
                 if (count($parts) === 2) {
                     $foreignKeys[$col] = [
                         'table' => $parts[0],
@@ -520,8 +538,14 @@ abstract class Model implements JsonSerializable
         }
 
         if (!$tableExists) {
+            // Desativa checagem de FK para resolver o problema de ordem de criação de tabelas
+            if ($driver !== 'sqlite') {
+                $pdo->exec("SET FOREIGN_KEY_CHECKS=0;");
+            }
+
             $colsSql = [];
-            $colsSql[] = ($driver === 'sqlite') ? "`id` INTEGER PRIMARY KEY AUTOINCREMENT" : "`id` INT AUTO_INCREMENT PRIMARY KEY";
+            // Modernizamos para BIGINT UNSIGNED o ID principal também!
+            $colsSql[] = ($driver === 'sqlite') ? "`id` INTEGER PRIMARY KEY AUTOINCREMENT" : "`id` BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY";
 
             foreach ($parsedColumns as $col => $sqlType) {
                 $colsSql[] = "`{$col}` {$sqlType} NULL";
@@ -537,6 +561,10 @@ abstract class Model implements JsonSerializable
             }
 
             $pdo->exec("CREATE TABLE `{$table}` (" . implode(', ', $colsSql) . ")");
+
+            if ($driver !== 'sqlite') {
+                $pdo->exec("SET FOREIGN_KEY_CHECKS=1;");
+            }
             return;
         }
 
@@ -559,27 +587,37 @@ abstract class Model implements JsonSerializable
         $toAdd = array_diff($expectedCols, $existingCols);
         $toDrop = array_diff($existingCols, $expectedCols);
 
-        foreach ($toAdd as $col) {
-            if (isset($parsedColumns[$col])) {
-                $type = $parsedColumns[$col];
-                $pdo->exec("ALTER TABLE `{$table}` ADD COLUMN `{$col}` {$type} NULL");
-
-                if (isset($foreignKeys[$col]) && $driver !== 'sqlite') {
-                    $refData = $foreignKeys[$col];
-                    try {
-                        $pdo->exec("ALTER TABLE `{$table}` ADD CONSTRAINT `fk_{$table}_{$col}` FOREIGN KEY (`{$col}`) REFERENCES `{$refData['table']}`(`{$refData['column']}`) ON DELETE SET NULL");
-                    } catch (\Exception $e) {}
-                }
-
-            } elseif (in_array($col, ['created_at', 'updated_at'])) {
-                $pdo->exec("ALTER TABLE `{$table}` ADD COLUMN `{$col}` DATETIME NULL");
+        if (!empty($toAdd) || !empty($toDrop)) {
+            if ($driver !== 'sqlite') {
+                $pdo->exec("SET FOREIGN_KEY_CHECKS=0;");
             }
-        }
 
-        foreach ($toDrop as $col) {
-            try {
-                $pdo->exec("ALTER TABLE `{$table}` DROP COLUMN `{$col}`");
-            } catch (\Exception $e) {}
+            foreach ($toAdd as $col) {
+                if (isset($parsedColumns[$col])) {
+                    $type = $parsedColumns[$col];
+                    $pdo->exec("ALTER TABLE `{$table}` ADD COLUMN `{$col}` {$type} NULL");
+
+                    if (isset($foreignKeys[$col]) && $driver !== 'sqlite') {
+                        $refData = $foreignKeys[$col];
+                        try {
+                            $pdo->exec("ALTER TABLE `{$table}` ADD CONSTRAINT `fk_{$table}_{$col}` FOREIGN KEY (`{$col}`) REFERENCES `{$refData['table']}`(`{$refData['column']}`) ON DELETE SET NULL");
+                        } catch (\Exception $e) {}
+                    }
+
+                } elseif (in_array($col, ['created_at', 'updated_at'])) {
+                    $pdo->exec("ALTER TABLE `{$table}` ADD COLUMN `{$col}` DATETIME NULL");
+                }
+            }
+
+            foreach ($toDrop as $col) {
+                try {
+                    $pdo->exec("ALTER TABLE `{$table}` DROP COLUMN `{$col}`");
+                } catch (\Exception $e) {}
+            }
+
+            if ($driver !== 'sqlite') {
+                $pdo->exec("SET FOREIGN_KEY_CHECKS=1;");
+            }
         }
     }
 
