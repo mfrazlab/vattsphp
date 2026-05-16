@@ -319,11 +319,9 @@ class VattsAuth
             (function() {
                 try {
                     const payload = {$jsonPayload};
-                    console.log("[Vatts.js OAuth] Tentando postMessage com payload:", payload);
                     
                     if (window.opener) {
                         window.opener.postMessage(payload, "*");
-                        console.log("[Vatts.js OAuth] Mensagem enviada com sucesso!");
                     } else {
                         console.error("[Vatts.js OAuth] window.opener AINDA está nulo. O navegador bloqueou a referência.");
                     }
