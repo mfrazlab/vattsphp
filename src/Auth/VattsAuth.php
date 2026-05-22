@@ -118,6 +118,16 @@ class VattsAuth
         ini_set('session.use_only_cookies', '1'); // Força uso exclusivo de cookies (nada de ID na URL)
         ini_set('session.gc_maxlifetime', (string) $lifetime);
 
+        // --- A MÁGICA AQUI: Isolar a pasta de sessão ---
+        // Cria uma subpasta no temp do SO específica para sua aplicação,
+        // evitando que o Garbage Collector padrão do servidor delete suas sessões de 30 dias.
+        $sessionPath = sys_get_temp_dir() . '/vatts_sessions';
+        if (!is_dir($sessionPath)) {
+            @mkdir($sessionPath, 0777, true);
+        }
+        ini_set('session.save_path', $sessionPath);
+        // ----------------------------------------------
+
         if (PHP_VERSION_ID >= 70300) {
             session_set_cookie_params([
                 'lifetime' => $lifetime,
