@@ -134,7 +134,9 @@ class Router
                     return ($this->fallbackHandler)($request, $response);
                 } catch (\Throwable $e) {
                     error_log($e);
-                    return $response->status(500)->json(['error' => $e->getMessage(), 'e' => $e]);
+                    // [SEGURANÇA CRÍTICA] Remoção de Information Disclosure.
+                    // O objeto de erro vaza toda a trilha de arquivos, queries SQL e configs.
+                    return $response->status(500)->json(['error' => 'Internal Server Error']);
                 }
             }
             return $response->status(404)->json(['error' => 'Route not found']);
@@ -151,7 +153,9 @@ class Router
         try {
             return $route->call($request, $response);
         } catch (\Throwable $e) {
-            return $response->status(500)->json(['error' => $e->getMessage()]);
+            error_log($e);
+            // [SEGURANÇA CRÍTICA] Remoção de Information Disclosure.
+            return $response->status(500)->json(['error' => 'Internal Server Error']);
         }
     }
 
@@ -188,7 +192,11 @@ class Router
     public static function parseRequest(): Request
     {
         $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
-        $path = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH);
+
+        // [SEGURANÇA] Evita ataques baseados em caracteres de controle nulos e invisíveis no path
+        $uri = $_SERVER['REQUEST_URI'] ?? '/';
+        $uri = preg_replace('/[\x00-\x1F\x7F]/', '', $uri);
+        $path = parse_url($uri, PHP_URL_PATH);
 
         $scriptPath = dirname($_SERVER['SCRIPT_NAME'] ?? '');
         if ($scriptPath !== '/' && $scriptPath !== '.' && strpos($path, $scriptPath) === 0) {
@@ -229,7 +237,7 @@ class Router
 
         $body = $response->getBody();
         if ($body !== null) {
-            echo is_string($body) ? $body : json_encode($body);
+            echo is_string($body) ? $body : json_encode($body, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP);
         }
     }
 }

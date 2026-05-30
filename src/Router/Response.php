@@ -23,6 +23,11 @@ class Response
 
     public function header(string $key, string $value): self
     {
+        // [SEGURANÇA] Previne HTTP Response Splitting (CRLF Injection).
+        // Impede que atacantes injetem quebras de linha para criar falsos headers ou forjar cookies.
+        $key = str_replace(["\r", "\n", "\0"], '', $key);
+        $value = str_replace(["\r", "\n", "\0"], '', $value);
+
         // Allow multiple header values for the same header name (e.g., Set-Cookie)
         if (isset($this->headers[$key])) {
             if (is_array($this->headers[$key])) {
@@ -43,7 +48,9 @@ class Response
 
     public function json(mixed $data): self
     {
-        $this->body = json_encode($data);
+        // [SEGURANÇA] Adicionadas flags para escapar marcações HTML e prevenir XSS
+        // caso esse JSON seja embutido no meio de uma página web acidentalmente.
+        $this->body = json_encode($data, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP);
         $this->header('Content-Type', 'application/json');
         return $this;
     }
@@ -114,6 +121,9 @@ class Response
      */
     public function redirect(string $url, int $status = 302): self
     {
+        // [SEGURANÇA] Bloqueia quebras de linha na URL para impedir CRLF e Open Redirect malformado.
+        $url = str_replace(["\r", "\n", "\0"], '', $url);
+
         $this->status($status);
         $this->header('Location', $url);
 
@@ -126,7 +136,8 @@ class Response
     public function setCookie(string $name, string $value, array $options = []): self
     {
         $parts = [];
-        $parts[] = $name . '=' . $value;
+        // Segurança garantida pelo str_replace no método header() chamado no final
+        $parts[] = urlencode($name) . '=' . urlencode($value);
 
         if (!empty($options['path'])) $parts[] = 'Path=' . $options['path'];
         if (!empty($options['domain'])) $parts[] = 'Domain=' . $options['domain'];

@@ -217,7 +217,9 @@ abstract class Model implements JsonSerializable
 
         if ($isInsert) {
             $columns = array_keys($data);
-            $escapedColumns = array_map(fn($col) => "`{$col}`", $columns);
+
+            // [SEGURANÇA] Garante que não hajam crases dentro do nome da coluna para impedir evasão no SQL
+            $escapedColumns = array_map(fn($col) => "`" . str_replace('`', '', $col) . "`", $columns);
             $placeholders = array_map(fn($col) => ":{$col}", $columns);
 
             $sql = "INSERT INTO `{$table}` (" . implode(', ', $escapedColumns) . ") VALUES (" . implode(', ', $placeholders) . ")";
@@ -235,7 +237,9 @@ abstract class Model implements JsonSerializable
 
             $sets = [];
             foreach (array_keys($data) as $col) {
-                $sets[] = "`{$col}` = :{$col}";
+                // [SEGURANÇA] Higieniza o nome da coluna no UPDATE
+                $colSafe = str_replace('`', '', $col);
+                $sets[] = "`{$colSafe}` = :{$col}";
             }
 
             $sql = "UPDATE `{$table}` SET " . implode(', ', $sets) . " WHERE `id` = :id";
@@ -285,10 +289,17 @@ abstract class Model implements JsonSerializable
 
     protected function addWhereCondition($column, $operator = null, $value = null): void
     {
+        // [SEGURANÇA] Whitelist (Lista de Permissão) rigorosa para operadores.
+        // Impede que dados do usuário causem SQL Injection ao manipular o operador (ex: UNION SELECT).
+        $allowedOperators = ['=', '<', '>', '<=', '>=', '<>', '!=', 'LIKE', 'NOT LIKE', 'IS', 'IS NOT', 'IN'];
+
         if (is_array($column)) {
             foreach ($column as $k => $v) {
+                // [SEGURANÇA] Blindagem contra quebra de identificador
+                $kSafe = str_replace('`', '', $k);
+
                 $this->qbParamCounter++;
-                $this->qbWheres[] = "`{$k}` = :qb_{$this->qbParamCounter}";
+                $this->qbWheres[] = "`{$kSafe}` = :qb_{$this->qbParamCounter}";
                 $this->qbParams["qb_{$this->qbParamCounter}"] = $v;
             }
         } else {
@@ -297,8 +308,17 @@ abstract class Model implements JsonSerializable
                 $operator = '=';
             }
 
+            // Sanitiza e valida o operador contra a Whitelist
+            $operator = strtoupper(trim($operator));
+            if (!in_array($operator, $allowedOperators)) {
+                $operator = '='; // Cai para operador seguro se tentar invadir
+            }
+
+            // [SEGURANÇA] Blindagem contra quebra de identificador na coluna
+            $columnSafe = str_replace('`', '', $column);
+
             $this->qbParamCounter++;
-            $this->qbWheres[] = "`{$column}` {$operator} :qb_{$this->qbParamCounter}";
+            $this->qbWheres[] = "`{$columnSafe}` {$operator} :qb_{$this->qbParamCounter}";
             $this->qbParams["qb_{$this->qbParamCounter}"] = $value;
         }
     }
@@ -340,13 +360,18 @@ abstract class Model implements JsonSerializable
 
     protected function _orderBy(string $column, string $direction = 'ASC'): static
     {
-        $direction = strtoupper($direction) === 'DESC' ? 'DESC' : 'ASC';
-        $this->qbOrderBy = " ORDER BY `{$column}` {$direction}";
+        // [SEGURANÇA] Impede SQLi por ordenação caso a coluna venha de um $_GET
+        $columnSafe = str_replace('`', '', $column);
+        $direction = strtoupper(trim($direction)) === 'DESC' ? 'DESC' : 'ASC';
+
+        $this->qbOrderBy = " ORDER BY `{$columnSafe}` {$direction}";
         return $this;
     }
 
     protected function _limit(int $limit): static
     {
+        // [SEGURANÇA] Força um limite mínimo de 0 para impedir erros do DB com limites negativos
+        $limit = max(0, $limit);
         $this->qbLimit = " LIMIT {$limit}";
         return $this;
     }
@@ -436,11 +461,14 @@ abstract class Model implements JsonSerializable
         $defaults = static::getClassDefaults();
 
         if (!empty($defaults['table'])) {
-            self::$cachedTableNames[$class] = $defaults['table'];
+            $tableName = $defaults['table'];
         } else {
             $path = explode('\\', $class);
-            self::$cachedTableNames[$class] = strtolower(end($path)) . 's';
+            $tableName = strtolower(end($path)) . 's';
         }
+
+        // [SEGURANÇA] Sanitiza o nome da tabela (remover crases)
+        self::$cachedTableNames[$class] = str_replace('`', '', $tableName);
 
         return self::$cachedTableNames[$class];
     }
@@ -516,8 +544,8 @@ abstract class Model implements JsonSerializable
                 $parts = explode('.', $refPath);
                 if (count($parts) === 2) {
                     $foreignKeys[$col] = [
-                        'table' => $parts[0],
-                        'column' => $parts[1]
+                        'table' => str_replace('`', '', $parts[0]),
+                        'column' => str_replace('`', '', $parts[1])
                     ];
                 }
             }
@@ -525,7 +553,9 @@ abstract class Model implements JsonSerializable
                 $sqlType = self::mapType($typeStr, $driver);
             }
 
-            $parsedColumns[$col] = $sqlType;
+            // Remove caracteres perigosos no nome da coluna gerada via Reflection
+            $colSafe = str_replace('`', '', $col);
+            $parsedColumns[$colSafe] = $sqlType;
         }
 
         $tableExists = false;

@@ -45,6 +45,8 @@ class FrontendHandler
     protected function tryServeExtraStatic(Request $request, Response $response): ?Response
     {
         $uri = ltrim($request->getPath(), '/');
+        // [SEGURANÇA] Evita tentativas básicas de Directory Traversal
+        $uri = str_replace(['../', '..\\', "\0"], '', $uri);
 
         // Ignora requisições que são especificamente do build do frontend.
         // O restante dos arquivos cai na regra da pasta public/.
@@ -59,8 +61,11 @@ class FrontendHandler
         // Verifica se o arquivo existe (ou se existe uma versão comprimida dele)
         if ($this->fileExistsOrCompressed($filePath)) {
             $realPath = realpath($filePath) ?: realpath($filePath . '.gz') ?: realpath($filePath . '.br');
+            $realServePath = realpath($servePath);
 
-            if ($realPath && str_starts_with($realPath, realpath($servePath))) {
+            // [SEGURANÇA] Validação estrita (LFI Protection).
+            // Impede que mesmo manipulando o URI o atacante saia da pasta permitida.
+            if ($realPath && $realServePath && str_starts_with($realPath, $realServePath)) {
                 return $this->serveFile($filePath, $request, $response, 'public, max-age=3600');
             }
         }
@@ -71,6 +76,8 @@ class FrontendHandler
     protected function serveStaticOrSPA(Request $request, Response $response): Response
     {
         $uri = ltrim($request->getPath(), '/');
+        // [SEGURANÇA] Dificulta Directory Traversal na raiz.
+        $uri = str_replace(['../', '..\\', "\0"], '', $uri);
 
         // Arquivos do build do frontend (index.html, dist/, .vatts/) ficam em serve/dist/
         $exportPath = $this->projectPath . DIRECTORY_SEPARATOR . 'serve' . DIRECTORY_SEPARATOR . 'dist' . DIRECTORY_SEPARATOR;
@@ -78,13 +85,18 @@ class FrontendHandler
         $targetFile = empty($uri) ? 'index.html' : $uri;
         $filePath = $exportPath . $targetFile;
 
-        // Verifica se o arquivo original OU versões comprimidas existem na pasta "serve/dist"
-        if (!$this->fileExistsOrCompressed($filePath)) {
-            $fallbackPath = $exportPath . 'index.html';
-            return $this->serveFile($fallbackPath, $request, $response, 'no-cache, no-store, must-revalidate');
+        $realPath = realpath($filePath) ?: realpath($filePath . '.gz') ?: realpath($filePath . '.br');
+        $realExportPath = realpath($exportPath);
+
+        // [SEGURANÇA CRÍTICA] Impede o vazamento de arquivos de configuração (ex: .env)
+        // Só permite a leitura se o caminho final do arquivo começar obrigatoriamente dentro da pasta "serve/dist"
+        if ($this->fileExistsOrCompressed($filePath) && $realPath && $realExportPath && str_starts_with($realPath, $realExportPath)) {
+            return $this->serveFile($filePath, $request, $response, $this->resolveCachePolicy($filePath));
         }
 
-        return $this->serveFile($filePath, $request, $response, $this->resolveCachePolicy($filePath));
+        // Se o arquivo não existir ou for uma tentativa de invasão, cai no fallback (SPA)
+        $fallbackPath = $exportPath . 'index.html';
+        return $this->serveFile($fallbackPath, $request, $response, 'no-cache, no-store, must-revalidate');
     }
 
     /**
@@ -168,6 +180,8 @@ class FrontendHandler
             return $response->status(304)->send('');
         }
 
+        // [SEGURANÇA] Bloqueia MIME sniffing para prevenir ataques XSS via uploads disfarçados
+        $response->header('X-Content-Type-Options', 'nosniff');
         return $response->header('Content-Type', $mimeType)->send($content);
     }
 
@@ -190,7 +204,10 @@ class FrontendHandler
                 continue;
             }
             if ($lowerName !== 'host') {
-                $headers[] = $name . ': ' . (is_array($values) ? implode(', ', $values) : $values);
+                // [SEGURANÇA] Previne CRLF Injection (HTTP Request Smuggling) em requisições repassadas ao proxy.
+                $sanitizedName = str_replace(["\r", "\n", "\0"], '', $name);
+                $sanitizedValue = str_replace(["\r", "\n", "\0"], '', (is_array($values) ? implode(', ', $values) : $values));
+                $headers[] = $sanitizedName . ': ' . $sanitizedValue;
             }
         }
 
@@ -225,7 +242,8 @@ class FrontendHandler
                 $key = strtolower(trim($key));
                 if ($key === 'content-type' && str_contains(strtolower($value), 'text/html')) $isHtml = true;
                 if (!in_array($key, ['transfer-encoding', 'connection', 'content-length', 'content-encoding'])) {
-                    $response->header($key, trim($value));
+                    // Limpeza básica na resposta do proxy de dev (Prevenção)
+                    $response->header(trim($key), str_replace(["\r", "\n"], '', trim($value)));
                 }
             }
         }

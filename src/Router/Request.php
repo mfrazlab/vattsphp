@@ -14,8 +14,13 @@ class Request
 
     public function __construct(string $method, string $path, array $body = [], array $query = [], array $headers = [])
     {
-        $this->method = strtoupper($method);
-        $this->path = $path;
+        // [SEGURANÇA] Limita o método a 10 caracteres e aceita apenas letras.
+        // Previne Denial of Service (DOS) via injeção de métodos massivos na requisição que podem estourar a memória RAM via strtoupper().
+        $this->method = strtoupper(preg_replace('/[^a-zA-Z]/', '', substr($method, 0, 10)));
+
+        // [SEGURANÇA] Extirpa o Null Byte (\0) que atacantes usam para truncar leitura de caminhos e contornar filtros.
+        $this->path = str_replace("\0", '', $path);
+
         $this->body = $body;
         $this->query = $query;
         $this->headers = $headers;

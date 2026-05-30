@@ -71,7 +71,11 @@ class DB
             self::$pdo->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
 
         } catch (PDOException $e) {
-            throw new Exception("Database connection failed: " . $e->getMessage());
+            // [SEGURANÇA] Information Disclosure:
+            // Impede que a mensagem do PDOException vaze o usuário, host ou estrutura do banco na tela.
+            // O erro detalhado é logado apenas no servidor.
+            error_log("[DB Error] Connection failed: " . $e->getMessage());
+            throw new Exception("Database connection failed.");
         }
     }
 }

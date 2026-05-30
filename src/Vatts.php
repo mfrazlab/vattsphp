@@ -144,16 +144,22 @@ class Vatts
                 continue;
             }
 
-            if (strpos($line, '=') !== false) {
+            if (str_contains($line, '=')) {
                 list($name, $value) = explode('=', $line, 2);
-                $name = trim($name);
-                $value = trim($value);
+
+                // [SEGURANÇA] Impede Null Byte Poisoning em arquivos .env dinâmicos
+                $name = str_replace("\0", '', trim($name));
+                $value = str_replace("\0", '', trim($value));
                 $value = trim($value, "\"'");
 
-                if (!array_key_exists($name, $_SERVER) && !array_key_exists($name, $_ENV)) {
-                    putenv(sprintf('%s=%s', $name, $value));
-                    $_ENV[$name] = $value;
-                    $_SERVER[$name] = $value;
+                // [SEGURANÇA] Força a variável a ter um nome estritamente válido no OS
+                // Evita Environment Variable Injection perigosa caso o .env seja manipulado
+                $safeName = preg_replace('/[^a-zA-Z0-9_]/', '', $name);
+
+                if ($safeName !== '' && !array_key_exists($safeName, $_SERVER) && !array_key_exists($safeName, $_ENV)) {
+                    putenv(sprintf('%s=%s', $safeName, $value));
+                    $_ENV[$safeName] = $value;
+                    $_SERVER[$safeName] = $value;
                 }
             }
         }
@@ -189,8 +195,10 @@ class Vatts
                 return null;
         }
 
-        // Remove aspas caso a variável tenha sido definida entre elas
-        if (is_string($value) && preg_match('/\A([\'"])(.*)\1\z/', $value, $matches)) {
+        // [SEGURANÇA / ESTABILIDADE] O modificador 's' (DOTALL) foi adicionado.
+        // Sem isso, se o valor no .env contivesse quebras de linha (ex: chaves privadas RSA multilineares usadas no JWT),
+        // a Regex falharia e destruiria a chave, impedindo as assinaturas criptográficas de funcionarem.
+        if (is_string($value) && preg_match('/\A([\'"])(.*)\1\z/s', $value, $matches)) {
             return $matches[2];
         }
 
@@ -233,7 +241,14 @@ class Vatts
         $iterator = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($dir));
         foreach ($iterator as $file) {
             if ($file->isFile() && $file->getExtension() === 'php') {
-                require_once $file->getPathname();
+                $pathname = $file->getPathname();
+
+                // [SEGURANÇA] Eager Loading RCE Protection
+                if (str_starts_with($file->getFilename(), '.') || preg_match('/(upload|tmp|cache|temp)/i', $pathname)) {
+                    continue;
+                }
+
+                require_once $pathname;
             }
         }
     }
@@ -245,12 +260,18 @@ class Vatts
             return;
         }
 
-        // Apenas carrega os arquivos em memória. O schema_sync
-        // agora acontece no próprio Model, somente quando ele for usado.
         $iterator = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($dir));
         foreach ($iterator as $file) {
             if ($file->isFile() && $file->getExtension() === 'php') {
-                require_once $file->getPathname();
+                $pathname = $file->getPathname();
+
+                // [SEGURANÇA] Eager Loading RCE Protection
+                // Impede que malwares disfarçados de imagens subidos por usuários nas pastas executem.
+                if (str_starts_with($file->getFilename(), '.') || preg_match('/(upload|tmp|cache|temp)/i', $pathname)) {
+                    continue;
+                }
+
+                require_once $pathname;
             }
         }
     }
@@ -265,7 +286,14 @@ class Vatts
         $iterator = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($dir));
         foreach ($iterator as $file) {
             if ($file->isFile() && $file->getExtension() === 'php') {
-                require_once $file->getPathname();
+                $pathname = $file->getPathname();
+
+                // [SEGURANÇA] Eager Loading RCE Protection
+                if (str_starts_with($file->getFilename(), '.') || preg_match('/(upload|tmp|cache|temp)/i', $pathname)) {
+                    continue;
+                }
+
+                require_once $pathname;
             }
         }
     }
