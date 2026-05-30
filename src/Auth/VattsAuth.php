@@ -123,22 +123,23 @@ class VattsAuth
         $path = $sessionConfig['path'] ?? '/';
         $domain = $sessionConfig['domain'] ?? '';
 
-        // --- HARDENING DO PHP SESSIONS ---
-        ini_set('session.use_strict_mode', '1');
-        ini_set('session.use_only_cookies', '1');
-        ini_set('session.gc_maxlifetime', (string) $lifetime);
-
-        // Garante que o PHP entenda o lifetime globalmente
-        ini_set('session.cookie_lifetime', (string) $lifetime);
-
-        // Cria uma subpasta no temp do SO específica para evitar deleção precoce do GC
-        $sessionPath = sys_get_temp_dir() . '/vatts_sessions';
-        if (!is_dir($sessionPath)) {
-            @mkdir($sessionPath, 0777, true);
-        }
-        ini_set('session.save_path', $sessionPath);
-
         if (session_status() === PHP_SESSION_NONE) {
+            // --- HARDENING DO PHP SESSIONS ---
+            // Colocamos os ini_set DENTRO do if para evitar E_WARNING se a sessão já estiver ativa
+            ini_set('session.use_strict_mode', '1');
+            ini_set('session.use_only_cookies', '1');
+            ini_set('session.gc_maxlifetime', (string) $lifetime);
+
+            // Garante que o PHP entenda o lifetime globalmente
+            ini_set('session.cookie_lifetime', (string) $lifetime);
+
+            // Cria uma subpasta no temp do SO específica para evitar deleção precoce do GC
+            $sessionPath = sys_get_temp_dir() . '/vatts_sessions';
+            if (!is_dir($sessionPath)) {
+                @mkdir($sessionPath, 0777, true);
+            }
+            ini_set('session.save_path', $sessionPath);
+
             // Se a sessão não foi iniciada, injetamos os parâmetros normalmente
             if (PHP_VERSION_ID >= 70300) {
                 session_set_cookie_params([
