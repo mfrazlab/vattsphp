@@ -68,13 +68,16 @@ class CredentialsProvider implements AuthProviderInterface
     }
 
     /**
-     * Validação robusta de email
+     * Validação robusta de email contra Array Injection e Malformações
      */
     public function validateCredentials(array $credentials): bool
     {
         foreach ($this->config['credentials'] as $key => $field) {
-            if (empty($credentials[$key])) {
-                error_log("[{$this->id} Provider] Missing required credential: {$key}");
+
+            // [SEGURANÇA] Bloqueia Array Injection. Se o atacante enviar um array/objeto no lugar
+            // de uma string, bloqueamos imediatamente antes de dar Crash/Fatal Error nas funções do PHP.
+            if (empty($credentials[$key]) || !is_string($credentials[$key])) {
+                error_log("[{$this->id} Provider] Missing or invalid type for credential: {$key}");
                 return false;
             }
 

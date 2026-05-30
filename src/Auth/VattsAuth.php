@@ -16,8 +16,6 @@ class VattsAuth
     {
         $this->config = $config;
 
-        // Sempre chamamos a configuração!
-        // Se a sessão já estiver ativa, o método agora forçará a expiração correta no cookie do navegador.
         $this->configureSession($config['session'] ?? []);
 
         if (session_status() === PHP_SESSION_NONE) {
@@ -33,7 +31,7 @@ class VattsAuth
 
     /**
      * Retorna a sessão atual do usuário autenticado para uso interno no backend
-     * Valida segurança contra Hijacking e inatividade
+     * Valida segurança contra Hijacking, inatividade e integridade (via callback)
      *
      * @return array|null Retorna os dados do usuário ou null se não estiver logado
      */
@@ -58,7 +56,7 @@ class VattsAuth
             return null;
         }
 
-        // 2. Valida se o IP mudou (Opcional, pois redes móveis mudam muito de IP)
+        // 2. Valida se o IP mudou
         $bindIp = $this->config['session']['bind_ip'] ?? false;
         if ($bindIp && isset($_SESSION['vatts_auth_ip']) && $_SESSION['vatts_auth_ip'] !== $currentIp) {
             $this->signOut();
@@ -66,16 +64,31 @@ class VattsAuth
         }
 
         // 3. Valida Inatividade (Idle Timeout)
-        $idleTimeout = $this->config['session']['idle_timeout'] ?? 7200; // Padrão: 2 horas (7200s)
+        $idleTimeout = $this->config['session']['idle_timeout'] ?? 7200;
         if (isset($_SESSION['vatts_auth_last_activity']) && (time() - $_SESSION['vatts_auth_last_activity']) > $idleTimeout) {
             $this->signOut();
             return null;
         }
 
-        // Atualiza a última atividade
+        $sessionUser = $_SESSION['vatts_auth_user'];
+
+        // 4. Delega a validação de integridade para o Callback configurado (Ex: checar se a senha mudou ou usuário foi deletado)
+        if (isset($this->config['callbacks']['session']) && is_callable($this->config['callbacks']['session'])) {
+            $validatedUser = call_user_func($this->config['callbacks']['session'], $sessionUser);
+
+            // Se a validação falhar (usuário banido, senha mudou, deletado), DESTRÓI a sessão do servidor instantaneamente.
+            if (!$validatedUser) {
+                $this->signOut();
+                return null;
+            }
+            // Atualizamos a var com os dados frescos vindos do banco
+            $sessionUser = $validatedUser;
+        }
+
+        // Atualiza a última atividade apenas se passou em todas as verificações
         $_SESSION['vatts_auth_last_activity'] = time();
 
-        return $_SESSION['vatts_auth_user'];
+        return $sessionUser;
     }
 
     /**
@@ -89,7 +102,6 @@ class VattsAuth
             session_start();
         }
 
-        // Limpa todos os dados de segurança e o usuário
         unset(
             $_SESSION['vatts_auth_user'],
             $_SESSION['vatts_auth_ua'],
@@ -97,10 +109,8 @@ class VattsAuth
             $_SESSION['vatts_auth_last_activity']
         );
 
-        // Destrói a sessão completamente
         session_destroy();
 
-        // Remove o cookie do navegador no logout
         $sessionConfig = $this->config['session'] ?? [];
         $path = $sessionConfig['path'] ?? '/';
         $domain = $sessionConfig['domain'] ?? '';
@@ -109,9 +119,6 @@ class VattsAuth
         return true;
     }
 
-    /**
-     * Configura as opções da sessão, incluindo tempo de vida, segurança e cookies
-     */
     protected function configureSession(array $sessionConfig): void
     {
         $lifetimeDays = (int) ($sessionConfig['lifetime_days'] ?? 30);
@@ -124,23 +131,17 @@ class VattsAuth
         $domain = $sessionConfig['domain'] ?? '';
 
         if (session_status() === PHP_SESSION_NONE) {
-            // --- HARDENING DO PHP SESSIONS ---
-            // Colocamos os ini_set DENTRO do if para evitar E_WARNING se a sessão já estiver ativa
             ini_set('session.use_strict_mode', '1');
             ini_set('session.use_only_cookies', '1');
             ini_set('session.gc_maxlifetime', (string) $lifetime);
-
-            // Garante que o PHP entenda o lifetime globalmente
             ini_set('session.cookie_lifetime', (string) $lifetime);
 
-            // Cria uma subpasta no temp do SO específica para evitar deleção precoce do GC
             $sessionPath = sys_get_temp_dir() . '/vatts_sessions';
             if (!is_dir($sessionPath)) {
                 @mkdir($sessionPath, 0777, true);
             }
             ini_set('session.save_path', $sessionPath);
 
-            // Se a sessão não foi iniciada, injetamos os parâmetros normalmente
             if (PHP_VERSION_ID >= 70300) {
                 session_set_cookie_params([
                     'lifetime' => $lifetime,
@@ -154,15 +155,10 @@ class VattsAuth
                 session_set_cookie_params($lifetime, $path, $domain, $secure, $httpOnly);
             }
         } else {
-            // Se a sessão JÁ estava ativa (iniciada pelo framework), forçamos o envio
-            // de um cookie atualizado para sobrescrever a marca de "Session" no navegador
             $this->forceCookieExpiration();
         }
     }
 
-    /**
-     * Método auxiliar para forçar o navegador a aceitar a expiração correta do cookie
-     */
     protected function forceCookieExpiration(): void
     {
         $sessionConfig = $this->config['session'] ?? [];
@@ -189,12 +185,8 @@ class VattsAuth
         }
     }
 
-    /**
-     * Registra as rotas padrões (/api/auth/*) no Router do Vatts
-     */
     public function registerRoutes(Router $router): void
     {
-        // 1. Rotas Adicionais dos Providers (Callbacks, Passkeys Register, etc)
         foreach ($this->providers as $provider) {
             foreach ($provider->getAdditionalRoutes() as $route) {
                 $method = strtolower($route['method']);
@@ -202,16 +194,10 @@ class VattsAuth
             }
         }
 
-        // 2. Rotas Fixas do Sistema
-
         // GET /api/auth/session
         $router->get('/api/auth/session', function (Request $req, Response $res) {
+            // A chamada getSession() agora já embute e processa o callback internamente
             $session = $this->getSession();
-
-            if ($session && isset($this->config['callbacks']['session']) && is_callable($this->config['callbacks']['session'])) {
-                $session = call_user_func($this->config['callbacks']['session'], $session);
-            }
-
             return $res->json(['session' => $session ? ['user' => $session] : null]);
         });
 
@@ -269,11 +255,7 @@ class VattsAuth
 
             if (session_status() === PHP_SESSION_NONE) session_start();
 
-            // Gera um novo ID de sessão (Mitiga Session Fixation)
             session_regenerate_id(true);
-
-            // Aqui morava o perigo! O novo ID regenerado voltava para cookie de "Sessão" no navegador
-            // Forçamos o envio físico do novo cookie com os seus 30 dias definidos
             $this->forceCookieExpiration();
 
             $_SESSION['vatts_auth_user'] = $userToSave;
@@ -319,11 +301,15 @@ class VattsAuth
                 $payload['error'] = $error ?: 'Authentication failed';
             }
 
-            $jsonPayload = json_encode($payload);
+            // [SEGURANÇA] JSON encoding rigoroso para evitar XSS dentro de tags <script>
+            $jsonPayload = json_encode($payload, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP);
             $headingText = $success ? "✓ Autenticação bem-sucedida" : "✗ Erro na autenticação";
-            $messageText = $success ? "Fechando janela..." : ($error ?: "Algo deu errado");
+            $messageText = $success ? "Fechando janela..." : htmlspecialchars($error ?: "Algo deu errado", ENT_QUOTES, 'UTF-8');
             $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) ? "https://" : "http://";
-            $safeOrigin = $protocol . $_SERVER['HTTP_HOST'];
+
+            // [SEGURANÇA] Evita Host Header Injection via sanitização.
+            $safeHost = htmlspecialchars($_SERVER['HTTP_HOST'], ENT_QUOTES, 'UTF-8');
+            $safeOrigin = $protocol . $safeHost;
 
             $html = <<<HTML
 <!DOCTYPE html>
