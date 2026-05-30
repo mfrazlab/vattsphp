@@ -16,8 +16,11 @@ class VattsAuth
     {
         $this->config = $config;
 
+        // Sempre chamamos a configuração!
+        // Se a sessão já estiver ativa, o método agora forçará a expiração correta no cookie do navegador.
+        $this->configureSession($config['session'] ?? []);
+
         if (session_status() === PHP_SESSION_NONE) {
-            $this->configureSession($config['session'] ?? []);
             session_start();
         }
 
@@ -37,6 +40,7 @@ class VattsAuth
     public function getSession(): ?array
     {
         if (session_status() === PHP_SESSION_NONE) {
+            $this->configureSession($this->config['session'] ?? []);
             session_start();
         }
 
@@ -93,8 +97,14 @@ class VattsAuth
             $_SESSION['vatts_auth_last_activity']
         );
 
-        // Destrói a sessão completamente e apaga o cookie
+        // Destrói a sessão completamente
         session_destroy();
+
+        // Remove o cookie do navegador no logout
+        $sessionConfig = $this->config['session'] ?? [];
+        $path = $sessionConfig['path'] ?? '/';
+        $domain = $sessionConfig['domain'] ?? '';
+        setcookie(session_name(), '', time() - 3600, $path, $domain);
 
         return true;
     }
@@ -108,29 +118,65 @@ class VattsAuth
         $lifetime = max(0, $lifetimeDays * 86400);
 
         $secure = $sessionConfig['secure'] ?? (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off');
-        $httpOnly = $sessionConfig['httponly'] ?? true; // Crucial contra XSS
-        $sameSite = $sessionConfig['samesite'] ?? 'Lax'; // 'Strict' é ainda mais seguro, se o app permitir
+        $httpOnly = $sessionConfig['httponly'] ?? true;
+        $sameSite = $sessionConfig['samesite'] ?? 'Lax';
         $path = $sessionConfig['path'] ?? '/';
         $domain = $sessionConfig['domain'] ?? '';
 
         // --- HARDENING DO PHP SESSIONS ---
-        ini_set('session.use_strict_mode', '1'); // Impede Session Fixation (rejeita IDs criados pelo atacante)
-        ini_set('session.use_only_cookies', '1'); // Força uso exclusivo de cookies (nada de ID na URL)
+        ini_set('session.use_strict_mode', '1');
+        ini_set('session.use_only_cookies', '1');
         ini_set('session.gc_maxlifetime', (string) $lifetime);
 
-        // --- A MÁGICA AQUI: Isolar a pasta de sessão ---
-        // Cria uma subpasta no temp do SO específica para sua aplicação,
-        // evitando que o Garbage Collector padrão do servidor delete suas sessões de 30 dias.
+        // Garante que o PHP entenda o lifetime globalmente
+        ini_set('session.cookie_lifetime', (string) $lifetime);
+
+        // Cria uma subpasta no temp do SO específica para evitar deleção precoce do GC
         $sessionPath = sys_get_temp_dir() . '/vatts_sessions';
         if (!is_dir($sessionPath)) {
             @mkdir($sessionPath, 0777, true);
         }
         ini_set('session.save_path', $sessionPath);
-        // ----------------------------------------------
+
+        if (session_status() === PHP_SESSION_NONE) {
+            // Se a sessão não foi iniciada, injetamos os parâmetros normalmente
+            if (PHP_VERSION_ID >= 70300) {
+                session_set_cookie_params([
+                    'lifetime' => $lifetime,
+                    'path' => $path,
+                    'domain' => $domain,
+                    'secure' => $secure,
+                    'httponly' => $httpOnly,
+                    'samesite' => $sameSite,
+                ]);
+            } else {
+                session_set_cookie_params($lifetime, $path, $domain, $secure, $httpOnly);
+            }
+        } else {
+            // Se a sessão JÁ estava ativa (iniciada pelo framework), forçamos o envio
+            // de um cookie atualizado para sobrescrever a marca de "Session" no navegador
+            $this->forceCookieExpiration();
+        }
+    }
+
+    /**
+     * Método auxiliar para forçar o navegador a aceitar a expiração correta do cookie
+     */
+    protected function forceCookieExpiration(): void
+    {
+        $sessionConfig = $this->config['session'] ?? [];
+        $lifetimeDays = (int) ($sessionConfig['lifetime_days'] ?? 30);
+        $lifetime = max(0, $lifetimeDays * 86400);
+
+        $secure = $sessionConfig['secure'] ?? (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off');
+        $httpOnly = $sessionConfig['httponly'] ?? true;
+        $sameSite = $sessionConfig['samesite'] ?? 'Lax';
+        $path = $sessionConfig['path'] ?? '/';
+        $domain = $sessionConfig['domain'] ?? '';
 
         if (PHP_VERSION_ID >= 70300) {
-            session_set_cookie_params([
-                'lifetime' => $lifetime,
+            setcookie(session_name(), session_id(), [
+                'expires' => time() + $lifetime,
                 'path' => $path,
                 'domain' => $domain,
                 'secure' => $secure,
@@ -138,7 +184,7 @@ class VattsAuth
                 'samesite' => $sameSite,
             ]);
         } else {
-            session_set_cookie_params($lifetime, $path, $domain, $secure, $httpOnly);
+            setcookie(session_name(), session_id(), time() + $lifetime, $path, $domain, $secure, $httpOnly);
         }
     }
 
@@ -150,7 +196,7 @@ class VattsAuth
         // 1. Rotas Adicionais dos Providers (Callbacks, Passkeys Register, etc)
         foreach ($this->providers as $provider) {
             foreach ($provider->getAdditionalRoutes() as $route) {
-                $method = strtolower($route['method']); // get, post
+                $method = strtolower($route['method']);
                 $router->$method($route['path'], $route['handler']);
             }
         }
@@ -161,7 +207,6 @@ class VattsAuth
         $router->get('/api/auth/session', function (Request $req, Response $res) {
             $session = $this->getSession();
 
-            // Permite modificar os dados da sessão antes de enviar pro front
             if ($session && isset($this->config['callbacks']['session']) && is_callable($this->config['callbacks']['session'])) {
                 $session = call_user_func($this->config['callbacks']['session'], $session);
             }
@@ -171,10 +216,7 @@ class VattsAuth
 
         // GET /api/auth/csrf
         $router->get('/api/auth/csrf', function (Request $req, Response $res) {
-            // Token criptograficamente seguro equivalente ao do Node.js
             $csrfToken = rtrim(strtr(base64_encode(random_bytes(32)), '+/', '-_'), '=');
-
-            // Salva na sessão para validação posterior (Recomendado)
             if (session_status() === PHP_SESSION_NONE) session_start();
             $_SESSION['csrf_token'] = $csrfToken;
 
@@ -201,7 +243,6 @@ class VattsAuth
 
             $provider = $this->providers[$providerId];
 
-            // Emula o map da property popup string/boolean do JS
             if (isset($body['popup'])) {
                 $body['popup'] = (string) $body['popup'];
             }
@@ -212,7 +253,6 @@ class VattsAuth
                 return $res->status(401)->json(['error' => 'Invalid credentials']);
             }
 
-            // Se for uma string, é uma URL de OAuth, retorna para redirect
             if (is_string($result)) {
                 return $res->json([
                     'success' => true,
@@ -221,21 +261,21 @@ class VattsAuth
                 ]);
             }
 
-            // Permite modificar os dados do usuário antes de salvar na sessão do PHP
             $userToSave = $result;
             if (isset($this->config['callbacks']['jwt']) && is_callable($this->config['callbacks']['jwt'])) {
                 $userToSave = call_user_func($this->config['callbacks']['jwt'], $userToSave);
             }
 
-            // Garante que a sessão tá iniciada
             if (session_status() === PHP_SESSION_NONE) session_start();
 
-            // Salva na sessão do PHP e gera um novo ID de sessão (Mitiga Session Fixation na hora do login)
+            // Gera um novo ID de sessão (Mitiga Session Fixation)
             session_regenerate_id(true);
 
-            $_SESSION['vatts_auth_user'] = $userToSave;
+            // Aqui morava o perigo! O novo ID regenerado voltava para cookie de "Sessão" no navegador
+            // Forçamos o envio físico do novo cookie com os seus 30 dias definidos
+            $this->forceCookieExpiration();
 
-            // --- REGISTRA OS DADOS PARA SEGURANÇA (FINGERPRINTING) ---
+            $_SESSION['vatts_auth_user'] = $userToSave;
             $_SESSION['vatts_auth_ua'] = $_SERVER['HTTP_USER_AGENT'] ?? 'unknown';
             $_SESSION['vatts_auth_ip'] = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
             $_SESSION['vatts_auth_last_activity'] = time();
@@ -254,16 +294,12 @@ class VattsAuth
         });
 
         // GET /api/auth/popup-callback
-// GET /api/auth/popup-callback
         $router->get('/api/auth/popup-callback', function (Request $req, Response $res) {
-
-            // A MÁGICA ESTÁ AQUI: Diz pro navegador não "cortar" a comunicação entre a aba principal e o popup
             header('Cross-Origin-Opener-Policy: unsafe-none');
             header('Cross-Origin-Resource-Policy: cross-origin');
             header('Cross-Origin-Embedder-Policy: unsafe-none');
 
             $query = $req->getQuery();
-
             $successParam = $query['success'] ?? false;
             $success = $successParam === 'true' || $successParam === true || $successParam === '1' || $successParam === 1;
 
@@ -283,11 +319,11 @@ class VattsAuth
             }
 
             $jsonPayload = json_encode($payload);
-
             $headingText = $success ? "✓ Autenticação bem-sucedida" : "✗ Erro na autenticação";
             $messageText = $success ? "Fechando janela..." : ($error ?: "Algo deu errado");
             $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) ? "https://" : "http://";
             $safeOrigin = $protocol . $_SERVER['HTTP_HOST'];
+
             $html = <<<HTML
 <!DOCTYPE html>
 <html>
@@ -313,10 +349,9 @@ class VattsAuth
         (function() {
             try {
                 const payload = {$jsonPayload};
-                const targetOrigin = "{$safeOrigin}"; // <-- ORIGEM RESTRITA AQUI
+                const targetOrigin = "{$safeOrigin}"; 
                 
                 if (window.opener) {
-                    // Removemos o "*" e colocamos a origem exata do seu site
                     window.opener.postMessage(payload, targetOrigin);
                 } else {
                     console.error("[Vatts.js OAuth] window.opener AINDA está nulo. O navegador bloqueou a referência.");
@@ -332,7 +367,6 @@ class VattsAuth
 </html>
 HTML;
 
-            // Dependendo do seu framework (parece Leaf PHP ou similar), o header() nativo já resolve.
             return $res->html($html);
         });
     }
